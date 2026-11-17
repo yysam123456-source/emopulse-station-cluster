@@ -1,0 +1,150 @@
+classDiagram
+    direction LR
+
+    class SiteApp {
+        <<interface>>
+        +SiteId id
+        +init(config: SiteConfig, ctx: RuntimeContext) void
+        +mount(container: HTMLElement) void
+        +start() void
+        +pause() void
+        +getScene() Scene
+        +onEvent(event: AppEvent, payload) void
+        +dispose() void
+    }
+
+    class StillApp {
+        +init(config, ctx) void
+        +mount(container) void
+        +start() void
+        +onEvent(event, payload) void
+        +dispose() void
+    }
+    class LicenseApp
+    class PraiseApp
+    class HugApp
+    class KoiApp
+
+    class SiteConfig {
+        +SiteId id
+        +string route
+        +ThemeConfig theme
+        +CopyConfig copy
+        +LayoutConfig layout
+        +PartRef[] parts
+        +AnalyticsCfg analytics
+    }
+    class ThemeConfig {
+        +number[] WCOL
+        +number[] PCOL
+        +number[] SUNC
+        +number EXPO
+        +number RAYS
+    }
+    class CopyConfig {
+        +string title
+        +string subtitle
+        +string[] controls
+        +string locale
+    }
+    class LayoutConfig {
+        +number seed
+        +Viewpoint[] viewpoints
+        +string quality
+        +AudioCfg audio
+    }
+    class PartRef {
+        +string id
+        +string source
+        +boolean enabled
+        +Object options
+    }
+
+    class Runtime {
+        -SiteConfig config
+        -SiteApp app
+        -StateMachine state
+        -AnalyticsApi analytics
+        +boot(siteId: SiteId) void
+        +loadConfig(siteId) SiteConfig
+        +createContext() RuntimeContext
+        +dispatch(event: AppEvent, payload) void
+        +teardown() void
+    }
+    class RuntimeContext {
+        +Scene scene
+        +Camera camera
+        +WebGLRenderer renderer
+        +QualityApi quality
+        +AudioApi audio
+        +StateMachine state
+        +AnalyticsApi analytics
+        +Object store
+    }
+    class StateMachine {
+        +string initial
+        +string[] states
+        +Transition[] transitions
+        +current() string
+        +send(event, payload) string
+        +onEnter(state, cb) void
+        +onExit(state, cb) void
+        +reset() void
+    }
+    class Transition {
+        +string from
+        +AppEvent event
+        +string to
+        +Function action
+    }
+    class AnalyticsApi {
+        +track(event: AppEvent, payload) void
+        +startTimer(key: string) void
+        +stopTimer(key: string) number
+    }
+    class ShortUrl {
+        +encode(payload: Object) string
+        +decode(query: string) Object
+    }
+    class BuildPipeline {
+        +build(siteId: SiteId) string
+        +buildAll() string[]
+        +verifyCore() boolean
+    }
+    class Overlay {
+        +merge(coreDir: string, siteDir: string) string
+    }
+    class CoreEngine {
+        <<Frozen>>
+        +quality
+        +math
+        +audio
+        +main
+        +shadersBase
+    }
+
+    SiteApp <|.. StillApp
+    SiteApp <|.. LicenseApp
+    SiteApp <|.. PraiseApp
+    SiteApp <|.. HugApp
+    SiteApp <|.. KoiApp
+
+    Runtime --> SiteApp : 持有并驱动生命周期
+    Runtime --> SiteConfig : 加载
+    Runtime --> RuntimeContext : 创建并注入
+    Runtime --> StateMachine : 持有
+    SiteConfig *-- ThemeConfig
+    SiteConfig *-- CopyConfig
+    SiteConfig *-- LayoutConfig
+    SiteConfig *-- PartRef
+    RuntimeContext *-- StateMachine
+    RuntimeContext --> AnalyticsApi
+    StateMachine *-- Transition
+    StillApp ..> RuntimeContext : 使用
+    LicenseApp ..> RuntimeContext : 使用
+    PraiseApp ..> RuntimeContext : 使用
+    HugApp ..> RuntimeContext : 使用
+    BuildPipeline --> Overlay : 调用
+    BuildPipeline --> CoreEngine : 组合
+    Overlay --> CoreEngine : 读取冻结内核
+    Runtime ..> ShortUrl : 使用(?from)

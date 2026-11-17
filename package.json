@@ -1,0 +1,25 @@
+{
+  "name": "emopulse-station-cluster",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "情绪脉冲站群：稳固共享底座 + 可插拔单 HTML 站点",
+  "scripts": {
+    "build": "node shared/build/build.mjs still",
+    "build:all": "node shared/build/build.mjs all",
+    "build:readable": "node shared/build/build.mjs still --readable",
+    "dev": "node shared/build/build.mjs still --readable",
+    "verify:core": "node shared/build/verify-core.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.169.0",
+    "@webgpu/types": "^0.1.5",
+    "esbuild": "^0.23.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+# QA 冒烟测试遗留的临时浏览器 profile（非代码，体积巨大）
+tests/.edge-*/
+tests/.cache/
+tests/.tmp/
+*.log
+.DS_Store
+.tmp/
+*.local
+*.tar.gz

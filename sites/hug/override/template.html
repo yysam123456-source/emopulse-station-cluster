@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<title>Hug · Send a hug, get one back</title>
+<meta name=description content="Send a hug into the air. Someone will hug you back. A quiet place for a little warmth.">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=theme-color content=#2a1d17>
+<style>
+html { background: #2a1d17; }
+body { position: fixed; top: 0; left: 0; width: 100%; height: 100%; margin: 0; overflow: hidden; background: radial-gradient(#7a5138, #2a1d17 72%); font: 700 clamp(13px, .7vw + .9vh, 36px)/1.4 system-ui, sans-serif; color: #fbeedc; -webkit-user-select: none; user-select: none; }
+@media (orientation: portrait) and (pointer: coarse) { body { width: 100dvh; height: 100dvw; transform-origin: 0 0; transform: rotate(90deg) translateY(-100%); } }
+canvas#c { position: absolute; width: 100%; height: 100%; touch-action: none; cursor: crosshair; transition: filter 1s, transform 1s, opacity 2s; }
+body:not(.g) canvas#c { filter: blur(1vmax) brightness(.5); transform: scale(1.06); }
+.l canvas#c { opacity: 0; }
+#m { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: min(1em, 3.2vmin); padding: 1em 1em 2.5em; text-align: center; background: radial-gradient(#2a1d1700 30%, #2a1d17d9); transition: opacity .5s, visibility .5s; }
+.g #m, .m #l, .l #g { opacity: 0; visibility: hidden; }
+h1 { margin: 0; font: 900 4.4em/1 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #0000; background: linear-gradient(#fff 25%, #f0c79a 60%, #c08456); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 .06em .2em #000c); }
+p { margin: 0; }
+#sub { max-width: 30em; font-size: 1.05em; text-wrap: balance; }
+#sub-zh { max-width: 30em; font-size: .78em; opacity: .72; text-wrap: balance; }
+#stage { width: min(32em, 86vw); height: min(12em, 26vh); border-radius: .5em; box-shadow: 0 .6em 2em #0008; }
+#status { min-height: 1.3em; font: 600 .82em/1.4 ui-monospace, Consolas, monospace; letter-spacing: .08em; color: #f0c79a; }
+#a { display: grid; width: 27em; max-width: 100%; }
+#a > * { grid-area: 1/1; transition: opacity .8s, visibility .8s; }
+#s, #w, #q, #k, #h { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
+#w { margin-top: 1.2em; color: #f0c79a; text-wrap: balance; }
+#p { height: .5em; margin: .4em 0 1em; overflow: hidden; border-radius: 1em; background: #2a1d17; box-shadow: 0 0 0 2px #f0c79a80, 0 0 1.5em #c08456; }
+#b { display: block; height: 100%; background: linear-gradient(90deg, #c08456, #fbeedc); transform: scaleX(0); transform-origin: 0; will-change: transform; }
+.e #p { visibility: hidden; }
+.e #s { font-size: 1.1em; letter-spacing: 0; text-transform: none; }
+button { display: flex; align-items: center; justify-content: center; gap: .6em; padding: .8em 1.4em; border: 0; border-radius: .5em; background: #fbeedc; box-shadow: inset 0 -.2em #0003, 0 .3em 1em #0009; font: 800 1em/1.2 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #2b1d14; cursor: pointer; transition: transform .12s, filter .12s; }
+button:hover { transform: translateY(-.12em); filter: brightness(1.1); }
+button:active { transform: translateY(.1em); filter: brightness(.95); }
+:focus-visible { outline: 3px solid #fbeedc; outline-offset: 3px; }
+#g { display: grid; gap: min(.8em, 2.4vmin); justify-items: center; }
+#act { padding: .9em; background: linear-gradient(#f0c79a, #c08456); font-size: 1.2em; }
+.row { display: flex; gap: .6em; flex-wrap: wrap; justify-content: center; }
+.row button { font-size: .76em; opacity: .88; }
+#back { background: #b85d3c; color: #fff; font-size: .8em; }
+#q, #k, #h { padding: 1em 1.6em; border-radius: .7em; background: #2a1d17b3; }
+#q { display: flex; align-items: center; gap: .4em; padding: .4em; }
+#q span { flex: 1; color: #f0c79a; }
+#q button { flex: 1.2; padding: .7em 0; background: none; box-shadow: none; color: #fbeedc; }
+#q button:hover { background: #f0c79a33; }
+#q .on { background: linear-gradient(#f0c79a, #c08456); box-shadow: inset 0 -.2em #0003; color: #2b1d14; pointer-events: none; }
+#k { display: flex; justify-content: center; gap: 2em; text-align: left; }
+#k p { display: grid; grid-template-columns: auto auto; align-content: start; align-items: center; gap: .55em .9em; }
+#k i { display: flex; justify-self: end; align-items: center; gap: .25em; font-style: normal; }
+#k b { min-width: 1.1em; padding: .2em .5em; border-radius: .35em; background: #fbeedc; box-shadow: inset 0 -.15em #0004; color: #2b1d14; text-align: center; }
+#h { display: none; }
+@media (pointer: coarse), (max-height: 30em) { #k { display: none; } }
+@media (pointer: coarse) { #h { display: block; } }
+#o { position: absolute; top: .6em; right: .6em; display: none; padding: .3em .6em; background: #2b1d14d9; box-shadow: inset 0 0 0 2px #f0c79a, 0 .3em 1em #0009; font-size: 1.3em; color: #fbeedc; opacity: .8; }
+.g #o { display: flex; }
+.p #o { display: none; }
+#i { position: absolute; top: 1em; left: 1.2em; margin: 0; font: .8em/1.6 ui-monospace, Consolas, monospace; white-space: pre-wrap; text-shadow: 0 1px 4px #000; pointer-events: none; }
+</style>
+</head>
+<body class=l>
+<canvas id=c></canvas>
+<div id=m>
+  <h1>Hug</h1>
+  <div id=a>
+    <div id=l><div id=p><i id=b></i></div><p id=s>Gathering warmth…</p><p id=w hidden>Use Google Chrome for optimal experience</p></div>
+    <div id=g>
+      <p id=sub>Send a hug. Someone will hug you back.</p>
+      <p id=sub-zh>送出一份拥抱。有人会把它还给你。</p>
+      <canvas id=stage aria-label="dandelion meadow"></canvas>
+      <p id=status>一点暖意正在聚拢。</p>
+      <button id=act>Let it go</button>
+      <p class=row>
+        <button id=back hidden>Hug them back</button>
+        <button id=share>Share</button>
+        <button id=mic>Use mic</button>
+        <button id=listen>Listen</button>
+        <button id=leave>Leave</button>
+        <button id=d>Enter scene</button>
+      </p>
+      <p id=q><span>Detail</span><button>Low</button><button>Medium</button><button>High</button></p>
+      <div id=k><p><i><b>Go</b></i>Release <i><b>M</b></i>Listen <i><b>Esc</b></i>Leave</p></div>
+      <p id=h>Tap to release · mic is optional, the button always works</p>
+    </div>
+  </div>
+</div>
+<button id=o aria-label=Menu>≡</button>
+<pre id=i></pre>
+<script>
+/*SCRIPT*/
+</script>
+<script>
+/*RUNTIME*/
+</script>
+</body>
+</html>

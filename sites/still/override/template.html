@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<title>Still · A quiet corner</title>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=theme-color content=#1b1917>
+<style>
+/* body class = 页面状态：l 加载 / m 菜单 / g 场景中 / l e 启动失败（与 core 一致） */
+html { background: #1b1917; }
+body {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; margin: 0; overflow: hidden;
+  background: radial-gradient(#4a4238, #1b1917 70%);
+  font: 700 clamp(13px, .7vw + .9vh, 36px)/1.4 system-ui, sans-serif; color: #f2e9dc;
+  -webkit-user-select: none; user-select: none;
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  body { width: 100dvh; height: 100dvw; transform-origin: 0 0; transform: rotate(90deg) translateY(-100%); }
+}
+canvas {
+  position: absolute; width: 100%; height: 100%; touch-action: none; cursor: crosshair;
+  transition: filter 1s, transform 1s, opacity 2s;
+}
+body:not(.g) canvas { filter: blur(1vmax) brightness(.5); transform: scale(1.06); }
+.l canvas { opacity: 0; }
+#m {
+  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: min(1.6em, 5vmin);
+  padding: 1em 1em 3em; text-align: center; background: radial-gradient(#1b191700 30%, #1b1917cc);
+  transition: opacity .5s, visibility .5s;
+}
+.g #m, .m #l, .l #g { opacity: 0; visibility: hidden; }
+h1 {
+  margin: 0; font: 900 4.4em/1 system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  color: #0000; background: linear-gradient(#fff 25%, #e8d5b7 60%, #b99a75);
+  -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 .06em .2em #000c);
+}
+p { margin: 0; }
+#sub { max-width: 30em; font-size: 1.1em; font-weight: 600; letter-spacing: .02em; text-wrap: balance; }
+#sub-zh { max-width: 30em; font-size: .8em; font-weight: 500; opacity: .72; text-wrap: balance; }
+#sit-timer { min-height: 1.4em; font: 600 .85em/1.4 ui-monospace, Consolas, monospace; letter-spacing: .16em; opacity: .55; }
+#a { display: grid; width: 27em; max-width: 100%; }
+#a > * { grid-area: 1/1; transition: opacity .8s, visibility .8s; }
+#s, #w, #q, #k, #h { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
+#w { margin-top: 1.2em; color: #e8d5b7; text-wrap: balance; }
+#p {
+  height: .5em; margin: .4em 0 1em; overflow: hidden; border-radius: 1em; background: #1b1917;
+  box-shadow: 0 0 0 2px #e8d5b780, 0 0 1.5em #b99a75;
+}
+#b {
+  display: block; height: 100%; background: linear-gradient(90deg, #b99a75, #f2e9dc);
+  transform: scaleX(0); transform-origin: 0; will-change: transform;
+}
+.e #p { visibility: hidden; }
+.e #s { font-size: 1.1em; letter-spacing: 0; text-transform: none; }
+button {
+  display: flex; align-items: center; justify-content: center; gap: .6em; padding: .8em 1.4em; border: 0;
+  border-radius: .5em; background: #f2e9dc; box-shadow: inset 0 -.2em #0003, 0 .3em 1em #0009;
+  font: 800 1em/1.2 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; text-decoration: none;
+  color: #2b241d; cursor: pointer; transition: transform .12s, filter .12s;
+}
+button:hover { transform: translateY(-.12em); filter: brightness(1.1); }
+button:active { transform: translateY(.1em); filter: brightness(.95); }
+:focus-visible { outline: 3px solid #f2e9dc; outline-offset: 3px; }
+#g { display: grid; gap: min(1em, 3vmin); justify-items: center; }
+#d {
+  padding: .9em; background: linear-gradient(#e8d5b7, #b99a75); font-size: 1.3em;
+  box-shadow: inset 0 -.2em #0003, 0 0 2em #b99a7580;
+}
+.row { display: flex; gap: .6em; }
+.row button { font-size: .8em; opacity: .85; }
+#q, #k, #h { padding: 1em 1.6em; border-radius: .7em; background: #1b1917b3; }
+#q { display: flex; align-items: center; gap: .4em; padding: .4em; }
+#q span { flex: 1; color: #e8d5b7; }
+#q button { flex: 1.2; padding: .7em 0; background: none; box-shadow: none; color: #f2e9dc; }
+#q button:hover { background: #e8d5b733; }
+#q .on { background: linear-gradient(#e8d5b7, #b99a75); box-shadow: inset 0 -.2em #0003; color: #2b241d; pointer-events: none; }
+#k { display: flex; justify-content: center; gap: 2em; text-align: left; }
+#k p { display: grid; grid-template-columns: auto auto; align-content: start; align-items: center; gap: .55em .9em; }
+#k i { display: flex; justify-self: end; align-items: center; gap: .25em; font-style: normal; }
+#k b {
+  min-width: 1.1em; padding: .2em .5em; border-radius: .35em; background: #f2e9dc;
+  box-shadow: inset 0 -.15em #0004; color: #2b241d; text-align: center;
+}
+#h { display: none; }
+@media (pointer: coarse), (max-height: 30em) { #k { display: none; } }
+@media (pointer: coarse) { #h { display: block; } }
+#o {
+  position: absolute; top: .6em; right: .6em; display: none; padding: .3em .6em; background: #2b241dd9;
+  box-shadow: inset 0 0 0 2px #e8d5b7, 0 .3em 1em #0009; font-size: 1.3em; color: #f2e9dc; opacity: .8;
+}
+.g #o { display: flex; }
+.p #o { display: none; }
+#i {
+  position: absolute; top: 1em; left: 1.2em; margin: 0; font: .8em/1.6 ui-monospace, Consolas, monospace;
+  white-space: pre-wrap; text-shadow: 0 1px 4px #000; pointer-events: none;
+}
+</style>
+</head>
+<body class=l>
+<canvas id=c></canvas>
+<div id=m>
+  <h1>Still</h1>
+  <div id=a>
+    <div id=l><div id=p><i id=b></i></div><p id=s>Entering…</p><p id=w hidden>Use Google Chrome for optimal experience</p></div>
+    <div id=g>
+      <p id=sub>A quiet corner. Nothing to do here.</p>
+      <p id=sub-zh>一个安静的角落。这里什么都不必做。</p>
+      <p id=sit-timer>想待多久，就待多久。</p>
+      <button id=d>Sit</button>
+      <p class=row><button id=listen>Listen</button><button id=leave>Leave</button></p>
+      <p id=q><span>Detail</span><button>Low</button><button>Medium</button><button>High</button></p>
+      <div id=k>
+        <p>
+          <i><b>Sit</b></i>Stay a while
+          <i><b>M</b></i>Listen
+          <i><b>Esc</b></i>Leave
+        </p>
+      </div>
+      <p id=h>Hold to stay · slide to look around</p>
+    </div>
+  </div>
+</div>
+<button id=o aria-label=Menu>≡</button>
+<pre id=i></pre>
+<script>
+/*SCRIPT*/
+</script>
+<script>
+/*RUNTIME*/
+</script>
+</body>
+</html>

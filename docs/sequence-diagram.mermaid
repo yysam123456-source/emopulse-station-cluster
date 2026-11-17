@@ -1,0 +1,41 @@
+sequenceDiagram
+    autonumber
+    actor U as 访问者
+    participant B as 浏览器(dist/still.html)
+    participant R as Runtime
+    participant C as SiteConfig
+    participant SM as StateMachine
+    participant A as AnalyticsApi
+    participant App as StillApp(glue)
+    participant Core as CoreEngine(main/quality/audio)
+
+    U->>B: 打开 /still
+    B->>R: boot('still')
+    R->>C: loadConfig('still')
+    C-->>R: theme/copy/layout/parts
+    R->>R: createContext(scene,camera,renderer,...)
+    R->>Core: 初始化画质三档 + 动态分辨率(quality.js)
+    R->>Core: 初始化 Web Audio 音景(audio.js，默认静音待用户开启)
+    R->>Core: 固定种子构图(math.js, seed)
+    R->>SM: new StateMachine(initial='idle', 站点状态表)
+    R->>App: init(config, ctx)
+    App->>SM: onEnter('sitting'): 启动静坐计时
+    App->>App: mount(container) 首屏文案 "A quiet corner..."
+    R->>App: start()
+    App->>Core: 注册渲染循环回调 update(t)
+    Core-->>B: 首帧渲染：水/雾/光/焦散 + 音景
+    B-->>U: 呈现静默空间(无聊天/任务/消费引导)
+
+    loop 静坐中
+        Core->>App: onEvent('ANALYTICS_TICK', t)
+        App->>SM: send('ANALYTICS_TICK')
+        App->>A: startTimer('sit_duration') / 分桶上报
+    end
+
+    U->>B: 交互(停留/离开)
+    B->>App: onEvent('USER_INTERACT' / 'USER_COMPLETE')
+    App->>SM: send → idle→sitting→leaving
+    A->>A: track(匿名事件，无 PII)
+    U->>B: 关闭页面
+    B->>R: teardown()
+    R->>App: dispose() 释放零件/监听
