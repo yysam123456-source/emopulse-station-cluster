@@ -1,41 +1,60 @@
 sequenceDiagram
     autonumber
     actor U as 访问者
-    participant B as 浏览器(dist/still.html)
-    participant R as Runtime
-    participant C as SiteConfig
+    participant B as dist/<slug>.html
+    participant CORE as 通道A IIFE（L0 Frozen Core）
+    participant MS as mountSite()（通道B2 IIFE）
+    participant CP as CapabilityProbe
+    participant CO as Composer
+    participant BUS as LayerBus
+    participant P as 零件实例（五层）
+    participant GA as GenericApp
     participant SM as StateMachine
-    participant A as AnalyticsApi
-    participant App as StillApp(glue)
-    participant Core as CoreEngine(main/quality/audio)
+    participant AN as AnalyticsApi
 
-    U->>B: 打开 /still
-    B->>R: boot('still')
-    R->>C: loadConfig('still')
-    C-->>R: theme/copy/layout/parts
-    R->>R: createContext(scene,camera,renderer,...)
-    R->>Core: 初始化画质三档 + 动态分辨率(quality.js)
-    R->>Core: 初始化 Web Audio 音景(audio.js，默认静音待用户开启)
-    R->>Core: 固定种子构图(math.js, seed)
-    R->>SM: new StateMachine(initial='idle', 站点状态表)
-    R->>App: init(config, ctx)
-    App->>SM: onEnter('sitting'): 启动静坐计时
-    App->>App: mount(container) 首屏文案 "A quiet corner..."
-    R->>App: start()
-    App->>Core: 注册渲染循环回调 update(t)
-    Core-->>B: 首帧渲染：水/雾/光/焦散 + 音景
-    B-->>U: 呈现静默空间(无聊天/任务/消费引导)
-
-    loop 静坐中
-        Core->>App: onEvent('ANALYTICS_TICK', t)
-        App->>SM: send('ANALYTICS_TICK')
-        App->>A: startTimer('sit_duration') / 分桶上报
+    U->>B: 打开 /<slug>?from=...
+    B->>CORE: 执行 /*SCRIPT*/（r169 WGSL 渲染循环）
+    alt 无 WebGPU adapter
+        CORE-->>B: body.className='l e'（core 自身正确降级，QA V6）
+    else 有 adapter
+        CORE-->>B: 初始化 quality/audio/math
     end
-
-    U->>B: 交互(停留/离开)
-    B->>App: onEvent('USER_INTERACT' / 'USER_COMPLETE')
-    App->>SM: send → idle→sitting→leaving
-    A->>A: track(匿名事件，无 PII)
-    U->>B: 关闭页面
-    B->>R: teardown()
-    R->>App: dispose() 释放零件/监听
+    B->>MS: 执行 /*RUNTIME*/ → mountSite(config)
+    Note over MS: ★ 独立 IIFE，不在 core catch 内（F18）<br/>故 mountSite 自带 try/catch + 全局兜底
+    MS->>CP: probe(config.requires)
+    CP-->>MS: Capability{ adapterAvailable, renderer:'canvas2d', degraded }
+    MS->>CO: createComposer(config.composition, capability)
+    MS->>CO: validate()
+    alt 存在 Conflict（如 duplicate-exclusive）
+        CO-->>MS: conflicts[]
+        MS->>B: data-degraded="conflict" + 静态等效画面（不启动零件）
+    else 无冲突
+        CO-->>MS: []
+        MS->>GA: new GenericApp(config.id, composer)
+        MS->>GA: init(config, ctx)
+        GA->>CO: init() 按 LAYER_ORDER 装配
+        loop narrative → scene → interaction → audio → artifact（层内 order 升序）
+            CO->>BUS: 创建该零件私有 store 命名空间
+            CO->>P: factory({ref,options,bus,store,capability})
+            P-->>CO: PartInstance
+            alt chain 模式（如 rain-post → ssf-fog）
+                CO->>BUS: exchange('postprocess', frame) 按 priority 串联
+            end
+        end
+        MS->>GA: mount(container) / start()
+        GA->>SM: createStateMachine(config 状态表)
+        GA->>AN: track('APP_INIT', {site, from}) 经 scrubPayload
+        loop 每帧（FrameBridge）
+            CO->>P: update(t) 按层序（narrative 无 update）
+            GA->>AN: 分桶计时 / 完成事件（NX-I-01）
+        end
+        U->>GA: onEvent(USER_INTERACT / STATE_* / USER_COMPLETE)
+        GA->>SM: send(event) → 驱动零件动作
+        GA->>AN: track(主交互完成 / 凭证导出)
+        U->>B: 关闭 / pagehide
+        MS->>CO: dispose() 严格逆序 artifact→audio→interaction→scene→narrative
+        CO->>BUS: 清理全部监听/定时器（liveListeners → 0）
+        CO->>P: dispose() 逐个
+        MS->>AN: flush()
+    end
+    Note over MS,B: 任何同步异常 / unhandledrejection / error<br/>→ 转 data-degraded 标注，写 __emopulseDiagnostics<br/>绝不 rethrow，未捕获异常数 = 0（GM-6）

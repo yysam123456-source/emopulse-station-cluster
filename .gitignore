@@ -1,4 +1,6 @@
 node_modules/
+# 主理人准备的上游参考资料（非交付物，仅本地产出参考）
+.reference/
 # QA 冒烟测试遗留的临时浏览器 profile（非代码，体积巨大）
 tests/.edge-*/
 tests/.cache/

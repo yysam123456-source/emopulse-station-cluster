@@ -1,30 +1,23 @@
 classDiagram
     direction LR
 
-    class SiteApp {
-        <<interface>>
-        +SiteId id
-        +init(config: SiteConfig, ctx: RuntimeContext) void
-        +mount(container: HTMLElement) void
-        +start() void
-        +pause() void
-        +getScene() Scene
-        +onEvent(event: AppEvent, payload) void
-        +dispose() void
+    class SiteManifest {
+        +string id
+        +string route
+        +string dir
+        +string out
+        +string config
+        +string bridge
+        +SiteCohort cohort
+        +SiteEngine engine
+        +string requires
     }
-
-    class StillApp {
-        +init(config, ctx) void
-        +mount(container) void
-        +start() void
-        +onEvent(event, payload) void
-        +dispose() void
+    class SiteRegistry {
+        +loadRegistry() Promise~Map~
+        +getSite(id) SiteManifest
+        +listSites() string[]
+        +validateManifest(m) void
     }
-    class LicenseApp
-    class PraiseApp
-    class HugApp
-    class KoiApp
-
     class SiteConfig {
         +SiteId id
         +string route
@@ -32,119 +25,161 @@ classDiagram
         +CopyConfig copy
         +LayoutConfig layout
         +PartRef[] parts
-        +AnalyticsCfg analytics
+        +AnalyticsConfig analytics
+        +CompositionConfig composition
     }
-    class ThemeConfig {
-        +number[] WCOL
-        +number[] PCOL
-        +number[] SUNC
-        +number EXPO
-        +number RAYS
+    class CompositionConfig {
+        +PartBinding[] narrative
+        +PartBinding[] scene
+        +PartBinding[] interaction
+        +PartBinding[] audio
+        +PartBinding[] artifact
     }
-    class CopyConfig {
-        +string title
-        +string subtitle
-        +string[] controls
-        +string locale
-    }
-    class LayoutConfig {
-        +number seed
-        +Viewpoint[] viewpoints
-        +string quality
-        +AudioCfg audio
-    }
-    class PartRef {
-        +string id
-        +string source
+    class PartBinding {
+        +string ref
         +boolean enabled
+        +number order
+        +number priority
+        +PartClaim[] claims
         +Object options
     }
-
+    class PartClaim {
+        +string resource
+        +string mode
+    }
+    class PartManifest {
+        +string id
+        +PartLayer layer
+        +PartOrigin origin
+        +string entry
+        +string source
+        +string contract
+        +PartClaim[] claims
+    }
+    class PartInstance {
+        <<interface>>
+        +update(seconds) void
+        +dispose() void
+        +pipe(input) unknown
+    }
+    class PartFactory {
+        <<interface>>
+        +create(opts) PartInstance
+    }
+    class LayerBus {
+        <<interface>>
+        +on(target,type,fn) void
+        +interval(fn,ms) void
+        +exchange(resource,value) unknown
+        +get(key) T
+        +set(key,value) void
+        +Capability capability
+        +GainNode masterGain
+    }
+    class Composer {
+        +CompositionConfig layers
+        +validate() Conflict[]
+        +init() void
+        +update(seconds) void
+        +dispose() void
+        +ComposerDiagnostics diagnostics
+    }
+    class ComposerDiagnostics {
+        +Conflict[] conflicts
+        +string[] initOrder
+        +string[] updateOrder
+        +string[] disposeOrder
+        +number liveListeners
+        +boolean degraded
+    }
+    class CapabilityProbe {
+        +probe(requires) Promise~Capability~
+    }
+    class Capability {
+        +boolean adapterAvailable
+        +string renderer
+        +boolean degraded
+        +string reason
+    }
+    class GenericApp {
+        +SiteId id
+        +init(config,ctx) void
+        +mount(container) void
+        +start() void
+        +pause() void
+        +getScene() Scene
+        +onEvent(event,payload) void
+        +dispose() void
+    }
+    class MountSite {
+        +mountSite(config) void
+    }
+    class SiteApp {
+        <<interface>>
+        +init(config,ctx) void
+        +mount(container) void
+        +start() void
+        +pause() void
+        +getScene() Scene
+        +onEvent(event,payload) void
+        +dispose() void
+    }
     class Runtime {
-        -SiteConfig config
-        -SiteApp app
-        -StateMachine state
-        -AnalyticsApi analytics
-        +boot(siteId: SiteId) void
-        +loadConfig(siteId) SiteConfig
-        +createContext() RuntimeContext
-        +dispatch(event: AppEvent, payload) void
+        +boot(siteId,env) Runtime
+        +dispatch(event,payload) void
         +teardown() void
     }
-    class RuntimeContext {
-        +Scene scene
-        +Camera camera
-        +WebGLRenderer renderer
-        +QualityApi quality
-        +AudioApi audio
-        +StateMachine state
-        +AnalyticsApi analytics
-        +Object store
-    }
     class StateMachine {
-        +string initial
-        +string[] states
-        +Transition[] transitions
         +current() string
-        +send(event, payload) string
-        +onEnter(state, cb) void
-        +onExit(state, cb) void
-        +reset() void
-    }
-    class Transition {
-        +string from
-        +AppEvent event
-        +string to
-        +Function action
-    }
-    class AnalyticsApi {
-        +track(event: AppEvent, payload) void
-        +startTimer(key: string) void
-        +stopTimer(key: string) number
-    }
-    class ShortUrl {
-        +encode(payload: Object) string
-        +decode(query: string) Object
+        +send(event,payload) string
+        +onEnter(state,cb) void
+        +onExit(state,cb) void
     }
     class BuildPipeline {
-        +build(siteId: SiteId) string
-        +buildAll() string[]
-        +verifyCore() boolean
+        +verifyCore() void
+        +loadRegistry() void
+        +build(site) string
+        +assertArtifact(html,config) void
     }
-    class Overlay {
-        +merge(coreDir: string, siteDir: string) string
-    }
-    class CoreEngine {
+    class FrozenCore {
         <<Frozen>>
         +quality
         +math
-        +audio
+        +shaders
+        +world
         +main
-        +shadersBase
+        +audio
+    }
+    class LegacySiteTable {
+        <<Frozen Snapshot>>
+        +LEGACY_SITES: Readonly~Record~
+        +LEGACY_IDS: ReadonlySet~string~
+        +length: 7
     }
 
-    SiteApp <|.. StillApp
-    SiteApp <|.. LicenseApp
-    SiteApp <|.. PraiseApp
-    SiteApp <|.. HugApp
-    SiteApp <|.. KoiApp
-
-    Runtime --> SiteApp : 持有并驱动生命周期
-    Runtime --> SiteConfig : 加载
-    Runtime --> RuntimeContext : 创建并注入
+    SiteRegistry --> SiteManifest : 增量扫描发现(8)
+    SiteRegistry --> LegacySiteTable : 冻结存量(长度恒7)
+    LegacySiteTable --> SiteManifest : 提供7条存量注册信息
+    SiteRegistry --> BuildPipeline : 提供注册信息
+    SiteConfig *-- CompositionConfig : 可选字段
+    CompositionConfig *-- PartBinding
+    PartBinding *-- PartClaim
+    PartBinding ..> PartManifest : ref 查表
+    PartManifest --> PartFactory : entry
+    PartFactory ..> PartInstance : 创建
+    PartInstance ..> LayerBus : 受控副作用
+    Composer --> CompositionConfig : 装配
+    Composer --> PartInstance : init/update/dispose
+    Composer --> LayerBus : 持有
+    Composer *-- ComposerDiagnostics
+    CapabilityProbe --> Capability : 产出
+    MountSite --> CapabilityProbe : 调用
+    MountSite --> Composer : 创建并驱动
+    MountSite --> GenericApp : 创建
+    SiteApp <|.. GenericApp
+    GenericApp --> Composer : 委托
+    Runtime --> SiteApp : 驱动生命周期
     Runtime --> StateMachine : 持有
-    SiteConfig *-- ThemeConfig
-    SiteConfig *-- CopyConfig
-    SiteConfig *-- LayoutConfig
-    SiteConfig *-- PartRef
-    RuntimeContext *-- StateMachine
-    RuntimeContext --> AnalyticsApi
-    StateMachine *-- Transition
-    StillApp ..> RuntimeContext : 使用
-    LicenseApp ..> RuntimeContext : 使用
-    PraiseApp ..> RuntimeContext : 使用
-    HugApp ..> RuntimeContext : 使用
-    BuildPipeline --> Overlay : 调用
-    BuildPipeline --> CoreEngine : 组合
-    Overlay --> CoreEngine : 读取冻结内核
-    Runtime ..> ShortUrl : 使用(?from)
+    BuildPipeline --> FrozenCore : 通道A 拼接(冻结)
+    BuildPipeline --> SiteConfig : 通道B1 加载
+    BuildPipeline --> MountSite : 通道B2 bundle 进 RUNTIME
