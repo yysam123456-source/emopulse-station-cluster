@@ -18,12 +18,17 @@
     "paths": {
       "@contract/*": ["shared/contract/*"],
       "@content/*": ["content/*"]
-    }
+    },
+    "allowJs": true,
+    "checkJs": false
   },
   "include": [
     "shared/contract/**/*.ts",
+    "shared/parts-library/registry/**/*.ts",
+    "shared/parts-library/*/part.manifest.ts",
     "sites/**/*.ts",
-    "content/**/*.ts"
+    "content/**/*.ts",
+    "tests/fixtures/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "shared/core"]
 }

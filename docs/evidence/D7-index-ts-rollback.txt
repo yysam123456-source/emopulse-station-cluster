@@ -1,0 +1,38 @@
+D7 实测证据：shared/contract/index.ts 的 export * 追加 → 7 站产物哈希全变 → 已回退
+============================================================
+执行人：寇豆码（工程师）｜日期：2026-11-17｜阶段门：G3 / T01 第一硬门
+
+一、实验（架构 §4.1 风险提示 / §7.2 验收第 4 条 / §10.2 D7）
+在 shared/contract/index.ts 末尾追加 8 行 export *：
+  ./nexus-events  ./manifest  ./composition  ./parts-registry
+  ./composer  ./capability  ./mount-site  ./generic-app
+
+改完立即执行：npm run build:all && shasum -a 256 -c tests/baseline-dist.sha256
+
+实测输出：
+  dist/hug.html: FAILED
+  dist/koi-ink.html: FAILED
+  dist/koi-pond.html: FAILED
+  dist/koi-watercolor.html: FAILED
+  dist/license.html: FAILED
+  dist/praise.html: FAILED
+  dist/still.html: FAILED
+  shasum: WARNING: 7 computed checksums did NOT match
+
+结论：架构预判成立 —— `export *` 集合变化确实改写了 esbuild IIFE 的模块解析 /
+初始化顺序与变量前缀，7 站 bundle 字节全部变化。**不能用 tree-shaking「理论上不变」代替实测。**
+
+二、回退（D7 指定方案）
+将 shared/contract/index.ts 恢复为 HEAD 原始 8 行（`git checkout -- shared/contract/index.ts`，
+工作区该文件与 HEAD 逐字节相同，`git status` 为空）。
+回退后立即复测：npm run build:all && shasum -a 256 -c tests/baseline-dist.sha256
+→ 7/7 OK（全部 OK，见交付说明）。
+
+三、对后续任务（T02~T05）的硬约束
+1. nexus 新站的 bridge.ts **禁止**从 `shared/contract/index` import；
+   必须直接 import 具体模块，例如：
+     import { mountSite } from '../../shared/contract/mount-site';
+2. 任何人在 shared/contract/index.ts 追加 `export *` 都会让 7 站产物哈希全部变化，
+   直接违反 INV-3 / GM-1。该文件此后应为「只读」。
+3. 本约束已在 index.ts 的注释与架构 §4.1 风险提示中记录，G4 可用
+   `node tests/verify-legacy-hash.mjs` 一键复核。

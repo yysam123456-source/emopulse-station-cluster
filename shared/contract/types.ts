@@ -1,12 +1,19 @@
 // L1 协议层：站点配置、运行时上下文、插件接口的唯一真相源。
 import type { AppEvent, StateMachine } from './state-machine';
 import type { AnalyticsApi } from './analytics';
+import type { CompositionConfig } from './composition';
 
 import type * as THREE from 'three';
 
-/** 站点 ID——枚举，新增站点需在此登记（唯一需要改的底座文件之一，只加不改）。 */
-export type SiteId = 'still' | 'license' | 'praise' | 'hug'
-  | 'koi-pond' | 'koi-ink' | 'koi-watercolor';
+/**
+ * 站点 ID——**开放字符串**（ADR-6 / E1 / INV-6）。
+ * 一次性从 7 项联合枚举放宽：此后新增站点只需追加 site.manifest.ts，不再改本文件。
+ * 明确**不使用**品牌类型 `string & { brand }`：品牌类型不接受裸字面量赋值，
+ * 会让既有 7 站 site.config.ts 的 `id: 'still'` 全部 tsc 报错 → 破坏 INV-3。
+ * 类型安全由三层保留：编译期 `satisfies SiteConfig` + 构建期 validate-manifest.mjs
+ * + 测试期 verify-registry.mjs / verify-append-only.mjs。
+ */
+export type SiteId = string;
 
 /**
  * 配色常量——五字段保持不变，落点跨两个文件（v1.1 据真实源码校准）：
@@ -84,6 +91,11 @@ export interface SiteConfig {
   layout: LayoutConfig;
   parts: PartRef[];
   analytics: AnalyticsConfig;
+  /**
+   * ★ 新增可选字段（ADR-8）：nexus 8 站提供 → 走 Composer + GenericApp；
+   * legacy 7 站不提供 → 走原 glue，零回归。字段可选是双轨并存的唯一解。
+   */
+  composition?: CompositionConfig;
 }
 
 /** 运行时上下文——Runtime 注入给站点，站点不自行 new 引擎。 */

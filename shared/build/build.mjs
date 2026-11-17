@@ -5,7 +5,7 @@ import { buildSync } from 'esbuild';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FILES, getSite, listSites } from './sites.config.mjs';
+import { FILES, getSite, listSites, loadRegistry, registryStats } from './sites.config.mjs';
 import { resolveOverlay, warnUnknownOverrides } from './resolve-overlay.mjs';
 import { injectTheme } from './inject-theme.mjs';
 import { inlineHtml, inlineRuntime } from './inline.mjs';
@@ -19,7 +19,7 @@ const distDir = path.join(root, 'dist');
 const args = process.argv.slice(2);
 const readable = args.includes('--readable');
 const target = args.find((arg) => !arg.startsWith('--')) ?? 'still';
-const targets = target === 'all' ? listSites() : [target];
+// targets 的解析移到 verifyCore() 与 loadRegistry() 之后（注册表是 async 加载的）。
 
 /** 校验 Frozen Core 哈希，失败立即终止构建。 */
 function verifyCore() {
@@ -144,5 +144,11 @@ async function buildSite(siteId) {
 }
 
 verifyCore();
+// ★ T01 唯一新增的构建步骤：加载注册表（LEGACY_SITES 冻结存量 ∪ 增量 manifest 扫描）。
+// 这是构建元信息，不读不写任何 core / site 文件，不参与产物字节函数 f()。
+await loadRegistry();
+const stats = registryStats();
+console.log(`[build] 注册表：${stats.total} 站（legacy ${stats.legacy} + 扫描 ${stats.scanned}）`);
+const targets = target === 'all' ? listSites() : [target];
 for (const id of targets) await buildSite(id);
 console.log(`[build] 完成：${targets.join(', ')}`);

@@ -9,7 +9,10 @@
     "build:all": "node shared/build/build.mjs all",
     "build:readable": "node shared/build/build.mjs still --readable",
     "dev": "node shared/build/build.mjs still --readable",
+    "build:nexus": "node shared/build/build.mjs all",
     "verify:core": "node shared/build/verify-core.mjs",
+    "verify:nexus": "node tests/verify-registry.mjs && node tests/verify-legacy-hash.mjs && node tests/verify-no-core-write.mjs && node tests/verify-append-only.mjs && node tests/verify-size.mjs",
+    "verify:nexus:full": "node tests/verify-registry.mjs && node tests/verify-legacy-hash.mjs && node tests/verify-no-core-write.mjs && node tests/verify-composition.mjs && node tests/verify-size.mjs && node tests/verify-degradation.mjs && node tests/verify-esm-parts.mjs && node tests/verify-append-only.mjs && node tests/verify-config-driven.mjs && node tests/verify-analytics.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
