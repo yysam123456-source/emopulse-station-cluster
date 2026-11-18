@@ -13,3 +13,7 @@ tests/.tmp/
 
 # T-R02 复用对账报告（构建产物，不入库；由 tests/verify-provenance.mjs --report 生成）
 dist/reuse-report.json
+
+# 临时脚本与目视验收产物（不值得入库，按需重建）
+_scratch/
+_third_party/

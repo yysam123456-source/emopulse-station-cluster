@@ -11,9 +11,13 @@
     "dev": "node shared/build/build.mjs still --readable",
     "build:nexus": "node shared/build/build.mjs all",
     "verify:core": "node shared/build/verify-core.mjs",
+    "verify:stage": "node tests/stage-smoke.mjs && node tests/stage-mutation.mjs && node tests/parts-composition.mjs",
+    "build:demo": "node shared/stage/demo/build-demo.mjs",
+    "verify:reuse": "node tests/verify-parts-assembly.mjs && node tests/verify-provenance.mjs && node tests/verify-reuse-wording.mjs && node tests/golden-run.mjs && node tests/mutation-probe.mjs",
     "verify:nexus": "node tests/verify-registry.mjs && node tests/verify-legacy-hash.mjs && node tests/verify-no-core-write.mjs && node tests/verify-append-only.mjs && node tests/verify-size.mjs",
     "verify:nexus:full": "node tests/verify-registry.mjs && node tests/verify-legacy-hash.mjs && node tests/verify-no-core-write.mjs && node tests/verify-composition.mjs && node tests/verify-size.mjs && node tests/verify-degradation.mjs && node tests/verify-esm-parts.mjs && node tests/verify-append-only.mjs && node tests/verify-config-driven.mjs && node tests/verify-analytics.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview:field": "node _scratch/build-field-preview.mjs"
   },
   "dependencies": {
     "three": "^0.169.0"

@@ -24,6 +24,8 @@
   },
   "include": [
     "shared/contract/**/*.ts",
+    "shared/stage/**/*.ts",
+    "shared/parts/**/*.ts",
     "shared/parts-library/registry/**/*.ts",
     "shared/parts-library/*/part.manifest.ts",
     "shared/parts-library/*/index.ts",
