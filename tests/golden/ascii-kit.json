@@ -1,0 +1,98 @@
+{
+  "part": "ascii-kit",
+  "adapter": "ascii-kit-kit",
+  "note": "D4 零件：lib/kit.js 逐字节复制进产物，直接 import 原件导出执行，不经过任何我方改写。黄金值取纯函数（无随机、无 DOM），期望值由源码公式手算代入；含一个字符串用例（ramp 的字符映射）与一个向量用例（rotZ），字符串用 === 比对、tol 必须为 0。",
+  "cases": [
+    {
+      "symbol": "clamp",
+      "args": [1.5],
+      "expect": 1,
+      "tol": 0,
+      "derivation": "默认 a=0、b=1；1.5 > b=1 → 返回 b=1；这是上界截断分支，纯比较不产生浮点误差，故 tol=0"
+    },
+    {
+      "symbol": "clamp",
+      "args": [-0.5],
+      "expect": 0,
+      "tol": 0,
+      "derivation": "默认 a=0、b=1；-0.5 < a=0 → 返回 a=0；与上一例一起覆盖 clamp 的两端截断分支"
+    },
+    {
+      "symbol": "clamp",
+      "args": [0.25, 0, 10],
+      "expect": 0.25,
+      "tol": 0,
+      "derivation": "a=0 ≤ 0.25 ≤ b=10 → 原值返回 0.25；验证非默认参数（自定义上下界）时不做任何缩放或偏移"
+    },
+    {
+      "symbol": "lerp",
+      "args": [2, 4, 0.25],
+      "expect": 2.5,
+      "tol": 1e-9,
+      "derivation": "a+(b-a)*t = 2+(4-2)*0.25 = 2+2*0.25 = 2+0.5 = 2.5；t=0.25 处线性插值应等于四分之一点，用于锁定插值方向不会写反"
+    },
+    {
+      "symbol": "smooth",
+      "args": [0.5],
+      "expect": 0.5,
+      "tol": 1e-6,
+      "derivation": "t*t*(3-2t) = 0.25*(3-1) = 0.25*2 = 0.5；中点不动（smoothstep 关于 (0.5,0.5) 对称），是平滑函数最基本的定点校验"
+    },
+    {
+      "symbol": "smooth",
+      "args": [0.25],
+      "expect": 0.15625,
+      "tol": 1e-6,
+      "derivation": "0.25^2=0.0625；3-2*0.25=2.5；0.0625*2.5=0.15625；取非对称点，验证 3-2t 项方向正确（若写成 2t-3 会得 -0.15625 立即暴露）"
+    },
+    {
+      "symbol": "fract",
+      "args": [2.75],
+      "expect": 0.75,
+      "tol": 1e-9,
+      "derivation": "v-floor(v) = 2.75-2 = 0.75；用正数非整数点确认取的是向下取整而不是四舍五入（round 会得 0.75 以外的小数部分偏移）"
+    },
+    {
+      "symbol": "fract",
+      "args": [-0.25],
+      "expect": 0.75,
+      "tol": 1e-9,
+      "derivation": "v-floor(v) = -0.25-(-1) = 0.75；负数必须走向下取整而不是向零取整（trunc 会得 -0.25），这是 GLSL fract 语义，写错会让负坐标纹理整体翻转"
+    },
+    {
+      "symbol": "ramp",
+      "args": [0],
+      "expect": " ",
+      "tol": 0,
+      "derivation": "i=floor(0*10)=0，clamp 到 [0,9] 仍为 0 → RAMPS.classic 是 \" .:-=+*#%@\"，第 0 个字符是空格；v=0 对应最暗，必须是空格而不是 '.'"
+    },
+    {
+      "symbol": "ramp",
+      "args": [0.95],
+      "expect": "@",
+      "tol": 0,
+      "derivation": "i=floor(0.95*10)=floor(9.5)=9，clamp 到 ≤9（chars.length-1=9）→ 第 9 个字符 '@'；注意乘的是 chars.length=10 而不是 9，用 9 会得 floor(8.55)=8 即 '%'"
+    },
+    {
+      "symbol": "ramp",
+      "args": [1],
+      "expect": "@",
+      "tol": 0,
+      "derivation": "i=floor(1*10)=10 → 超过上界 9，被 Math.min(chars.length-1,10) 夹到 9 → '@'；这是越界夹取分支，v=1 必须落在最亮档而不是 undefined 字符"
+    },
+    {
+      "symbol": "dot",
+      "args": [[1, 2, 3], [4, 5, 6]],
+      "expect": 32,
+      "tol": 0,
+      "derivation": "a0*b0+a1*b1+a2*b2 = 1*4+2*5+3*6 = 4+10+18 = 32；全整数运算无浮点误差，故 tol=0；顺序无关不代表可以漏项（漏 z 项会得 14）"
+    },
+    {
+      "symbol": "rotZ",
+      "args": [[1, 0, 0], 1.5707963267948966],
+      "expect": [0, 1, 0],
+      "tol": 1e-6,
+      "derivation": "c=cos(π/2)=6.123e-17、s=sin(π/2)=1；x'=x*c-y*s=6.123e-17-0≈0，y'=x*s+y*c=1+0=1，z=0 → 把 +x 轴转到 +y 轴（右旋 90°），tol=1e-6 用于吸收 cos(π/2) 的机器零"
+    }
+  ]
+}

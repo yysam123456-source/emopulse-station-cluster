@@ -24,7 +24,9 @@
 ## 接入约定（写死，避免各站发明新机制）
 
 1. 零件原件放入对应目录，保持来源内容不变；来源 URL 记录于本表；
-2. 站点 `parts/` 写薄包装 `createPart(opts) => { update(t), dispose() }`，通过
-   `registerPartFactory(id, factory)` 挂到 `ctx.store.partFactories`；
-3. `site.config.ts.parts` 中 `enabled: true` 才装载，零件内部状态机不改动，由 glue 对齐外层 FSM；
+2. `site.config.ts.parts[]` 的语义是**声明本站装了什么**（供门 2 / 死引用 / 许可普查读取），
+   **不承诺可挂载**。零件入站目前必须改站点 glue 的硬编码槽位——通用挂载路径
+   （`store.partFactories` + `registerPartFactory`）在产线上**从未生效**（Q-01，已裁定删除）；
+3. `site.config.ts.parts` 中 `enabled: true` 只表示「本站启用该功能」，**不代表该 ref 会被装载**；
+   零件内部状态机不改动，由 glue 对齐外层 FSM；
 4. 自研仅限：情绪文案、Canvas 凭证导出、短 URL+埋点、零件粘合 glue；其余全部复制或按描述等效实现。

@@ -3,7 +3,7 @@ import { createFrameBridge, type FrameBridge } from '../../shared/contract/index
 import type { AppEvent, RuntimeContext, SiteApp, SiteConfig, SiteId, StateMachine } from '../../shared/contract/index';
 import { HUG_COPY, hugLine, backHint } from '../../content/hug';
 import { createHugState, RELEASE_EVENT, ARRIVE_EVENT, BACK_EVENT, type HugState } from './state';
-import { createDandelionPart, createBlowInputPart, createFlightPart, type Part } from './parts/index';
+import { createDandelionPart, createBlowInputPart, createFlightPart } from './parts/index';
 
 interface HugParts {
   dandelion: ReturnType<typeof createDandelionPart>;
@@ -20,7 +20,6 @@ export class HugApp implements SiteApp {
   private bridge: FrameBridge | null = null;
   private container: HTMLElement | null = null;
   private parts: HugParts | null = null;
-  private extraParts: Part[] = [];
   private cleanup: Array<() => void> = [];
   private timers: number[] = [];
   private disposed = false;
@@ -42,11 +41,10 @@ export class HugApp implements SiteApp {
       }),
       flight: createFlightPart(c),
     };
-    for (const ref of config.parts) {
-      if (['dandelion', 'blow', 'flight'].includes(ref.id)) continue;
-      const factory = (ctx.store.partFactories as Map<string, (c: CanvasRenderingContext2D) => Part> | undefined)?.get(ref.source);
-      if (ref.enabled && factory) this.extraParts.push(factory(c));
-    }
+    // 注：`site.config.ts` 的 parts[] 只**声明本站装了什么**（供门 2 / 死引用 / 许可普查读取），
+    // **不承诺可挂载**。原来的通用挂载循环（遍历 parts[] 取 ctx.store.partFactories）已删除：
+    // 它读的 `ctx.store.partFactories` 全仓无写入点（QUARANTINE.md Q-01），永不生效。
+    // 新增零件必须在此处加一个硬编码槽位。
 
     this.state.onEnter('drifting', () => {
       this.parts?.dandelion.release();
@@ -162,7 +160,6 @@ export class HugApp implements SiteApp {
     }
     this.parts.dandelion.update(seconds);
     this.parts.flight.update(seconds);
-    for (const part of this.extraParts) part.update(seconds);
   }
 
   private setStatus(text: string): void {
@@ -178,7 +175,6 @@ export class HugApp implements SiteApp {
     for (const fn of this.cleanup) fn();
     this.cleanup = [];
     this.parts?.dandelion.dispose(); this.parts?.blow.dispose(); this.parts?.flight.dispose();
-    for (const part of this.extraParts) part.dispose();
     this.ctx?.analytics.flush();
     this.disposed = true;
   }

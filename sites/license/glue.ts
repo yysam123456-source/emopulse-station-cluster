@@ -4,7 +4,7 @@ import type { AppEvent, RuntimeContext, SiteApp, SiteConfig, SiteId, StateMachin
 import { LICENSE_COPY, makeSerial, formatDate } from '../../content/license';
 import { createLicenseState, VERIFY_EVENT, APPROVE_EVENT, RESET_EVENT, type LicenseState } from './state';
 import {
-  createPaperPart, createTimelinePart, createStampPart, createPlanePart, type Part,
+  createPaperPart, createTimelinePart, createStampPart, createPlanePart,
 } from './parts/index';
 import { renderLicense, downloadLicense } from './export';
 
@@ -24,7 +24,6 @@ export class LicenseApp implements SiteApp {
   private bridge: FrameBridge | null = null;
   private container: HTMLElement | null = null;
   private parts: LicenseParts | null = null;
-  private extraParts: Part[] = [];
   private cleanup: Array<() => void> = [];
   private timers: number[] = [];
   private serial = '';
@@ -46,12 +45,10 @@ export class LicenseApp implements SiteApp {
       stamp: createStampPart(c),
       plane: createPlanePart(c),
     };
-    // P2 增量零件：site.config.ts.parts 中后续启用的项由此挂载，底座不改。
-    for (const ref of config.parts) {
-      if (ref.id === 'paper' || ref.id === 'timeline' || ref.id === 'stamp' || ref.id === 'plane') continue;
-      const factory = (ctx.store.partFactories as Map<string, (c: CanvasRenderingContext2D) => Part> | undefined)?.get(ref.source);
-      if (ref.enabled && factory) this.extraParts.push(factory(c));
-    }
+    // 注：`site.config.ts` 的 parts[] 只**声明本站装了什么**（供门 2 / 死引用 / 许可普查读取），
+    // **不承诺可挂载**。原来的通用挂载循环（遍历 parts[] 取 ctx.store.partFactories）已删除：
+    // 它读的 `ctx.store.partFactories` 全仓无写入点（QUARANTINE.md Q-01），永不生效。
+    // 新增零件必须在此处加一个硬编码槽位。
 
     this.state.onEnter('verifying', () => this.setStatus(LICENSE_COPY.stageZh[0]));
     this.state.onEnter('stamping', () => this.setStatus(LICENSE_COPY.stageZh[1]));
@@ -147,7 +144,6 @@ export class LicenseApp implements SiteApp {
     this.parts.timeline.update(seconds);
     this.parts.stamp.update(seconds);
     this.parts.plane.update(seconds);
-    for (const part of this.extraParts) part.update(seconds);
   }
 
   private setStatus(text: string): void {
@@ -164,7 +160,6 @@ export class LicenseApp implements SiteApp {
     this.cleanup = [];
     this.parts?.paper.dispose(); this.parts?.timeline.dispose();
     this.parts?.stamp.dispose(); this.parts?.plane.dispose();
-    for (const part of this.extraParts) part.dispose();
     this.ctx?.analytics.flush();
     this.disposed = true;
   }

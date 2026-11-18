@@ -1,0 +1,140 @@
+{
+  "part": "blow-input",
+  "adapter": "blow-input-core",
+  "note": "D3 吹气检测的黄金值。期望值全部由原文公式手算代入（derivation 记录代入过程），实现只做 |actual − expect| ≤ tol 的比较。本清单要防住的是门 9 验不出的退化：把 threshold 的下限 0.025 删掉（安静房间会被自己的底噪放飞）、把 broadband 的 max(1,·) 分母保护删掉（低频极弱时权重被放大到 1 以上）、把 strength 的「rms 不超阈值就是 0」删掉（任何环境噪声都会累积 breath）。这些都是纯函数，可以完全离线验。",
+  "cases": [
+    {
+      "symbol": "constant",
+      "args": ["FFT_SIZE"],
+      "expect": 2048,
+      "tol": 0,
+      "derivation": "原文 `analyser.fftSize = 2048`；2048 点 FFT = 1024 个频段 bin"
+    },
+    {
+      "symbol": "constant",
+      "args": ["SMOOTHING_TIME_CONSTANT"],
+      "expect": 0.65,
+      "tol": 0,
+      "derivation": "原文 `analyser.smoothingTimeConstant = 0.65`，逐字搬入；0.65 越大越平滑、越迟钝"
+    },
+    {
+      "symbol": "constant",
+      "args": ["CALIBRATION_SECONDS"],
+      "expect": 1.2,
+      "tol": 0,
+      "derivation": "原文底噪校准窗口 1.2 s；1.2×1000 = 1200 ms 内累积 baseline"
+    },
+    {
+      "symbol": "constant",
+      "args": ["THRESHOLD_FLOOR"],
+      "expect": 0.025,
+      "tol": 0,
+      "derivation": "原文 `threshold = max(0.025, baseline * 2.8)` 的下限 = 0.025"
+    },
+    {
+      "symbol": "constant",
+      "args": ["THRESHOLD_BASELINE_FACTOR"],
+      "expect": 2.8,
+      "tol": 0,
+      "derivation": "原文同式的倍数 = 2.8；baseline 越大阈值越高，避免空调/风扇声误触发"
+    },
+    {
+      "symbol": "constant",
+      "args": ["STRENGTH_SPAN"],
+      "expect": 0.16,
+      "tol": 0,
+      "derivation": "原文 strength = (rms − threshold) / 0.16，分母 = 0.16，即超出阈值 0.16 就满格"
+    },
+    {
+      "symbol": "constant",
+      "args": ["BROADBAND_LOW_FACTOR"],
+      "expect": 2.5,
+      "tol": 0,
+      "derivation": "原文 broadband = min(1, high / max(1, low×2.5)) 的系数 = 2.5"
+    },
+    {
+      "symbol": "thresholdOf",
+      "args": [0],
+      "expect": 0.025,
+      "tol": 1e-12,
+      "derivation": "max(0.025, 0×2.8) = max(0.025, 0) = 0.025；下限在 baseline = 0 时兜底"
+    },
+    {
+      "symbol": "thresholdOf",
+      "args": [0.01],
+      "expect": 0.028,
+      "tol": 1e-12,
+      "derivation": "max(0.025, 0.01×2.8) = max(0.025, 0.028) = 0.028；此时倍数项已超过下限"
+    },
+    {
+      "symbol": "thresholdOf",
+      "args": [0.1],
+      "expect": 0.28,
+      "tol": 1e-12,
+      "derivation": "max(0.025, 0.1×2.8) = max(0.025, 0.28) = 0.28"
+    },
+    {
+      "symbol": "broadbandOf",
+      "args": [0, 0.5],
+      "expect": 0.5,
+      "tol": 1e-12,
+      "derivation": "min(1, 0.5/max(1, 0×2.5)) = min(1, 0.5/max(1,0)) = min(1, 0.5/1) = 0.5；low = 0 时分母取 1 而不是 0"
+    },
+    {
+      "symbol": "broadbandOf",
+      "args": [0.2, 0.2],
+      "expect": 0.2,
+      "tol": 1e-12,
+      "derivation": "min(1, 0.2/max(1, 0.2×2.5)) = min(1, 0.2/max(1,0.5)) = min(1, 0.2/1) = 0.2；若删掉 max(1,·)，会得到 0.2/0.5 = 0.4，此条即红"
+    },
+    {
+      "symbol": "broadbandOf",
+      "args": [100, 50],
+      "expect": 0.2,
+      "tol": 1e-12,
+      "derivation": "min(1, 50/max(1, 250)) = min(1, 0.2) = 0.2；高频弱于低频时权重被压低，吹气（宽频）才拿高分"
+    },
+    {
+      "symbol": "strengthOf",
+      "args": [0.05, 0.1, 1],
+      "expect": 0,
+      "tol": 1e-12,
+      "derivation": "rms = 0.05 ≤ threshold = 0.1 → (0.05−0.1)/0.16 = −0.3125，clamp01 到 0，再 ×1 = 0；不超阈值绝不给强度"
+    },
+    {
+      "symbol": "strengthOf",
+      "args": [0.05, 0.025, 0.5],
+      "expect": 0.078125,
+      "tol": 1e-12,
+      "derivation": "(0.05−0.025)/0.16 = 0.025/0.16 = 0.15625；×0.5 = 0.078125（未满载时按比例）"
+    },
+    {
+      "symbol": "strengthOf",
+      "args": [0.2, 0.025, 1],
+      "expect": 1,
+      "tol": 1e-12,
+      "derivation": "(0.2−0.025)/0.16 = 0.175/0.16 = 1.09375，clamp01 封顶到 1，再 ×1 = 1"
+    },
+    {
+      "symbol": "rmsFlat",
+      "args": [128, 64],
+      "expect": 0,
+      "tol": 1e-12,
+      "derivation": "波形字节全为 128 = 零点偏移：v = (128−128)/128 = 0，64 项全 0，√(0/64) = 0"
+    },
+    {
+      "symbol": "rmsFlat",
+      "args": [192, 64],
+      "expect": 0.5,
+      "tol": 1e-12,
+      "derivation": "v = (192−128)/128 = 0.5，64 项平方和 = 64×0.25 = 16，√(16/64) = √0.25 = 0.5"
+    },
+    {
+      "symbol": "bandUniform",
+      "args": [1, 44100],
+      "expect": [9, 187],
+      "tol": 0,
+      "derivation": "hzPerBin = 44100/2048 = 21.533203125；low：hz < 180 → bin 0..8（8×21.533 = 172.27 < 180，9×21.533 = 193.80 > 180）共 9 个；high：180 ≤ hz ≤ 4200 → bin 9..195（195×21.533 = 4198.97 ≤ 4200，196×21.533 = 4220.51 > 4200）共 196−9 = 187 个"
+    }
+  ]
+}

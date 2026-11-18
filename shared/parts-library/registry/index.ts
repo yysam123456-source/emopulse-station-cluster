@@ -1,10 +1,14 @@
 // L3 零件注册中心索引（只增不改）：汇总全部 part.manifest.ts，供 resolvePart() 查表。
 // 说明：本文件**只聚合声明**，不 import 各零件的工厂模块（entry）。
-//   - entry 指向的薄包装随站点在 T02~T05 创建，此刻 import 会因文件不存在而失败；
-//   - 站点接线方式：`import { createPart } from '<entry>'` + `registerPart(manifest, createPart)`，
-//     由站点 bridge 依赖树经通道 B2 bundle（R3 / K2）。
+//   - 注册表只提供**零件元数据**（id / depth / requires / license），供门 2、死引用判定、
+//     许可分级普查使用。
+//   - 站点当前**不经过**本表实例化零件：7 站均由 glue 内硬编码槽位装配；`createPart` 与
+//     7 方法契约是**预留 API，未经产线验证**（`mountSite()` 无站点 import、
+//     `installParts()` 无产线调用点，见仓库根 `QUARANTINE.md` 的 Q-02）。
 import type { PartManifest } from '../../contract/parts-registry';
+import blowInput from '../blow-input/part.manifest';
 import crimsonLoong from '../crimson-loong/part.manifest';
+import dandelion from '../dandelion/part.manifest';
 import grandAtelier from '../grand-atelier/part.manifest';
 import koi from '../koi/part.manifest';
 import microScenes from '../micro-scenes/part.manifest';
@@ -16,7 +20,9 @@ import asciiKit from '../ascii-kit/part.manifest';
 /** 全库零件声明（按 id 字典序冻结，保证输出确定性）。 */
 export const PART_MANIFESTS: readonly PartManifest[] = Object.freeze(
   [
+    blowInput,
     crimsonLoong,
+    dandelion,
     grandAtelier,
     koi,
     microScenes,

@@ -1,4 +1,4 @@
-// L3 装配器（T-R01 P0-R0 修复）：把 8 个零件的「声明 + 工厂」真正装进私有注册中心。
+// L3 装配器（T-R01 P0-R0 修复）：把 10 个零件的「声明 + 工厂」真正装进私有注册中心。
 //
 // 为什么单独一个文件、不改 registry/index.ts：
 //   registry/index.ts 只聚合声明（并被各零件入口间接依赖）；若把 installParts 塞进去，
@@ -22,7 +22,9 @@ import {
   PartNotMountedError,
 } from '../part-errors';
 import * as asciiKit from '../ascii-kit/index';
+import * as blowInput from '../blow-input/index';
 import * as crimsonLoong from '../crimson-loong/index';
+import * as dandelion from '../dandelion/index';
 import * as grandAtelier from '../grand-atelier/index';
 import * as koi from '../koi/index';
 import * as microScenes from '../micro-scenes/index';
@@ -37,12 +39,14 @@ export interface AssembledPartModule {
 }
 
 /**
- * 全部 8 个零件的装配模块表（顺序固定为 id 字典序，保证报告确定性）。
+ * 全部 10 个零件的装配模块表（顺序固定为 id 字典序，保证报告确定性）。
  * 新增零件：在此追加一行 + 一份 index.ts + 一份 part.manifest.ts，别处不用动。
  */
 export const PART_ASSEMBLY_MODULES: readonly AssembledPartModule[] = [
   { manifest: asciiKit.manifest, createPart: asciiKit.createPart },
+  { manifest: blowInput.manifest, createPart: blowInput.createPart },
   { manifest: crimsonLoong.manifest, createPart: crimsonLoong.createPart },
+  { manifest: dandelion.manifest, createPart: dandelion.createPart },
   { manifest: grandAtelier.manifest, createPart: grandAtelier.createPart },
   { manifest: koi.manifest, createPart: koi.createPart },
   { manifest: microScenes.manifest, createPart: microScenes.createPart },

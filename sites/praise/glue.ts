@@ -4,7 +4,7 @@ import type { AppEvent, RuntimeContext, SiteApp, SiteConfig, SiteId, StateMachin
 import { PRAISE_COPY, makeTicket, type PraiseTicket } from '../../content/praise';
 import { createPraiseState, PEEK_EVENT, PRINT_EVENT, EXPORT_EVENT, type PraiseState } from './state';
 import {
-  createReceiptPaperPart, createLayersPart, createPointerPart, createTypewriterPart, type Part,
+  createReceiptPaperPart, createLayersPart, createPointerPart, createTypewriterPart,
 } from './parts/index';
 import { renderReceipt, downloadReceipt } from './export';
 
@@ -24,7 +24,6 @@ export class PraiseApp implements SiteApp {
   private bridge: FrameBridge | null = null;
   private container: HTMLElement | null = null;
   private parts: PraiseParts | null = null;
-  private extraParts: Part[] = [];
   private cleanup: Array<() => void> = [];
   private ticket: PraiseTicket | null = null;
   private dataUrl = '';
@@ -44,11 +43,10 @@ export class PraiseApp implements SiteApp {
       pointer: createPointerPart(c),
       typer: createTypewriterPart(c),
     };
-    for (const ref of config.parts) {
-      if (['receipt-paper', 'layers', 'pointer', 'typewriter'].includes(ref.id)) continue;
-      const factory = (ctx.store.partFactories as Map<string, (c: CanvasRenderingContext2D) => Part> | undefined)?.get(ref.source);
-      if (ref.enabled && factory) this.extraParts.push(factory(c));
-    }
+    // 注：`site.config.ts` 的 parts[] 只**声明本站装了什么**（供门 2 / 死引用 / 许可普查读取），
+    // **不承诺可挂载**。原来的通用挂载循环（遍历 parts[] 取 ctx.store.partFactories）已删除：
+    // 它读的 `ctx.store.partFactories` 全仓无写入点（QUARANTINE.md Q-01），永不生效。
+    // 新增零件必须在此处加一个硬编码槽位。
 
     this.state.onEnter('peeking', () => this.setStatus(PRAISE_COPY.peekZh));
     this.state.onEnter('printing', () => {
@@ -148,7 +146,6 @@ export class PraiseApp implements SiteApp {
       this.onEvent(PEEK_EVENT);
     }
     if (this.state.current() === 'printing' && this.parts.typer.done) this.onEvent(PRINT_EVENT);
-    for (const part of this.extraParts) part.update(seconds);
   }
 
   private setStatus(text: string): void {
@@ -163,7 +160,6 @@ export class PraiseApp implements SiteApp {
     this.cleanup = [];
     this.parts?.paper.dispose(); this.parts?.layers.dispose();
     this.parts?.pointer.dispose(); this.parts?.typer.dispose();
-    for (const part of this.extraParts) part.dispose();
     this.ctx?.analytics.flush();
     this.disposed = true;
   }

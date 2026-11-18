@@ -25,7 +25,11 @@ const config: SiteConfig = {
     audio: { enabled: false, volume: 0.4 },
   },
   parts: [
-    { id: 'receipt-paper', source: 'room-at-dawn', enabled: true },
+    // 热敏纸纹观感参考 room-at-dawn（D0：3D GI 与 2D 纸纹无算法交集，C4 裁「仅取观感」），
+    // 实现为本站 createReceiptPaperPart。T-R05 真移植后再改回 source: 'room-at-dawn' 并升 D1。
+    // 为什么现在写 'local'：`source` 声称「装的是哪个上游零件」，而 createReceiptPaperPart 是
+    // 本站自写的 2D 纸纹，不是 manifest.entry 的实例化。写 room-at-dawn 即 E_SITE_REF_DEAD。
+    { id: 'receipt-paper', source: 'local', enabled: true },
     { id: 'layers', source: 'paper-plane', enabled: true },
     { id: 'pointer', source: 'sylva', enabled: true },
     { id: 'typewriter', source: 'local-template', enabled: true },

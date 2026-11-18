@@ -25,7 +25,12 @@ const config: SiteConfig = {
     audio: { enabled: false, volume: 0.4 },
   },
   parts: [
-    { id: 'paper', source: 'room-at-dawn', enabled: true },
+    // 纸纹观感参考 room-at-dawn（D0：3D GI 与 2D 纸纹无算法交集，C4 裁「仅取观感」），
+    // 实现为本站 createPaperPart。T-R05 真移植后再改回 source: 'room-at-dawn' 并升 D1。
+    // 为什么现在写 'local'：`source` 声称的是「该 ref 装的是哪个上游零件」，而 createPaperPart
+    // 是本站自写的 2D 噪声纸纹，不是 manifest.entry 的实例化。写 room-at-dawn 会让配置读起来
+    // 像一份功能清单，实际什么都不是（E_SITE_REF_DEAD）。
+    { id: 'paper', source: 'local', enabled: true },
     { id: 'timeline', source: 'crimson-loong', enabled: true },
     { id: 'stamp', source: 'grand-atelier', enabled: true },
     { id: 'plane', source: 'paper-plane', enabled: true },

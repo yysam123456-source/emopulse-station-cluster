@@ -1,0 +1,322 @@
+{
+  "part": "dandelion",
+  "adapter": "dandelion-core",
+  "note": "D3 蒲公英的黄金值。期望值全部由原文公式/原文常量手算代入（见每条 derivation），实现只做 |actual − expect| ≤ tol 的比较。本清单要防住的是「分支被删、常数被改」这类门 9 验不出的退化：把 DETACH_SECONDS 1.8 改成 1.5、把 |axis.y| > 0.96 的退化分支整段删掉、把 min(travel,1) 的正弦封顶删掉，都会在这里变红。派生量（SEED_COUNT / homeRadius / 球面轴）用固定随机源 () => 0.5 建场，抖动项恒为 0，因此可以手算；绝不用 Math.random，否则黄金值不可复现。",
+  "cases": [
+    {
+      "symbol": "constant",
+      "args": ["SEED_COUNT"],
+      "expect": 1335,
+      "tol": 0,
+      "derivation": "逐株求和 401+310+212+140+96+61+44+31+22+18 = 1335；与原文「10 株、共 1335 颗种子」一致，plantLayoutSeedSum 是这条的第二见证"
+    },
+    {
+      "symbol": "constant",
+      "args": ["DETACH_SECONDS"],
+      "expect": 1.8,
+      "tol": 0,
+      "derivation": "原文 `const DETACH_SECONDS = 1.8`（EXCERPT.md 第二节逐字抄录）；1.8 s = 1800 ms 的错峰释放窗口"
+    },
+    {
+      "symbol": "constant",
+      "args": ["SEGMENTS_PER_SEED"],
+      "expect": 44,
+      "tol": 0,
+      "derivation": "单颗 = 2 段基础（瘦果+细柄）+ 14 个伞冠方向 × 3 段 = 2 + 42 = 44"
+    },
+    {
+      "symbol": "constant",
+      "args": ["PAPPUS_DIRECTIONS"],
+      "expect": 14,
+      "tol": 0,
+      "derivation": "原文 `for (let j = 0; j < 14; j++)` 的循环上界 = 14 个伞冠方向"
+    },
+    {
+      "symbol": "constant",
+      "args": ["GOLDEN_STEP"],
+      "expect": 2.39996323,
+      "tol": 0,
+      "derivation": "原文方位角步长 `i * 2.39996323`；2.39996323 ≈ 黄金角 π(3−√5) = 3.883222.../φ，逐字取原文精度"
+    },
+    {
+      "symbol": "constant",
+      "args": ["FADE_START"],
+      "expect": 7,
+      "tol": 0,
+      "derivation": "原文 `smoothstep(7.0, 10.0, travel)` 的第一参数 = 7.0 s，淡出起点"
+    },
+    {
+      "symbol": "constant",
+      "args": ["FADE_END"],
+      "expect": 10,
+      "tol": 0,
+      "derivation": "原文 `smoothstep(7.0, 10.0, travel)` 的第二参数 = 10.0 s，淡出终点；10 − 7 = 3 s 的渐隐窗口"
+    },
+    {
+      "symbol": "constant",
+      "args": ["FLYING_ALPHA"],
+      "expect": 0.62,
+      "tol": 0,
+      "derivation": "原文 `mix(attachedAlpha, 0.62, flying)` 的目标值 = 0.62"
+    },
+    {
+      "symbol": "constant",
+      "args": ["ATTACHED_ALPHA_BASE"],
+      "expect": 0.19,
+      "tol": 0,
+      "derivation": "原文 `attachedAlpha = 0.19 + max(0.0, aAxis.z) * 0.26` 的常数项 = 0.19"
+    },
+    {
+      "symbol": "constant",
+      "args": ["ATTACHED_ALPHA_Z"],
+      "expect": 0.26,
+      "tol": 0,
+      "derivation": "原文同式的 Z 系数 = 0.26；aAxis.z = 1 时 attachedAlpha = 0.19 + 0.26 = 0.45"
+    },
+    {
+      "symbol": "constant",
+      "args": ["TURN_SECONDS"],
+      "expect": 1.3,
+      "tol": 0,
+      "derivation": "原文「会在约 1.3 秒内把径向朝向过渡到略微倾斜的向上方向」= 1.3 s"
+    },
+    {
+      "symbol": "constant",
+      "args": ["STEM_TOP_Y"],
+      "expect": 0.16,
+      "tol": 0,
+      "derivation": "原文几何第二段 `line([0,0,0],[0,0.16,0],0.7)` 的终点高度 = 0.16；同时是起点半径要扣掉的细柄长度"
+    },
+    {
+      "symbol": "plantLayoutSize",
+      "args": [],
+      "expect": 10,
+      "tol": 0,
+      "derivation": "原文「十株蒲公英」= 10 行 PLANT_LAYOUT；少一株则种子总数与构图同时失效"
+    },
+    {
+      "symbol": "plantLayoutSeedSum",
+      "args": [],
+      "expect": 1335,
+      "tol": 0,
+      "derivation": "逐株 seeds 相加 = 401+310+212+140+96+61+44+31+22+18 = 1335（独立于 SEED_COUNT 的第二个见证）"
+    },
+    {
+      "symbol": "geometrySegments",
+      "args": [],
+      "expect": 44,
+      "tol": 0,
+      "derivation": "shades.length = 2 + 14×3 = 44 段"
+    },
+    {
+      "symbol": "geometryEndpoints",
+      "args": [],
+      "expect": 88,
+      "tol": 0,
+      "derivation": "每段 2 个端点，44×2 = 88 个端点，写入 Float32Array 后长度 = 88×3 = 264"
+    },
+    {
+      "symbol": "geometryShade",
+      "args": [0],
+      "expect": 0.38,
+      "tol": 1e-6,
+      "derivation": "第 0 段 `line([0,-0.055,0],[0,0,0],0.38)` 的 shade = 0.38（瘦果，落在 SHADE_SPLIT=0.5 之下 → 棕色）"
+    },
+    {
+      "symbol": "geometryShade",
+      "args": [1],
+      "expect": 0.7,
+      "tol": 1e-6,
+      "derivation": "第 1 段 `line([0,0,0],[0,0.16,0],0.7)` 的 shade = 0.7（细柄，≥0.5 → 冠毛色）"
+    },
+    {
+      "symbol": "geometryShade",
+      "args": [2],
+      "expect": 0.92,
+      "tol": 1e-6,
+      "derivation": "第 2 段是 j=0 的第一根伞骨 `line([0,0.16,0],[0.07,0.19,0],0.92)`，shade = 0.92"
+    },
+    {
+      "symbol": "geometryShade",
+      "args": [43],
+      "expect": 0.9,
+      "tol": 1e-6,
+      "derivation": "末段下标 = 2 + 13×3 + 2 = 43，对应 j=13 的分叉段 shade = 0.9（float32 存储，误差 < 3e-8）"
+    },
+    {
+      "symbol": "smoothstep",
+      "args": [7, 10, 8.5],
+      "expect": 0.5,
+      "tol": 1e-9,
+      "derivation": "t = (8.5−7)/(10−7) = 0.5；t²(3−2t) = 0.25×2 = 0.5，中点对称处正好一半"
+    },
+    {
+      "symbol": "fract",
+      "args": [2.75],
+      "expect": 0.75,
+      "tol": 1e-9,
+      "derivation": "fract(x) = x − floor(x) = 2.75 − 2 = 0.75"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [0, 0, 0],
+      "expect": 0.19,
+      "tol": 1e-9,
+      "derivation": "fade = 1−smoothstep(7,10,0) = 1；attachedAlpha = 0.19+max(0,0)×0.26 = 0.19；mix(0.19,0.62,0) = 0.19 → 1×0.19 = 0.19"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [1, 0, 0],
+      "expect": 0.45,
+      "tol": 1e-9,
+      "derivation": "attachedAlpha = 0.19 + 1×0.26 = 0.45；fade=1、flying=0 → 0.45"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [-1, 0, 0],
+      "expect": 0.19,
+      "tol": 1e-9,
+      "derivation": "max(0.0, −1) = 0 的保护项：attachedAlpha = 0.19 + 0 = 0.19；删掉 max(0,·) 会得到 −0.07，此条即红"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [0, 7, 1],
+      "expect": 0.62,
+      "tol": 1e-9,
+      "derivation": "fade = 1−smoothstep(7,10,7) = 1−0 = 1；mix(0.19,0.62,1) = 0.62 → 1×0.62 = 0.62（淡出窗口左端点仍全亮）"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [0, 8.5, 0],
+      "expect": 0.095,
+      "tol": 1e-9,
+      "derivation": "fade = 1−smoothstep(7,10,8.5) = 1−0.5 = 0.5；flying=0 → 0.5 × 0.19 = 0.095（未放飞时 fade 仍生效）"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [0, 8.5, 1],
+      "expect": 0.31,
+      "tol": 1e-9,
+      "derivation": "fade = 0.5；mix(0.19,0.62,1) = 0.62 → 0.5×0.62 = 0.31"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [0.5, 9, 1],
+      "expect": 0.160740740741,
+      "tol": 1e-9,
+      "derivation": "t = (9−7)/3 = 2/3；t²(3−2t) = (4/9)(5/3) = 20/27；fade = 1−20/27 = 7/27；7/27×0.62 = 4.34/27 = 0.160740740741"
+    },
+    {
+      "symbol": "alphaOf",
+      "args": [0, 10, 1],
+      "expect": 0,
+      "tol": 1e-9,
+      "derivation": "fade = 1−smoothstep(7,10,10) = 1−1 = 0；0×0.62 = 0（窗口右端点完全隐去）"
+    },
+    {
+      "symbol": "drift",
+      "args": [0, 1, 0, 1],
+      "expect": [0.479306301453, 0.2144821321, -0.425],
+      "tol": 1e-9,
+      "derivation": "x = 1×(0.35+0×1.6) + sin(1.1)×0.24×min(1,1) = 0.35+0.891207360061×0.24 = 0.563889766415；y = 0.08+sin(0.9)×0.22 = 0.08+0.172331920118 = 0.252331920118；z = −(0.5+0)×1 = −0.5；gust = 0.85+0×0.25 = 0.85 → [0.563889766415, 0.252331920118, −0.5]×0.85 = [0.479306301453, 0.214482132100, −0.425]"
+    },
+    {
+      "symbol": "drift",
+      "args": [0, 0.5, 0, 1],
+      "expect": [0.202064097351, 0.074669277439, -0.2125],
+      "tol": 1e-9,
+      "derivation": "swing = min(0.5,1) = 0.5；x = 0.5×0.35 + sin(0.55)×0.24×0.5 = 0.175+0.522687228931×0.12 = 0.237722467472；y = 0.5×0.08+sin(0.45)×0.22×0.5 = 0.04+0.047846208752 = 0.087846208752；z = −0.5×0.5 = −0.25；×0.85 = [0.202064097351, 0.074669277439, −0.2125]"
+    },
+    {
+      "symbol": "drift",
+      "args": [0, 2, 0, 1],
+      "expect": [0.759933266379, 0.318109506974, -0.85],
+      "tol": 1e-9,
+      "derivation": "swing = min(2,1) = 1（封顶！若删掉 min(travel,1)，正弦项会按 travel=2 放大一倍）：x = 2×0.35+sin(2.2)×0.24 = 0.7+0.808496403820×0.24 = 0.894039136917；y = 2×0.08+sin(1.8)×0.22 = 0.16+0.214246478793 = 0.374246478793；z = −2×0.5 = −1；×0.85 = [0.759933266379, 0.318109506974, −0.85]"
+    },
+    {
+      "symbol": "drift",
+      "args": [0, 1, 0, 0.32],
+      "expect": [0.153378016465, 0.068634282272, -0.136],
+      "tol": 1e-9,
+      "derivation": "画布高度归一：heightScale = 0.32 → 整段位移（含正弦）×0.32；x = 0.479306301453×0.32 = 0.153378016465；y = 0.214482132100×0.32 = 0.068634282272；z = −0.425×0.32 = −0.136（原始系数不变，只多这一步缩放）"
+    },
+    {
+      "symbol": "drift",
+      "args": [0.25, 3, 1, 1],
+      "expect": [2.21139090837, 1.041773698479, -7.8375],
+      "tol": 1e-9,
+      "derivation": "x = 3×(0.35+0.25×1.6) + sin(3×1.1+0.25×31)×0.24 = 2.25 + sin(11.05)×0.24 = 2.25 + (−0.998519286476)×0.24 = 2.010355371246；y = 3×(0.08+fract(4.25)×0.7)+sin(3×0.9+0.25×23)×0.22 = 3×0.255 + sin(8.45)×0.22 = 0.765+0.827577266442×0.22 = 0.947066998617；z = −3×(0.5+fract(7.75)×2.5) = −3×2.375 = −7.125；gust = 0.85+1×0.25 = 1.1 → [2.211390908371, 1.041773698479, −7.8375]"
+    },
+    {
+      "symbol": "basisDegenerate",
+      "args": [0, 1, 0],
+      "expect": 1,
+      "tol": 0,
+      "derivation": "|axis.y| = 1 > 0.96 → 退化分支必须置真；这是极点 golden 的判定位，删掉该分支会返回 0"
+    },
+    {
+      "symbol": "basisRight",
+      "args": [0, 1, 0],
+      "expect": [0, 0, 1],
+      "tol": 1e-9,
+      "derivation": "轴为精确极点时退化分支把辅助轴从 Y 换成 X：cross((1,0,0),(0,1,0)) = (0×0−0×1, 0×0−1×0, 1×1−0×0) = (0,0,1)，已归一化。若仍用 Y 轴，叉积 = (0,0,0)，归一化后是零向量"
+    },
+    {
+      "symbol": "basisForward",
+      "args": [0, 1, 0],
+      "expect": [1, 0, 0],
+      "tol": 1e-9,
+      "derivation": "forward = cross(axis, right) = cross((0,1,0),(0,0,1)) = (1×1−0×0, 0×0−0×1, 0×0−1×0) = (1,0,0)"
+    },
+    {
+      "symbol": "basisDegenerate",
+      "args": [0, -1, 0],
+      "expect": 1,
+      "tol": 0,
+      "derivation": "|axis.y| = |−1| = 1 > 0.96 → 南极同样走退化分支（判断用的是绝对值）"
+    },
+    {
+      "symbol": "basisRight",
+      "args": [0, -1, 0],
+      "expect": [0, 0, -1],
+      "tol": 1e-9,
+      "derivation": "cross((1,0,0),(0,−1,0)) = (0×0−0×(−1), 0×0−1×0, 1×(−1)−0×0) = (0,0,−1)"
+    },
+    {
+      "symbol": "basisDegenerate",
+      "args": [0, 0.5, 0.8660254],
+      "expect": 0,
+      "tol": 0,
+      "derivation": "|axis.y| = 0.5 ≤ 0.96 → 非退化，仍用 Y 轴做辅助轴（这条是退化分支的对照组，防止「恒返回 true」的实现蒙混过关）"
+    },
+    {
+      "symbol": "basisRight",
+      "args": [0, 0.5, 0.8660254],
+      "expect": [1, 0, 0],
+      "tol": 1e-9,
+      "derivation": "cross((0,1,0),(0,0.5,0.8660254)) = (1×0.8660254−0×0.5, 0×0−0×0.8660254, 0×0.5−1×0) = (0.8660254,0,0)，归一化 = (1,0,0)"
+    },
+    {
+      "symbol": "basisForward",
+      "args": [0, 0.5, 0.8660254],
+      "expect": [0, 0.8660254, -0.5],
+      "tol": 1e-9,
+      "derivation": "forward = cross((0,0.5,0.8660254),(1,0,0)) = (0.5×0−0.8660254×0, 0.8660254×1−0×0, 0×0−0.5×1) = (0, 0.8660254, −0.5)"
+    },
+    {
+      "symbol": "seedAxisAt",
+      "args": [0.5, 0],
+      "expect": [0.0705784112, 0.9975062609, 0],
+      "tol": 1e-6,
+      "derivation": "固定随机源 0.5 使抖动全为 0；第 0 株首颗：ny = 1−(0.5/401)×2 = 1−1/401 = 400/401 = 0.9975062344，ring = √(1−ny²) = √(801)/401 = 0.0705784112，angle = 0×2.39996323 = 0 → 轴 = (cos0×ring, ny, sin0×ring) = (0.0705784112, 0.9975062609, 0)（float32 存储，tol 1e-6）"
+    },
+    {
+      "symbol": "seedHomeRadius",
+      "args": [0.5, 0],
+      "expect": 0.36,
+      "tol": 1e-6,
+      "derivation": "size = 0.82+0.5×0.36 = 1.0；起点半径 = 花球半径 − 细柄长×size = 0.52 − 0.16×1.0 = 0.36；若不扣细柄（原文特别提醒的那一步），会得到 0.52，花球胀大一圈"
+    }
+  ]
+}

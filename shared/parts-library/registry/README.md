@@ -52,6 +52,8 @@ createPart(opts: PartOptions) => PartInstance   // PartInstance = { update?(t), 
 | `room-at-dawn` | scene | copy | `shared/parts-library/room-at-dawn/index.ts` | `room-at-dawn/main.js` | `/license`、`/praise` |
 | `sylva` | interaction | copy | `shared/parts-library/sylva/index.ts` | `sylva/index.html` 等 2 文件 | `/praise` |
 | `ascii-kit` | scene | copy | `shared/parts-library/ascii-kit/index.ts` | `ascii-kit/lib/kit.js`（10,772 B 纯 ESM 无依赖） | `ascii-radio`（⑤，T04） |
+| `dandelion` | scene | port | `shared/parts-library/dandelion/index.ts` | 公众号文章（无仓库）：`src/three/DandelionMeadow.ts` 代码块见 `dandelion/EXCERPT.md` | `/hug` |
+| `blow-input` | interaction | port | `shared/parts-library/blow-input/index.ts` | 公众号文章（无仓库）：`src/utils/BlowInput.ts` 代码块见 `blow-input/EXCERPT.md` | `/hug` |
 
 ## 五、两条硬纪律
 

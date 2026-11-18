@@ -17,7 +17,19 @@ export type PartFactory = (options: Record<string, unknown>) => PartInstance;
 
 const partFactories = new Map<string, PartFactory>();
 
-/** 注册零件工厂（P2 场景变体在此接入，不影响 P0）。 */
+/**
+ * 注册零件工厂。
+ *
+ * **⚠️ 未接线 · 当前零调用点**：全仓没有任何地方调用它（`still.site.config.ts` 的
+ * `parts: []` 也是空数组，`mountPart()` 的循环从不迭代）。保留它是因为它是
+ * 「按配置挂载零件」这条路唯一的**可用参考实现**——`mountPart()` 在工厂缺失时**抛错**
+ * （fail-fast），而 `license` / `praise` / `hug` 三站把它抄成了
+ * `ctx.store.partFactories`（无人写）+ `if (ref.enabled && factory)`（静默跳过），
+ * 于是同一个洞在三站静默存活了很久。Q-01 已裁定删除三站的挂载循环，将来若要接通，
+ * 参考本文件的写法，不要参考那三站。
+ * @param {string} id 零件 id
+ * @param {PartFactory} factory 工厂
+ */
 export function registerPartFactory(id: string, factory: PartFactory): void {
   partFactories.set(id, factory);
 }
