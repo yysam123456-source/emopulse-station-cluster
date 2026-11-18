@@ -50,6 +50,17 @@ export interface PortedSymbol {
 }
 
 /**
+ * 移植面条目（REUSE-4 v1.1，ARCHITECTURE-REUSE §3.3）。
+ * `scope` 决定「哪些原件文件的参数会被纳入搬运率分母」，必须逐条给出纳入理由。
+ */
+export interface ParamScopeEntry {
+  /** 原件文件相对路径（相对 shared/parts-library/），必须出现在 provenance.files[].path 内 */
+  path: string;
+  /** 为什么这个文件的参数属于 2D 移植面（必填非空，一句话） */
+  reason: string;
+}
+
+/**
  * 零件溯源契约（REUSE-1，ARCHITECTURE-REUSE §3.1）。
  *
  * 为什么是**可选**字段：既有 legacy 7 站目录零新增零改动（主理人 D2 裁决），
@@ -74,11 +85,20 @@ export interface Provenance {
   files: readonly ProvenanceFile[];
   /** 已移植的原件符号（D0 零件必须为空数组：一字未用） */
   ported: readonly PortedSymbol[];
-  /** 原件可调参数面（搬运率分母）：enumerated.length 必须 === total，且每个名字可 grep 命中 */
+  /**
+   * 移植面与已接线参数（REUSE-4 v1.1）。
+   *
+   * **分母不由 manifest 提供**：`P_scope` 由 `tests/lib/param-pool.mjs` 用 TypeScript AST
+   * 从 `scope[].path` 机械抽取（N1–N4 四类节点 + E1–E5 五条去噪），防「自评分母」。
+   * `enumerated` 只允许写**真的接线了**的参数名（必须是 P_scope 的子集）；
+   * 未接线的名字写进来 = 分子造假，与上一版把分母填成分子是同类错误。
+   */
   paramSurface: {
-    total: number;
+    /** 移植面文件清单；空数组 = 无 JS/TS 原件（HTML 内联脚本，走 articleMode 替代门） */
+    scope: readonly ParamScopeEntry[];
+    /** 我方实际接线的参数名（键名必须能在原件 \b 命中，且不属于 E1–E5 剔除集） */
     enumerated: readonly string[];
-    /** 怎么数出来的（可复核的一句话） */
+    /** 枚举依据（必填，可复核的一句话） */
     evidence: string;
   };
   /** 许可证（REUSE-7）：spdx 允许 'NOASSERTION'，但必须给证据 */

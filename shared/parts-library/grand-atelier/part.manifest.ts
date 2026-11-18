@@ -36,9 +36,18 @@ const manifest = {
     ],
     ported: [],
     paramSurface: {
-      total: 2,
-      enumerated: ['HAMMER_STROKE_SECONDS', 'HAMMER_ATTACK_SECONDS'],
-      evidence: 'piano-action.ts:38-39 两个导出时序常量（.13 / .027）；其余参数在 ACTION 对象内未接线',
+      // 移植面预登记为 piano-action.ts：击弦机几何（key→capstan→wippen→jack→repetition→hammer）
+      // 与全部时序常量都在该文件内，是 T-R05 升 D3 的唯一目标面。
+      // piano-model.ts（3D 建模，且 6 模块未归集）与 piano-materials.ts（材质）无 2D 对应物，不纳入。
+      scope: [
+        {
+          path: 'grand-atelier/piano-action.ts',
+          reason: '击弦机几何比例与时序常量的唯一载体，2D 出证节奏移植面全部在此文件',
+        },
+      ],
+      enumerated: [],
+      evidence: '当前 D1 + ported:[]，未接线任何原件参数（HAMMER_* 为原件符号，未被使用）；'
+        + 'T-R05 升 D3 后逐条填入并过死参数探针；分母由 param-pool 从 scope 机械抽取',
     },
     license: {
       spdx: 'MIT',

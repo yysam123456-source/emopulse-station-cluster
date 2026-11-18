@@ -25,13 +25,16 @@ const manifest = {
     ],
     ported: [],
     paramSurface: {
-      total: 1,
-      enumerated: ['MAXROLL'],
-      evidence: '60_dragon.js:41 `const MAXROLL = rad(5)`，原件唯一顶层可调常量（TAU 等为数学常量，不计）',
+      // D1：三阶段时间轴是站点自写，原件四层骨骼链算法一字未移植 → 移植面为空（不是「缩水」，
+      // 是确实没有可搬的参数面）；MAXROLL 是原件符号，未被接线，不得算进分子。
+      scope: [],
+      enumerated: [],
+      evidence: 'D1 低复用件：ported 为空 → 无可搬运参数面；走 ARCHITECTURE-REUSE §3.3.5 的 D1 登记门，'
+        + '不用参数搬运率衡量（量纲错误）',
     },
     license: {
       spdx: 'NOASSERTION',
-      evidence: '仅 vendor/LICENSE（three.js MIT），不覆盖仓库代码；README 只提 three.js（F-R4）',
+      evidence: '仅 vendor/LICENSE（three.js MIT），不覆盖仓库代码；README 只提 three.js（F-R4）。无许可证声明，已签字豁免，仅用于个人展示站，不得再分发。',
       grade: 'L3',
     },
   },

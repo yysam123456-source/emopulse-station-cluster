@@ -10,3 +10,6 @@ tests/.tmp/
 .tmp/
 *.local
 *.tar.gz
+
+# T-R02 复用对账报告（构建产物，不入库；由 tests/verify-provenance.mjs --report 生成）
+dist/reuse-report.json

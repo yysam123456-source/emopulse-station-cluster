@@ -144,28 +144,62 @@ function provenanceProblems(manifest) {
     }
   }
 
+  // paramSurface 自洽（REUSE-4 v1.1，ARCHITECTURE-REUSE §3.3）：
+  // 分母不在本文件里（v1.0 的 `total` 已删除，因为它 8/8 都被填成 enumerated.length）；
+  // 这里只校验「移植面边界合法」与「分子真的接线了」两件事。
   const surface = p.paramSurface;
   if (!surface || typeof surface !== 'object') {
-    problems.push('缺 paramSurface（搬运率分母）');
+    problems.push('缺 paramSurface（REUSE-4）');
   } else {
-    const enumerated = Array.isArray(surface.enumerated) ? surface.enumerated : null;
-    if (enumerated === null) problems.push('paramSurface.enumerated 必须是数组');
-    else {
-      if (surface.total !== enumerated.length) {
-        problems.push(`paramSurface.total=${String(surface.total)} ≠ enumerated.length=${enumerated.length}`);
+    const declaredFiles = new Set((Array.isArray(p.files) ? p.files : []).map((file) => file?.path));
+    const scope = Array.isArray(surface.scope) ? surface.scope : null;
+    if (scope === null) {
+      problems.push('paramSurface.scope 必须是数组（无移植面填 []）');
+    } else {
+      if (p.depth === 'D0' && scope.length > 0) {
+        problems.push('depth=D0 的零件不得声明移植面（原件一字未用，scope 必须为空）');
       }
-      for (const name of enumerated) {
-        const hit = texts.some((file) => wordHit(file.text, name));
-        if (!hit) problems.push(`paramSurface.enumerated 中的 ${name} 在原件里未命中（不能凭空造分母）`);
-      }
-      for (const symbol of Array.isArray(p.ported) ? p.ported : []) {
-        for (const key of Object.keys(symbol?.params ?? {})) {
-          if (!enumerated.includes(key)) problems.push(`ported ${symbol.symbol} 的 params 键 ${key} 不在 enumerated 中`);
+      for (const entry of scope) {
+        const label = String(entry?.path);
+        if (typeof entry?.path !== 'string' || entry.path.trim() === '') {
+          problems.push('paramSurface.scope[].path 必须是非空字符串');
+          continue;
+        }
+        if (!declaredFiles.has(entry.path)) {
+          problems.push(`paramSurface.scope 的 ${label} 不在 provenance.files[] 内（移植面必须是归集文件的子集）`);
+        }
+        if (!/\.(?:js|mjs|ts)$/.test(entry.path)) {
+          problems.push(`paramSurface.scope 的 ${label} 不是 JS/TS 文件，param-pool 无法抽取（分母恒 0）`);
+        }
+        if (typeof entry?.reason !== 'string' || entry.reason.trim() === '') {
+          problems.push(`paramSurface.scope 的 ${label} 缺 reason（每个纳入的文件都要一句话说明理由）`);
         }
       }
     }
+
+    const enumerated = Array.isArray(surface.enumerated) ? surface.enumerated : null;
+    if (enumerated === null) {
+      problems.push('paramSurface.enumerated 必须是数组');
+    } else {
+      // 架构 §3.1 明文：enumerated = 所有 ported[].params 键的并集（脚本断言二者相等）
+      const wiredKeys = new Set();
+      for (const symbol of Array.isArray(p.ported) ? p.ported : []) {
+        for (const key of Object.keys(symbol?.params ?? {})) wiredKeys.add(key);
+      }
+      for (const name of enumerated) {
+        if (!wiredKeys.has(name)) {
+          problems.push(`enumerated 中的 ${name} 不在任何 ported[].params 里（未接线的名字 = 分子造假）`);
+        }
+        const hit = texts.some((file) => wordHit(file.text, name));
+        if (!hit) problems.push(`paramSurface.enumerated 中的 ${name} 在原件里未命中（不能凭空造分子）`);
+      }
+      for (const key of wiredKeys) {
+        if (!enumerated.includes(key)) problems.push(`ported[].params 的键 ${key} 不在 enumerated 中（漏登记）`);
+      }
+    }
+
     if (typeof surface.evidence !== 'string' || surface.evidence.trim() === '') {
-      problems.push('paramSurface.evidence 必须说明分母怎么数出来的');
+      problems.push('paramSurface.evidence 必填（说明枚举依据，可复核）');
     }
   }
 

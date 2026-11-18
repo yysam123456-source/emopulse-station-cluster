@@ -37,13 +37,23 @@ const manifest = {
     ],
     ported: [],
     paramSurface: {
-      total: 3,
-      enumerated: ['MAXR', 'NF', 'NSP'],
-      evidence: 'glsl.js:6 MAXR / ink.js:11 NF / koi.js:7 NSP，三个顶层导出常量；其余调参在对象字面量内',
+      // 移植面预登记为 koi.js：PRD-REUSE 把本件钉死为 D3，T-R03 的九项鱼体算法全部落在该文件
+      // （VARIETIES 花色表、bodyGeometry / finGeometry 体形几何、脊线采样）。
+      // 现况是 D1 + ported:[]（算法尚未进产物），故 enumerated 必须为空——
+      // 把 MAXR/NF/NSP 这类「原件符号」当成「已接线参数」正是 v1.0 的量纲错误。
+      scope: [
+        {
+          path: 'koi/koi.js',
+          reason: '鱼体几何 / 花色表 / 脊线采样三项 2D 算法的唯一载体，2D 移植面全部落在此文件',
+        },
+      ],
+      enumerated: [],
+      evidence: '当前 D1 + ported:[]，未接线任何原件参数（T-R03 升 D3 后逐条填入并过死参数探针）；'
+        + '分母 P_scope 由 param-pool 从 koi/koi.js 机械抽取，不由本文件声明',
     },
     license: {
       spdx: 'NOASSERTION',
-      evidence: '仓库无 LICENSE 文件（F-R4），无任何再分发声明',
+      evidence: '仓库无 LICENSE 文件（F-R4），无任何再分发声明。无许可证声明，已签字豁免，仅用于个人展示站，不得再分发。',
       grade: 'L3',
     },
   },

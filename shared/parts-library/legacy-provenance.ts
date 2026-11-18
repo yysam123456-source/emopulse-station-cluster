@@ -79,13 +79,15 @@ function gapProvenance(what: string): Provenance {
     // 三个缺口零件没有目录、没有归集文件（files 为空），归集状态只能记在顶层。
     completeness: 'absent',
     paramSurface: {
-      total: 0,
+      // ARCHITECTURE-REUSE §3.3.6 articleMode：无仓库 ⇒ 移植面必须为空数组（不得凭空声明）
+      scope: [],
       enumerated: [],
-      evidence: `无上游仓库可归集，仅有公众号文章代码片段；${what}（分母记 0）`,
+      evidence: `无上游仓库可归集，仅有公众号文章代码片段；${what}（P_scope=0，走文章锚定替代门）`,
     },
     license: {
       spdx: 'NOASSERTION',
-      evidence: '仅有文章代码片段，无仓库、无 LICENSE，无任何再分发声明（F-R4）',
+      evidence: '仅有文章代码片段，无仓库、无 LICENSE，无任何再分发声明（F-R4）。'
+        + '无许可证声明，已签字豁免，仅用于个人展示站，不得再分发。',
       grade: 'L3',
     },
   };
@@ -148,8 +150,22 @@ export const LEGACY_PARTS: Readonly<Record<string, readonly LegacyPartRef[]>> = 
 /**
  * 冻结快照的内容哈希（恒定量）。
  * 由 `sha256(JSON.stringify(LEGACY_PARTS))` 一次性算出并钉死；改内容不改常量 → 断言失败。
+ *
+ * 变更记录（每次变动都要写清「改了什么实质」，让后来人一眼知道哈希为什么变）：
+ *   - T-R01：e98d5465…
+ *     实质：初版快照，`paramSurface` 含人工填写的 `total`（后被判定为自证循环，见架构 §3.3.0）。
+ *   - T-R02 第 1 批：7867948d…
+ *     实质：**`paramSurface.total` 字段删除 → `gapProvenance()` 改 `scope: []`**
+ *     （三个缺口零件无仓库，ARCHITECTURE-REUSE §3.3.6 要求 scope 为空数组）；
+ *     同时 8 份 manifest 的 `enumerated` 一律清空为「真接线集合」
+ *     （此前把原件符号当已接线参数填进去，属量纲错误，见 §3.3.5）。
+ *   - T-R02 第 2 批：364687ec…
+ *     实质：**`license.evidence` 补 L3 固定句式的四要素**
+ *     （「无许可证声明，已签字豁免，仅用于个人展示站，不得再分发」，§14.1-A-2 要求逐件写明），
+ *     外加 `room-at-dawn` / `rain-webgpu` 的 `missing[]` 按门 1 的 import 反查补齐
+ *     （原声明 complete/少列依赖，被 import 反查抓出，REUSE-3 不许假装完整）。
  */
-export const LEGACY_PARTS_HASH = 'e98d5465689ff62964ced0148dab7e0f680e2ba23515032ac379503a7aac7fdb';
+export const LEGACY_PARTS_HASH = '364687ecbabbf8984b4f24eb7046c1984dc0e28175a33a26d8e1a0653184dd3e';
 
 /**
  * 按站点 id 取零件引用列表（未登记返回 undefined）。

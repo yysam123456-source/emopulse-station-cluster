@@ -31,14 +31,20 @@ const manifest = {
           './render/look.js（未归集）',
           './render/pipeline.js（未归集）',
           './scene/index.js（未归集）',
+          // T-R02 门 1（import 反查）又查出 3 个 main.js 直接依赖、此前未登记的缺口
+          './bake/baker.js（未归集）',
+          './render/film.js（未归集）',
+          './game/game.js（未归集）',
         ],
       },
     ],
     ported: [],
     paramSurface: {
-      total: 3,
-      enumerated: ['quality', 'aperture', 'focus'],
-      evidence: 'main.js:27 `state = { quality: Q.get(q)||"high", lens: { aperture: 0, focus: 3 } }`',
+      // D0：原件一字未用 → 移植面为空。原件的 quality/aperture/focus 是 3D GI 烘焙参数，
+      // 与 2D 纸纹无算法交集（C4 裁降 D1→实际 D0），不得登记为移植面。
+      scope: [],
+      enumerated: [],
+      evidence: 'D0 未装站：scope 与 enumerated 均为空（不得凭空声明移植面），走 E_PART_NOT_MOUNTED 门',
     },
     license: {
       spdx: 'MIT',

@@ -29,13 +29,15 @@ const manifest = {
     ],
     ported: [],
     paramSurface: {
-      total: 0,
+      // D0：6 个 HTML 文档都是内联脚本，没有模块导出、没有可机械抽取的 JS/TS 参数面；
+      // 且一字未用 → 移植面为空（ARCHITECTURE-REUSE §3.3.4）
+      scope: [],
       enumerated: [],
-      evidence: '6 个 HTML 文档均为内联脚本，无模块导出，无可枚举的顶层参数（分母记 0）',
+      evidence: '6 个 HTML 文档均为内联脚本，无 JS/TS 模块可计；D0 未装站，scope 与 enumerated 均为空',
     },
     license: {
       spdx: 'NOASSERTION',
-      evidence: '仓库无 LICENSE 文件，无任何再分发声明（F-R4）',
+      evidence: '仓库无 LICENSE 文件，无任何再分发声明（F-R4）。无许可证声明，已签字豁免，仅用于个人展示站，不得再分发。',
       grade: 'L3',
     },
   },
