@@ -177,9 +177,8 @@
 ### 任务 6｜已知但未处理的技术债
 
 1. `shared/parts-library/` 那 10 份 v1 manifest 与新体系**并存但互不相通**。`QUARANTINE.md` 的 Q-02 说得很清楚：`mountSite()` 全仓零导入者、`installParts()` 零生产调用点、7 站 `site.config.ts` 无 `composition` —— **零件实例化产线从未真正执行过**。要么把它接到新 `createStage`，要么整体废弃。**别让它继续「声明存在、实际失效」。**
-2. `tests/verify-registry.mjs` 第 140 行硬编码 `PART_MANIFESTS.length === 8`，现在实际 10 份，**1 项断言失败至今未修**。
-3. `shared/core/` 的体素引擎包围盒在 4 处重复（见 `docs/VOXEL-AS-PART.md` §一.2），数值当前一致但无编译期校验。基线只读，本轮没动。
-4. 三个旧站（`hug` / `license` / `praise`）的 `dist/*.html` 有待签基线（`tests/baseline-signoff.json` 三站未签）。新方向下这些站会被重做，**签不签先问用户**。
+2. `shared/core/` 的体素引擎包围盒在 4 处重复（见 `docs/VOXEL-AS-PART.md` §一.2），数值当前一致但无编译期校验。基线只读，本轮没动。
+3. `shared/build/` + `shared/contract/` + `sites/<id>/{glue,site.config,state,bridge}.ts` 是 v1 站群流水线，与 `createStage` 体系**完全不通**（旧产物里 `createStage` / `PartV2` / 零件 id 命中数全为 0）。产物已删、`dist/` 已 gitignore，但**源码还在**，因为它里面有 `sites/hug/parts/{dandelion,blow-input}.ts` 两个仍然要用的渲染层。等任务 1 的 PartV2 包装做完，这条流水线就可以整体删除。
 
 ---
 
@@ -199,6 +198,8 @@ node shared/parts/voxel-world/bench.mjs   # ⚠️ 会起 Edge headless + SwiftS
 # 上一轮遗产（仍应保持绿）
 npm run verify:reuse                  # 5 个门：装配 / 溯源 / 措辞 / 黄金值 / 死参数
 ```
+
+**`dist/` 已 gitignore**（v1 站群产物，2026-11-18 删除出库；`node shared/build/build.mjs <id>` 仍能重新生成，但产出的页面与新体系不兼容，只作历史对照）。
 
 **目视验收**：`node _scratch/build-field-preview.mjs` → `_scratch/field-preview.html`（单文件、零外部请求）。`_scratch/` 已进 `.gitignore`，是临时产物目录，别往里放正式代码。
 

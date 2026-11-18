@@ -3,10 +3,10 @@
 //   - LEGACY_SITES 7 条与旧硬编码 SITES 逐字段一致；
 //   - fixtures 下 2 条正向 manifest 全通过 schema；
 //   - 4 类负向（重复 id / 非法 slug / 缺失文件 / id 落入 LEGACY_IDS）各自报错；
-//   - 零件注册中心 8 份 part.manifest 合法、source 原件存在。
+//   - 零件注册中心的条目与磁盘目录一一对应，manifest 合法、source 原件存在。
 // 用法：node tests/verify-registry.mjs
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { loadTsModule, REPO_ROOT } from './lib/load-ts.mjs';
 import { FILES, CORE_ANCHORS, getSite, listSites, loadRegistry, resetRegistry } from '../shared/build/sites.config.mjs';
@@ -134,11 +134,21 @@ const real = await scanManifests({ rootDir: 'sites' });
 check(real.errors.length === 0, `真实 sites/ 扫描不应有错误，实际 ${real.errors.map((e) => e.message).join(';')}`);
 console.log(`[verify-registry] sites/ 扫描到 ${real.manifests.length} 条新站 manifest（T01 预期 0，8 个产品站属 T02~T05）`);
 
-// ─── 6. 零件注册中心：8 份 part.manifest 合法，source 原件必须存在 ──────────────
+// ─── 6. 零件注册中心：条目与磁盘目录一一对应，manifest 合法、source 原件存在 ─────
 const parts = await loadTsModule(path.join(REPO_ROOT, 'shared/parts-library/registry/index.ts'));
 const PART_MANIFESTS = parts.PART_MANIFESTS;
-check(Array.isArray(PART_MANIFESTS) && PART_MANIFESTS.length === 8,
-  `PART_MANIFESTS 应有 8 条，实际 ${Array.isArray(PART_MANIFESTS) ? PART_MANIFESTS.length : '非数组'}`);
+// 条数不写死：断言「注册中心条目数 == 磁盘上带 part.manifest.ts 的目录数」。
+// 原实现写死 8，dandelion / blow-input 注册后变成 10，这条断言就一直红着 ——
+// 硬编码的期望值在「只增不改」的零件库里必然过期，改结构性断言后新增零件自动跟上。
+const diskPartDirs = readdirSync(path.join(REPO_ROOT, 'shared', 'parts-library'), { withFileTypes: true })
+  .filter((d) => d.isDirectory() && existsSync(path.join(REPO_ROOT, 'shared', 'parts-library', d.name, 'part.manifest.ts')))
+  .map((d) => d.name)
+  .sort();
+const manifestIds = Array.isArray(PART_MANIFESTS) ? PART_MANIFESTS.map((m) => m.id).sort() : null;
+check(Array.isArray(PART_MANIFESTS) && PART_MANIFESTS.length === diskPartDirs.length,
+  `PART_MANIFESTS 条数应与磁盘目录一致（磁盘 ${diskPartDirs.length} 个：${diskPartDirs.join(',')}），实际 ${Array.isArray(PART_MANIFESTS) ? PART_MANIFESTS.length : '非数组'}`);
+check(manifestIds !== null && JSON.stringify(manifestIds) === JSON.stringify(diskPartDirs),
+  `PART_MANIFESTS 的 id 集合应与磁盘目录名集合相等；磁盘=${diskPartDirs.join(',')} 注册表=${(manifestIds ?? []).join(',')}`);
 const SLUG = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const LAYERS = ['narrative', 'scene', 'interaction', 'audio', 'artifact'];
 const ORIGINS = ['copy', 'equivalent', 'port'];
@@ -175,4 +185,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`[verify-registry] ✅ PASS：${checks} 项断言全通过（LEGACY_SITES 7 条字段逐字一致、fixtures 2 正向 + 4 负向、零件声明 8 条）`);
+console.log(`[verify-registry] ✅ PASS：${checks} 项断言全通过（LEGACY_SITES 7 条字段逐字一致、fixtures 2 正向 + 4 负向、零件声明 ${PART_MANIFESTS.length} 条与磁盘目录一一对应）`);

@@ -35,9 +35,10 @@ node shared/parts/field-ground/bench.mjs
 # 冻结基线（一个字节都不许改）
 npm run verify:core
 
-# 旧体系（v1，仍可跑，新方向下待重做）
-npm run verify:reuse
-npm run build:all
+# 旧体系（v1 站群）：源码还在，产物已删出库
+npm run verify:reuse      # 零件溯源五门（仍绿）
+npm run verify:nexus      # 注册表 + Frozen Core 零写入
+npm run build:all         # 产物写 dist/（已 gitignore），仅作历史对照，与新体系不兼容
 ```
 
 ## 目录地图
