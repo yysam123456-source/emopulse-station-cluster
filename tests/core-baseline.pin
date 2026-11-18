@@ -8,4 +8,4 @@
 #
 # 纪律：任何人改写 BASELINE.sha256，必须同步更新本文件的值并在 PR 说明原因。
 # 校验方式：node shared/build/verify-core.mjs（会在核对 11 个文件之前先验本钉）。
-4b5aef1e4efe1c6f1978e07421450961aaf997c9ba7c8b3220ae49589a3cae3f  shared/core/BASELINE.sha256
+6e943bfc3d62da479e45af1aae49b5bfe0dcf340339dd1ab9624e588826c8bc5  shared/core/BASELINE.sha256

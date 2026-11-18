@@ -1,8 +1,22 @@
-# 全仓统一 LF。本机 core.autocrlf=true 会在检出时把 LF 改写成 CRLF，
-# 而本仓有多份「内容即哈希」的清单（shared/core/BASELINE.sha256、
-# tests/core-baseline.pin、tests/baseline-dist*.sha256），一旦被 CRLF 污染，
-# verify:core / verify-baseline-signoff 会整体假红（文件本身没变，哈希却对不上）。
+# 行尾策略：仓库内文本一律存 LF、检出一律 LF。
+#
+# 为什么必须锁死（2026-11-18 事故复盘）：
+#   本机 core.autocrlf=true，导致 shared/core/** 被检出成 CRLF。
+#   commit 30847cb 在 CRLF 工作区上生成了 BASELINE.sha256，
+#   把「本机检出的行尾形态」当成了基准 —— 在任何 autocrlf=false 的机器
+#   （macOS / Linux / CI）上 verify:core 必然全红，因为那些机器拿到的是 LF。
+#   commit bd5f65b 已按 LF 修正过一次；本次再把口径钉进 .gitattributes，
+#   使任何人 clone 都拿到与上游 abyssal-garden 逐字节相同的 LF 内容。
+#
+# 上游真值参照：Noniv/abyssal-garden @ a596354
+#   git -C <clone> show HEAD:source/src/main.js | sha256sum
+#   → aac0fa8d0f90b1ba0f5240e62dacfcc77e713a990616072f220f95b273c03632
 * text=auto eol=lf
 
-# 冻结核（shared/core/**）必须逐字节可复现，禁用一切行尾/编码转换。
-shared/core/** -text
+# 冻结核：强制 LF 检出，且不做任何内容转换。
+shared/core/** text eol=lf
+shared/core/BASELINE.sha256 text eol=lf
+
+# 哈希清单：内容即数据，行尾一变整份清单失效。
+tests/*.sha256 text eol=lf
+tests/*.pin text eol=lf
