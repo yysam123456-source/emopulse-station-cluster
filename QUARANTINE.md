@@ -111,7 +111,7 @@
 3. **文档与代码在互相冒充**（三处）：
    - `shared/parts-library/README.md:28-29`：「通过 `registerPartFactory(id, factory)` 挂到 `ctx.store.partFactories`」——机制不存在（Q-01）；
    - `shared/parts-library/registry/index.ts:4-5`：「站点接线方式：`import { createPart } from '<entry>'` + `registerPart(manifest, createPart)`」——**没有任何站点这样做**；
-   - `docs/ARCHITECTURE-NEXUS.md` 多处把 `composition` 当作"8 站已提供"来写验收（如 §28 行「新站不写 glue」、§49 行「8 站 `composition` 每层 `ref` 均命中注册中心」）——**那是 v2.1 的设计目标，不是现状**；现状是 7 站全部走 glue、`composition` 一个都没有。
+   - `docs/archive/2026-11-pre-pivot/ARCHITECTURE-NEXUS.md`（已归档）多处把 `composition` 当作"8 站已提供"来写验收（如 §28 行「新站不写 glue」、§49 行「8 站 `composition` 每层 `ref` 均命中注册中心」）——**那是 v2.1 的设计目标，不是现状**；现状是 7 站全部走 glue、`composition` 一个都没有。
 4. **测试给了虚假信心**：`tests/verify-composition.mjs` / `verify-degradation.mjs` / `verify-config-driven.mjs` 都在工装里跑通了装配链，但**工装里的 config 是测试自己造的**，没有一个来自真实站点。绿灯证明"API 可用"，不证明"站点在用"。
 
 **待裁（二选一，各附代价）**：

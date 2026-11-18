@@ -103,14 +103,21 @@
 
 这两个是**逐常量对齐原文**的移植，且被 `tests/golden-run.mjs`（4 份 89 条，100% 通过）与 `tests/mutation-probe.mjs`（死参数 = 0）验过。**它们只是数学内核，没有画布渲染** —— 对应的 Canvas 渲染层在 `sites/hug/parts/dandelion.ts`（396 行）与 `sites/hug/parts/blow-input.ts`（247 行），是 v1 形态，要包成 PartV2 才能进新装配（见 §4 任务 1）。
 
-### 3.4 四份研究文档
+### 3.4 文档与权威链
+
+**先看 [`docs/README.md`](./README.md)** —— 那是唯一的权威声明。仓库里同时躺着四代文档（v1.0 / v1.1 / v2.1 站群 / 当前零件体系），读到旧的那份就会按错方向施工。
 
 | 文档 | 行数 | 用途 |
 |---|---|---|
+| `docs/README.md` | — | **权威链索引**：哪份能读、哪份只是留档、哪份已归档 |
 | `docs/BIOME-ASSET-MAP.md` | 303 | 4 个 biome 各需哪些零件（结论：**room 只要 2 件、field/tide 各 3 件、ink 2–3 件**）；ASCII 984 件能不能用；shaders 200 件的真实约束 |
 | `docs/ASCII-PIECE-CONTRACT.md` | 570 | ASCII 两套 piece 的渲染契约钉死到可照抄：闭包返回什么、frame 结构、调色注入点、`CELL_W=0.602`、成本与四种合并方案 |
 | `docs/VOXEL-AS-PART.md` | 189 | 体素引擎四问查实（DOM 依赖全表 / 包围盒 4 处实测值 / 硬依赖 / 三档画质）+ 三条路线裁决 + 20 条补丁表 |
-| `docs/QUARANTINE.md`（仓库根 `QUARANTINE.md`） | — | 上一轮遗留的两个隔离项（Q-01 已裁删除并落地；Q-02 零件实例化层产线从未执行 —— **这一条就是你接手后要补的洞**） |
+| 仓库根 `QUARANTINE.md` | — | 上一轮遗留的两个隔离项（Q-01 已裁删除并落地；Q-02 零件实例化层产线从未执行 —— **这一条就是你接手后要补的洞**） |
+| `docs/evidence/voxel-proof.png` | — | 唯一被浏览器真实跑出来的画面（CDP 驱动 Edge，水下世界 + 2D 光点叠加） |
+
+**已归档、不要读**：`docs/archive/2026-11-pre-pivot/`（站群架构 124 KB + 12 站矩阵 PRD 83 KB + 旧团队 SOP + 四张 mermaid 图）。
+**已废弃但留在原位**：`docs/ARCHITECTURE-REUSE.md`（232 KB）与 `docs/PRD-REUSE.md`（69 KB）—— 因为代码里有 20+ 处注释按 §章节号引用它们，移走会让引用悬空。两份顶部都有醒目废弃抬头。
 
 ---
 

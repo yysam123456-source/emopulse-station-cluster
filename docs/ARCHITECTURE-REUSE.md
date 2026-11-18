@@ -1,3 +1,12 @@
+> ⛔ **本文档描述的是已推翻的 v1 复用体系**（D0–D4 深度分档 / 门 1–10 溯源门 / 许可四级普查 / 参数搬运率）。
+> 当前权威文档：[`docs/HANDOFF.md`](./HANDOFF.md)。
+>
+> **为什么留在原位而不归档**：`shared/parts-library/*/part.manifest.ts`、`shared/contract/parts-registry.ts`、
+> `tests/lib/*.mjs` 等 20+ 处注释按 §章节号引用本文；移动或删除会让这些引用全部悬空。
+> 查阅遗留零件的溯源依据时仍需它 —— 但**产品方向与施工顺序以 HANDOFF 为准**。
+
+> 文中提到的 `ARCHITECTURE-NEXUS.md` / `PRD-REFINE.md` / `TEAM-SOP.md` / `system_design.md` 已于 2026-11-18 移入 `docs/archive/2026-11-pre-pivot/`，本文内对它们的引用路径已失效，请按归档路径查找。
+
 # ARCHITECTURE-REUSE · 零件复用专项架构设计 + 任务分解
 
 > 版本 **v1.7-reuse** ｜ 2026-11-18 ｜ 架构师：高见远（Gao）
