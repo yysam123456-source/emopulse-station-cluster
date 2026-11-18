@@ -5,7 +5,7 @@
 // 用法：node tests/verify-degradation.mjs
 import vm from 'node:vm';
 import path from 'node:path';
-import { bundleIife, REPO_ROOT } from './lib/load-ts.mjs';
+import { bundleIife, toImportSpecifier, REPO_ROOT } from './lib/load-ts.mjs';
 
 let checks = 0;
 const failures = [];
@@ -119,7 +119,7 @@ function makeConfig(overrides = {}) {
   };
 }
 
-const MOUNT_ENTRY = `export { mountSite } from '${path.join(REPO_ROOT, 'shared/contract/mount-site')}';`;
+const MOUNT_ENTRY = `export { mountSite } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/mount-site'))};`;
 const mountBundle = bundleIife({ contents: MOUNT_ENTRY, globalName: 'EmoPulse' });
 
 // ─── A. 正常路径：Canvas2D 可用 → 不降级、无 data-degraded ─────────────────────
@@ -152,8 +152,8 @@ const mountBundle = bundleIife({ contents: MOUNT_ENTRY, globalName: 'EmoPulse' }
   const conflictBundle = bundleIife({
     globalName: 'EmoPulse',
     contents: `
-      import { registerPart } from '${path.join(REPO_ROOT, 'shared/contract/parts-registry')}';
-      import { mountSite } from '${path.join(REPO_ROOT, 'shared/contract/mount-site')}';
+      import { registerPart } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/parts-registry'))};
+      import { mountSite } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/mount-site'))};
       const claims = [{ resource: 'canvas:stage', mode: 'exclusive' }];
       registerPart({ id: 'dup-1', layer: 'scene', origin: 'equivalent', entry: 'x', contract: 'v1', claims }, () => ({ dispose() {} }));
       registerPart({ id: 'dup-2', layer: 'scene', origin: 'equivalent', entry: 'x', contract: 'v1', claims }, () => ({ dispose() {} }));
@@ -182,8 +182,8 @@ const mountBundle = bundleIife({ contents: MOUNT_ENTRY, globalName: 'EmoPulse' }
   const throwBundle = bundleIife({
     globalName: 'EmoPulse',
     contents: `
-      import { registerPart } from '${path.join(REPO_ROOT, 'shared/contract/parts-registry')}';
-      import { mountSite } from '${path.join(REPO_ROOT, 'shared/contract/mount-site')}';
+      import { registerPart } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/parts-registry'))};
+      import { mountSite } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/mount-site'))};
       registerPart({ id: 'boom-sync', layer: 'scene', origin: 'equivalent', entry: 'x', contract: 'v1' },
         () => { throw new Error('boom-sync'); });
       export { mountSite };

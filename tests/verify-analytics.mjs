@@ -2,12 +2,12 @@
 // 手法：把 analytics.ts / nexus-events.ts / events.ts 打进同一模块实例，用 stub localStorage 观察实际落库内容。
 // 用法：node tests/verify-analytics.mjs
 import path from 'node:path';
-import { loadTsSource, REPO_ROOT } from './lib/load-ts.mjs';
+import { loadTsSource, toImportSpecifier, REPO_ROOT } from './lib/load-ts.mjs';
 
 const mod = await loadTsSource(`
-export { scrubPayload, bucketDuration, createAnalytics } from '${path.join(REPO_ROOT, 'shared/contract/analytics')}';
-export { NEXUS_EVENTS, asAppEvent } from '${path.join(REPO_ROOT, 'shared/contract/nexus-events')}';
-export { APP_EVENTS, eventLabel } from '${path.join(REPO_ROOT, 'shared/contract/events')}';
+export { scrubPayload, bucketDuration, createAnalytics } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/analytics'))};
+export { NEXUS_EVENTS, asAppEvent } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/nexus-events'))};
+export { APP_EVENTS, eventLabel } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/events'))};
 `);
 
 const { scrubPayload, bucketDuration, createAnalytics, NEXUS_EVENTS, asAppEvent, APP_EVENTS, eventLabel } = mod;

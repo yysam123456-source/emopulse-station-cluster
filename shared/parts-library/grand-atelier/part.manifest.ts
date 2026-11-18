@@ -1,17 +1,51 @@
-// 零件声明（L3 · 契约 v1）：grand-atelier —— 真实复制原件（击弦机 key→hammer→damper 联动）。
-// 原件：piano-action.ts / piano-model.ts / piano-materials.ts（依赖 three r169，属 L3 参考原件，
-// 本批次不直接 bundle 进产物，站点侧沿用已完成的可验证移植）。
+// 零件声明（L3 · 契约 v1）：grand-atelier —— 观感/参数参考（D1）。
+// 站点 /license 的 createStampPart 只做「两条横线 + 一个矩形按 drop 上下移」，
+// 原件 key→capstan→wippen→jack→repetition→hammer 链未进入产物（PRD-REUSE §1.4）。
 import type { PartManifest } from '../../contract/parts-registry';
 
 const manifest = {
   id: 'grand-atelier',
   layer: 'interaction',
-  origin: 'copy',
+  origin: 'equivalent',
   entry: 'shared/parts-library/grand-atelier/index.ts',
   source: 'grand-atelier/piano-action.ts',
   contract: 'v1',
   requires: 'none',
-  note: '真实复制原件（Anionex/grand-atelier）；/license 口径为 按钮→印章→出证，不改原件。',
+  note: '观感/参数参考：出证节奏参考 Anionex/grand-atelier 的击弦时序；击弦机算法未进产物（D1）。',
+  provenance: {
+    depth: 'D1',
+    upstream: {
+      repo: 'https://github.com/Anionex/grand-atelier',
+      accessed: '2026-11-18',
+    },
+    files: [
+      { path: 'grand-atelier/piano-action.ts', bytes: 15360, completeness: 'complete' },
+      {
+        path: 'grand-atelier/piano-model.ts',
+        bytes: 42331,
+        completeness: 'partial',
+        missing: [
+          './music.ts（未归集）',
+          './piano-keyboard.ts（未归集）',
+          './piano-acoustics.ts（未归集）',
+          './piano-pedals.ts（未归集）',
+          'three/addons（RoundedBoxGeometry / BufferGeometryUtils，未随库归集）',
+        ],
+      },
+      { path: 'grand-atelier/piano-materials.ts', bytes: 2237, completeness: 'complete' },
+    ],
+    ported: [],
+    paramSurface: {
+      total: 2,
+      enumerated: ['HAMMER_STROKE_SECONDS', 'HAMMER_ATTACK_SECONDS'],
+      evidence: 'piano-action.ts:38-39 两个导出时序常量（.13 / .027）；其余参数在 ACTION 对象内未接线',
+    },
+    license: {
+      spdx: 'MIT',
+      evidence: '_source_probe/Anionex_grand-atelier/LICENSE（Copyright (c) 2026 anionex）',
+      grade: 'L1',
+    },
+  },
 } satisfies PartManifest;
 
 export default manifest;

@@ -10,6 +10,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const coreDir = path.resolve(here, '..', 'core');
 const baselineFile = path.join(coreDir, 'BASELINE.sha256');
 const BASELINE_NAME = 'BASELINE.sha256';
+/** 防伪钉：BASELINE.sha256 自身的 sha256 被钉死在仓库根的 tests/core-baseline.pin。 */
+const pinFile = path.resolve(coreDir, '..', '..', 'tests', 'core-baseline.pin');
 
 /** 递归收集 core 下全部文件，返回相对 coreDir 的 POSIX 风格路径（排除基线自身）。 */
 function collectFiles(dir, base = '') {
@@ -29,15 +31,45 @@ function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
 }
 
+/**
+ * 防伪自校验：BASELINE.sha256 自身必须与 tests/core-baseline.pin 钉死的值一致。
+ *
+ * 为什么：单文件篡改 BASELINE.sha256 会让本脚本从「完整性门」退化为「随机门」
+ * （上一次事故正是 commit 里带了一份改错过的 BASELINE）。加了本钉后，要静默漂移
+ * 必须同时改 BASELINE.sha256 + pin + 本脚本三处，从「静默成功」升级为「显式三方共谋」。
+ */
+function verifyBaselinePin() {
+  if (!existsSync(pinFile)) {
+    console.error(`[verify-core] 缺少防伪 pin：${path.relative(path.resolve(coreDir, '..', '..'), pinFile)}`);
+    process.exit(1);
+  }
+  const match = /\b([0-9a-f]{64})\b/.exec(readFileSync(pinFile, 'utf8'));
+  if (!match) {
+    console.error('[verify-core] pin 文件格式错误：找不到 64 位十六进制 sha256');
+    process.exit(1);
+  }
+  const actual = sha256(baselineFile);
+  if (actual !== match[1]) {
+    console.error('[verify-core] BASELINE.sha256 已被改写（pin 不匹配），拒绝校验');
+    console.error(`  期望 ${match[1]}（tests/core-baseline.pin）`);
+    console.error(`  实际 ${actual}`);
+    console.error('  若确属授权变更：同步更新 tests/core-baseline.pin 并在 PR 说明原因。');
+    process.exit(1);
+  }
+  console.log('[verify-core] 防伪 pin 校验通过：BASELINE.sha256 未被改写');
+}
+
 /** 生成基线：按路径排序写入 `hash␠␠相对路径`。 */
 function generate() {
   const lines = collectFiles(coreDir).map((rel) => `${sha256(path.join(coreDir, rel))}  ${rel}`);
   writeFileSync(baselineFile, `${lines.join('\n')}\n`, 'utf8');
   console.log(`[verify-core] 基线已生成：${baselineFile}（${lines.length} 个文件）`);
+  console.warn('[verify-core] ⚠️ 基线已改写：必须同步更新 tests/core-baseline.pin，否则后续 verify 会拒绝校验');
 }
 
 /** 校验基线：文件缺失、哈希不符、新增文件均视为失败。 */
 function verify() {
+  verifyBaselinePin();
   if (!existsSync(baselineFile)) {
     console.error(`[verify-core] 缺少基线文件：${baselineFile}`);
     process.exit(1);

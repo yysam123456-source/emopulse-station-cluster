@@ -1,0 +1,129 @@
+%% ARCHITECTURE-REUSE v1.0 · 类图（零件契约 / 溯源 / 校验器）
+%% 对应 ARCHITECTURE-REUSE.md §9.1
+classDiagram
+    class PartManifest {
+        +string id
+        +PartLayer layer
+        +PartOrigin origin
+        +string entry
+        +string source?
+        +'v1' contract
+        +PartClaim[] claims?
+        +'webgpu'|'none' requires?
+        +string note?
+        +Provenance provenance?
+    }
+    class Provenance {
+        +ReuseDepth depth
+        +Upstream upstream
+        +ProvenanceFile[] files
+        +PortedSymbol[] ported
+        +ParamSurface paramSurface
+        +License license
+        +number sizeHint?
+    }
+    class Upstream {
+        +string repo?
+        +string ref?
+        +string article?
+        +string accessed
+    }
+    class ProvenanceFile {
+        +string path
+        +number bytes
+        +string sha256?
+        +completeness
+        +string[] missing?
+    }
+    class PortedSymbol {
+        +string symbol
+        +kind
+        +Record params?
+        +number rows?
+        +string portedTo?
+        +string downgrade?
+    }
+    class ParamSurface {
+        +number total
+        +string[] enumerated
+        +string evidence
+    }
+    class License {
+        +string spdx
+        +string evidence
+    }
+    class PartRegistration {
+        +PartManifest manifest
+        +PartFactory factory
+    }
+    class PartRegistry {
+        -Map partStore
+        +registerPart(manifest, factory) void
+        +resolvePart(ref) PartRegistration
+        +hasPart(ref) boolean
+        +listPartManifests() PartManifest[]
+    }
+    class PartsInstaller {
+        +ENTRIES readonly
+        +installParts() PartManifest[]
+    }
+    class LegacyProvenance {
+        +LEGACY_PARTS readonly
+        +LEGACY_PARTS_HASH string
+    }
+    class PartCore {
+        <<module>>
+        +PARAMS readonly
+        +halfWidth(s, p) number
+        +topH(s, p) number
+        +botH(s, p) number
+        +sampleBody(p) Section[]
+        +spineAt(s, t, p) Spine
+        +koiColour(s, y, up, p) Rgb
+        +wobble(t, p) number
+    }
+    class PartRender {
+        <<module>>
+        +createKoiPart(ctx, style) PartInstance
+    }
+    class ProvenanceVerifier {
+        +checkEntryExists() void
+        +checkSymbolGrep() void
+        +checkBytes() void
+        +checkCompleteness() void
+        +checkDepthOrigin() void
+        +checkLicenseGate() void
+        +checkParamRate() void
+        +emitReport() void
+    }
+    class GoldenRunner {
+        +loadCore(partId) module
+        +runCases(golden) Result[]
+    }
+    class MutationProbe {
+        +mutate(param, ratio) Params
+        +probeSymbol(symbol, cases) DeadParam[]
+    }
+    class RecordingCtx {
+        +log array
+        +digest() string
+    }
+
+    PartRegistry "1" o-- "*" PartRegistration
+    PartRegistration --> PartManifest
+    PartManifest --> "0..1" Provenance
+    Provenance --> Upstream
+    Provenance --> "1..*" ProvenanceFile
+    Provenance --> "*" PortedSymbol
+    Provenance --> ParamSurface
+    Provenance --> License
+    PartsInstaller ..> PartRegistry : installParts()
+    PartsInstaller ..> PartManifest : reads
+    LegacyProvenance --> "*" Provenance
+    PartRender ..> PartCore : imports pure functions
+    PartRender ..> RecordingCtx : tests only
+    ProvenanceVerifier ..> PartManifest : asserts
+    ProvenanceVerifier ..> LegacyProvenance : drift
+    GoldenRunner ..> PartCore : loadTsModule
+    MutationProbe ..> GoldenRunner : reuse cases
+    MutationProbe ..> RecordingCtx : Mode B

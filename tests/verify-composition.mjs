@@ -3,13 +3,13 @@
 //（不能分别 import，否则 parts-registry 的私有 store 会被复制成两份）。
 // 用法：node tests/verify-composition.mjs
 import path from 'node:path';
-import { loadTsSource, REPO_ROOT } from './lib/load-ts.mjs';
+import { loadTsSource, toImportSpecifier, REPO_ROOT } from './lib/load-ts.mjs';
 
 const mod = await loadTsSource(`
-export { createComposer } from '${path.join(REPO_ROOT, 'shared/contract/composer')}';
-export { registerPart, clearPartRegistry } from '${path.join(REPO_ROOT, 'shared/contract/parts-registry')}';
-export { LAYER_ORDER, UPDATE_ORDER, DISPOSE_ORDER, detectConflicts, normalizeComposition } from '${path.join(REPO_ROOT, 'shared/contract/composition')}';
-export { probeCapability, staticCapability } from '${path.join(REPO_ROOT, 'shared/contract/capability')}';
+export { createComposer } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/composer'))};
+export { registerPart, clearPartRegistry } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/parts-registry'))};
+export { LAYER_ORDER, UPDATE_ORDER, DISPOSE_ORDER, detectConflicts, normalizeComposition } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/composition'))};
+export { probeCapability, staticCapability } from ${toImportSpecifier(path.join(REPO_ROOT, 'shared/contract/capability'))};
 `);
 
 const {

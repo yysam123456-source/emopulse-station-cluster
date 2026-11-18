@@ -1,0 +1,56 @@
+%% ARCHITECTURE-REUSE v1.0 · 时序图（npm run verify:reuse 十门）
+%% 对应 ARCHITECTURE-REUSE.md §9.2
+sequenceDiagram
+    autonumber
+    participant Dev as 工程师
+    participant NPM as package.json
+    participant Asm as verify-parts-assembly
+    participant Prov as verify-provenance
+    participant Word as verify-reuse-wording
+    participant Gold as golden-run
+    participant Mut as mutation-probe
+    participant Reg as parts-registry(L1)
+    participant Inst as parts-library/install.ts
+    participant Load as tests/lib/load-ts.mjs
+    participant Disk as shared/parts-library/**
+    participant Dist as dist/reuse-report.json
+
+    Dev->>NPM: npm run verify:reuse
+    NPM->>Asm: ① 装配闭环
+    Asm->>Load: loadTsModule(registry/install.ts)
+    Load-->>Asm: { installParts, ENTRIES }
+    Asm->>Inst: installParts()
+    Inst->>Reg: hasPart(id)? registerPart(manifest, factory)
+    Reg-->>Inst: ok（幂等）
+    Asm->>Reg: resolvePart(id) ×8
+    Reg-->>Asm: { manifest, factory }
+    Asm->>Inst: factory(stubOptions) ×N（depth≠D0）
+    Inst-->>Asm: PartInstance（含 dispose）
+    Asm->>Asm: dispose() ×2 幂等断言
+    Asm-->>NPM: exit 0
+
+    NPM->>Prov: ② 溯源/完整性/深度/许可/搬运率
+    Prov->>Reg: listPartManifests()
+    Prov->>Disk: 读 files[].path（bytes + sha256）
+    Prov->>Disk: \b symbol \b 命中计数
+    Prov->>Disk: import 反查 → missing[] 对账
+    Prov->>Disk: 读 sites/**/site.config.ts 的 parts/composition
+    Prov->>Prov: depth ↔ origin 矩阵 / NOASSERTION 门
+    Prov->>Dist: --report 写 reuse-report.json（drift 栏）
+    Prov-->>NPM: exit 0
+
+    NPM->>Word: ③ 措辞黑名单 + 降级三问
+    Word-->>NPM: exit 0
+
+    NPM->>Gold: ④ 黄金值
+    Gold->>Load: loadTsModule(<part>/core/index.ts)
+    Load-->>Gold: 纯函数命名空间
+    Gold->>Gold: |actual - expect| <= 1e-6（逐 case）
+    Gold-->>NPM: exit 0
+
+    NPM->>Mut: ⑤ 死参数探针
+    Mut->>Gold: 复用 golden cases
+    Mut->>Mut: PARAMS[k] *= 0.9 / 1.1 → 重算 → 比较 > 1e-9
+    Mut->>Mut: Mode B：RecordingCtx.digest() 变化
+    Mut-->>NPM: 死参数数 = 0
+    NPM-->>Dev: 全绿（10 条门）

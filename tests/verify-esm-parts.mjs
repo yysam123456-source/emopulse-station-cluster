@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { bundleIife, REPO_ROOT } from './lib/load-ts.mjs';
+import { bundleIife, toImportSpecifier, REPO_ROOT } from './lib/load-ts.mjs';
 
 let checks = 0;
 const failures = [];
@@ -35,7 +35,7 @@ const bundle = bundleIife({
   globalName: 'AsciiKit',
   minify: true,
   contents: `
-    import { fbm, noise2, ramp, palette, bigText } from '${KIT}';
+    import { fbm, noise2, ramp, palette, bigText } from ${toImportSpecifier(KIT)};
     export const __KIT__ = { fbm, noise2, ramp, palette, bigText };
   `,
 });

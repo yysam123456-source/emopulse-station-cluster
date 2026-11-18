@@ -1,0 +1,11 @@
+# shared/core/BASELINE.sha256 的防伪钉（T-R01 追加项，主理人 2026-11-18 指示）。
+#
+# 上游出处：Noniv/abyssal-garden @ a596354（clone 后可用 cmp 逐字节复核）。
+#
+# 为什么需要它：单文件篡改 BASELINE.sha256 会让 verify:core 从「完整性门」退化为「随机门」。
+# 有了本钉，要静默漂移必须同时改三处：BASELINE.sha256 + 本文件 + verify-core.mjs 的校验逻辑，
+# 从「静默成功」升级为「必须显式三方共谋」，配合 code review 即可兜住。
+#
+# 纪律：任何人改写 BASELINE.sha256，必须同步更新本文件的值并在 PR 说明原因。
+# 校验方式：node shared/build/verify-core.mjs（会在核对 11 个文件之前先验本钉）。
+4b5aef1e4efe1c6f1978e07421450961aaf997c9ba7c8b3220ae49589a3cae3f  shared/core/BASELINE.sha256

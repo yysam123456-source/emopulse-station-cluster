@@ -1,0 +1,8 @@
+# 全仓统一 LF。本机 core.autocrlf=true 会在检出时把 LF 改写成 CRLF，
+# 而本仓有多份「内容即哈希」的清单（shared/core/BASELINE.sha256、
+# tests/core-baseline.pin、tests/baseline-dist*.sha256），一旦被 CRLF 污染，
+# verify:core / verify-baseline-signoff 会整体假红（文件本身没变，哈希却对不上）。
+* text=auto eol=lf
+
+# 冻结核（shared/core/**）必须逐字节可复现，禁用一切行尾/编码转换。
+shared/core/** -text
