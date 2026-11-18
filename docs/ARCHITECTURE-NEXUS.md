@@ -8,6 +8,8 @@
 > **本次逐份核实、未凭猜测**：四份文档 + 契约层 8 个 `.ts` + 构建层 6 个 `.mjs` + 站点范式（still 6 文件、koi/shared 2 文件）+ `BASELINE.sha256`（11 项）+ 参考资产 9 个文件 + `full_tree.tsv` 抽样 + `dist/*.html` 实际字节。凡本文出现的数字均给出处；无法从证据得到的结论一律标【假设】或【默认假设】。
 >
 > **v2.1 定点修订（主理人 D2 裁决，覆盖 v2.0 的原假设）**：撤销「既有 7 站各补 1 个 `site.manifest.ts`」方案，改为 **既有 7 站目录零新增、零改动**，其注册信息由 `shared/build/registry.mjs` 内置冻结快照 `LEGACY_SITES`（长度恒 7）提供；注册表 = `LEGACY_SITES` ∪ 增量 manifest 扫描。同步修订 §0.1 / §0.2 / §0.3 / §1.5 / §1.6 / §2 INV-3·INV-6 / §3.1 / §3.2 ADR-7 / §4.1 / §4.2 / §4.4 / §4.5 / §4.6 / §5.1 / §5.5 / §6.1 / §7.2 / §7.4 / §8 / §10.1 / §10.2 / 附 A。其余裁决（R1/R3/R4、160 KiB、slug、T01~T05）不变。
+>
+> **⚠️ 挂载链路为设计意图而非现状**：本文 §1.4 / §6.2 / INV-8 描述的 `mountSite()` / `composition` / `installParts()` 链路，2026-11-18 复核确认**产线未接通**（`mountSite()` 全仓零导入者、`installParts()` 零生产调用点、7 站 `site.config.ts` 无 `composition`）。见 `QUARANTINE.md` Q-01 / Q-02。**正文一字未改**。
 
 ---
 
