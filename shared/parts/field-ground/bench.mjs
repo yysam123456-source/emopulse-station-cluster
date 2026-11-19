@@ -26,9 +26,13 @@ const MS_PER_MPX_OPAQUE = 0.35;   // 不透明整屏 blit
 const MS_PER_MPX_SOLID_FILL = 0.30; // 实色多边形填充
 const MS_PER_K_SEGMENTS = 0.8;    // 描边，每千段
 /** 草地：high 档草叶数（与 index.ts 同值） */
-const BLADES_HIGH = 520;
+const BLADES_HIGH = 560;
 /** 山体覆盖的屏幕高度比例（base≈0.60，波动 ±0.085 → 从 0.51h 到底） */
 const HILL_COVER = 0.50;
+/** 三道的山脊亮边：每层 34 个曲线段 */
+const RIM_SEGMENTS = 3 * 34;
+/** 最近一档的草穗个数（约 1/3 的草落在近档） */
+const TIP_COUNT = Math.round(560 / 3);
 
 /**
  * 造一个只记账的假 2D 上下文。
@@ -37,7 +41,7 @@ const HILL_COVER = 0.50;
  */
 function makeFakeCtx() {
   const gradient = { addColorStop() {} };
-  const counts = { drawImage: 0, fill: 0, stroke: 0, fillRect: 0, segments: 0, gradients: 0 };
+  const counts = { drawImage: 0, fill: 0, stroke: 0, fillRect: 0, segments: 0, gradients: 0, clip: 0 };
   return {
     counts,
     globalAlpha: 1,
@@ -61,6 +65,10 @@ function makeFakeCtx() {
     fill() { counts.fill += 1; },
     stroke() { counts.stroke += 1; },
     arc() {},
+    // clip 必须实现：field-ground 用前景山脊裁切草坡。缺了它会每帧抛错、
+    // 被装配器隔离、画到一半就停 —— 而计数断言反而"恰好"成立（2026-11-18 踩过）。
+    clip() { counts.clip += 1; },
+    createPattern() { return null; },
     clearRect() {},
   };
 }
@@ -151,18 +159,22 @@ const mpx = (WIDTH * DPR * HEIGHT * DPR) / 1e6;
 // 1 次全屏不透明 blit + 3 次实色山体填充（各覆盖 50% 屏高）+ 520 段草叶描边
 const blitFullMs = mpx * MS_PER_MPX_OPAQUE;
 const hillFillMs = 3 * mpx * HILL_COVER * MS_PER_MPX_SOLID_FILL;
-const strokeMs = (BLADES_HIGH / 1000) * MS_PER_K_SEGMENTS;
-const estimate = blitFullMs + hillFillMs + strokeMs;
+// 描边段数 = 560 根草 + 3 道山脊亮边（各 34 段）
+const strokeMs = ((BLADES_HIGH + RIM_SEGMENTS) / 1000) * MS_PER_K_SEGMENTS;
+/** 草穗：一次 fill 画 TIP_COUNT 个小圆，按描边单价折半估 */
+const tipMs = (TIP_COUNT / 1000) * MS_PER_K_SEGMENTS * 0.5;
+const estimate = blitFullMs + hillFillMs + strokeMs + tipMs;
 
 console.log('field-ground —— 每帧画布指令（1280×720@dpr2，high 档）');
-console.log(`  drawImage=${one.drawImage}  fill=${one.fill}  fillRect=${one.fillRect}  stroke=${one.stroke}  曲线段=${one.segments}  createGradient=${one.gradients}`);
+console.log(`  drawImage=${one.drawImage}  fill=${one.fill}  fillRect=${one.fillRect}  stroke=${one.stroke}  曲线段=${one.segments}  createGradient=${one.gradients}  clip=${one.clip}`);
 console.log('  → createGradient=0 是设计目标：所有渐变都烘在离屏里，每帧不重建');
 console.log('  → 山体走实色 fill 而不是离屏 blit：实色无纹理采样，比带 alpha 的 blit 便宜一半以上');
 console.log('');
 console.log('成本估算（按声明的填充率常数）');
 console.log(`  全屏 blit        ${blitFullMs.toFixed(2)} ms  (${mpx.toFixed(2)} Mpx × ${MS_PER_MPX_OPAQUE})`);
 console.log(`  3× 山体实色填充  ${hillFillMs.toFixed(2)} ms  (3 × ${(mpx * HILL_COVER).toFixed(2)} Mpx × ${MS_PER_MPX_SOLID_FILL})`);
-console.log(`  草叶描边         ${strokeMs.toFixed(2)} ms  (${BLADES_HIGH} 段)`);
+console.log(`  草叶+山脊描边    ${strokeMs.toFixed(2)} ms  (${BLADES_HIGH} 草叶段 + ${RIM_SEGMENTS} 山脊段)`);
+console.log(`  草穗填充         ${tipMs.toFixed(2)} ms  (${TIP_COUNT} 个小圆，一次 fill)`);
 console.log(`  合计估算         ${estimate.toFixed(2)} ms`);
 console.log(`  声明 costMs=${part.costMs}  →  ${Math.abs(part.costMs - estimate) <= 1.0 ? '与估算相符（±1ms 内）' : '与估算不符，需要改'}`);
 console.log('');

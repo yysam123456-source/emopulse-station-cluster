@@ -111,10 +111,13 @@ WATER = LV>1 ? 256 : 512                       RAYN = LV>1 ? 12 : 34
 
 ### 路线 B 的最小 spike（真的跑了，不是推演）
 
-- 脚本：`_scratch/cdp-run.mjs`（headless Edge + CDP 驱动）+ `_scratch/voxel-proof.html`
+- 脚本：`tests/probe-webgpu.mjs`（不同无头 Edge 启动参数下的 WebGPU adapter 探测）。原文这里的
+  `_scratch/cdp-run.mjs` + `_scratch/voxel-proof.html` 随 `_scratch/`（gitignore）一起不在库内，**已不可复跑**。
 - 环境：Windows 11 / Edge headless / `--enable-unsafe-webgpu --use-webgpu-adapter=swiftshader`（软件光栅器）
-- 结果：**`state: ready`**，首帧完成，世界真的画出来了（截图 `_scratch/voxel-proof.png`：
-  海床、海藻、鱼群、光柱、漂浮颗粒，上面叠着 screen 混合的光点）。
+- 结果：**`state: ready`**，首帧完成，世界真的画出来了。截图已入库：
+  [`docs/evidence/voxel-proof.png`](./evidence/voxel-proof.png)（初次体素世界：海床、海藻、鱼群、光柱、漂浮颗粒，
+  上面叠着 screen 混合的光点）；另有更新的 [`docs/evidence/l2-over-l1-bubbles-on-voxel.png`](./evidence/l2-over-l1-bubbles-on-voxel.png)
+  （L2 气泡叠在 L1 体素世界之上）。原文写的 `_scratch/voxel-proof.png` 已不在库内。
 
 实测（同一次运行，HUD 原文）：
 
@@ -164,7 +167,9 @@ voxel-world ready · fps 44 · drawn 2 · render 384×216 (LV2) · draw 1.62ms �
 
 `engine.js` 头部写入了 6 个源文件的 sha256 前 12 位，可直接和 `shared/core/BASELINE.sha256` 对账。
 
-**没有做的事**：没有把 4 处包围盒收成一个常量（基线只读 + 会改变原件行为）；没有动 `shared/stage/*.ts`。
+**没有做的事**：没有把 4 处包围盒收成一个常量（基线只读 + 会改变原件行为）；没有动 `shared/stage/*.ts`
+（**截至移植时**；T18 之后 `stage.ts` 已改，见 `HANDOFF.md` §3.1「T18：L1 就地合成」—— 本件声明的 `blend: 'source-over'`
+现在被 stage 的 `compositeGl` / `glBlend` 消费，改这个值会影响 L1 合成进主画布的方式）。
 
 ---
 
@@ -172,7 +177,7 @@ voxel-world ready · fps 44 · drawn 2 · render 384×216 (LV2) · draw 1.62ms �
 
 见 `shared/parts/voxel-world/README.md` 与本轮汇报。要点：
 
-- `node tests/stage-smoke.mjs` → 28/28（零件声明 `requires: ['webgpu']`，Node 里没有 `navigator.gpu`，
+- `node tests/stage-smoke.mjs` → **44/44**（2026-11-19 实测；零件声明 `requires: ['webgpu']`，Node 里没有 `navigator.gpu`，
   装配器按契约跳过它，不构造、不抛错）
 - `npx tsc --noEmit` → 0 error
 - `node shared/core/build.mjs` 后 `git status --short shared/core` 为空（基线零改动）

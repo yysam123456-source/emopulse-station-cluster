@@ -18,9 +18,11 @@ const mutations = [
     expect: '层序错误',
   },
   {
+    // T18 之后 renderFrame 改成单循环，原来那句 `if (m.channel !== 'canvas2d') continue;` 不存在了。
+    // 新锚点选 canvas2d 分支里**独有**的两行（GL 分支缩进更深，不会撞）：
     name: 'M2 超预算时跳过 draw',
-    from: "      if (m.channel !== 'canvas2d') continue;",
-    to: "      if (m.channel !== 'canvas2d' || m.lod === 'low') continue;",
+    from: '        instance.draw(f);\n        ctx.restore();',
+    to: "        if (m.lod !== 'low') instance.draw(f);\n        ctx.restore();",
     expect: '缺块',
   },
   {

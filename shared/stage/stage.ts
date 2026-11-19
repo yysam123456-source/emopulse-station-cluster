@@ -14,6 +14,7 @@ import {
   StageError,
   type AudioState,
   type BiomeId,
+  type BlendMode,
   type DegradedEntry,
   type Lod,
   type PartChannel,
@@ -43,11 +44,17 @@ export interface StageOptions {
   readonly maxDpr?: number;
   readonly reducedMotion?: boolean;
   /**
-   * 2D 层整体与 GL 层的合成模式（CSS mix-blend-mode）。
-   * 现阶段的真实限制：3D 层与 2D 层之间只能有**一个**整体混合模式，
-   * 逐零件跨通道混合要等 WebGL 后处理链，不在本版范围。
+   * GL 层**合成进主 2D 画布**时用的 `globalCompositeOperation`。
+   *
+   * 缺省取 gl 零件自己声明的 `blend`；显式传入时必须是 `BLEND_MODES` 白名单里的值，
+   * 否则构造期抛 `E_BAD_BLEND`（白名单挡住 `copy` / `destination-in` 这类会清空整块画布的值）。
+   *
+   * 语义变更（2026-11-18 T18）：它以前是 `glCanvas.style.mixBlendMode`，靠 CSS 把 GL 画布
+   * **压在** 2D 画布之上。那条路有个致命后果：GL 是不透明的，它会把 L2/L3/L4/L5 全部挡住
+   * （`/still` 不只是 L0 看不见，气泡、墨、后处理、UI 都看不见）。现在改成按层序**就地合成**，
+   * GL 画布只负责"被读走"，不再负责"被看见"。
    */
-  readonly glBlend?: string;
+  readonly glBlend?: BlendMode;
   /** 取当前时间的函数（测试注入，保证确定性） */
   readonly now?: () => number;
 }
@@ -163,14 +170,27 @@ export function sortParts(parts: readonly PartV2[]): readonly PartV2[] {
 /**
  * 探测运行时能力，供 requires 过滤。
  *
- * @param canvas 主画布
+ * ★ 绝不能在**主画布**上试 `getContext('webgl2')`（2026-11-18 P0 白屏的根因）：
+ *   Canvas 只有一种上下文模式。在真浏览器里 `getContext('webgl2')` 会成功并锁定模式，
+ *   随后 `getContext('2d')` **恒返回 null** —— 于是每一个预览页/站点都在构造期抛
+ *   `主画布拿不到 2d 上下文`，页面白屏。Node 里的假画布对 'webgl2' 一律返回 null，
+ *   所以这个 bug 在测试里是隐形的（假绿），只有按规范写严格的假画布才复现。
+ *   现在的做法：用一次性探针画布探测 WebGL2；拿不到 `document` 就当作「探测不到」，
+ *   不抛错、不影响 2D 主路径。
+ *
  * @returns 能力集合
  */
-function detectCapabilities(canvas: HTMLCanvasElement): Set<string> {
+function detectCapabilities(): Set<string> {
   const caps = new Set<string>();
   try {
-    const gl2 = (canvas as unknown as { getContext(id: string): unknown }).getContext('webgl2');
-    if (gl2) caps.add('webgl2');
+    const doc = (globalThis as unknown as {
+      document?: { createElement(tag: string): { getContext(id: string): unknown } };
+    }).document;
+    if (doc && typeof doc.createElement === 'function') {
+      const probe = doc.createElement('canvas');
+      const gl2 = probe.getContext('webgl2');
+      if (gl2) caps.add('webgl2');
+    }
     const gpu = (globalThis as unknown as { navigator?: { gpu?: unknown } }).navigator?.gpu;
     if (gpu) caps.add('webgpu');
     const md = (globalThis as unknown as { navigator?: { mediaDevices?: unknown } }).navigator?.mediaDevices;
@@ -194,13 +214,15 @@ export function createStage(options: StageOptions): Stage {
   const now = options.now ?? (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
   const maxDpr = options.maxDpr && options.maxDpr > 0 ? options.maxDpr : DEFAULT_MAX_DPR;
   const ordered = sortParts(options.parts);
-  const caps = detectCapabilities(options.canvas);
 
+  // 顺序很重要：**先**锁死主画布的 2d 模式，**再**探测能力。
+  // 反过来的话能力探测会把画布锁成 webgl2（见 detectCapabilities 的注释），主画布就再也拿不到 2d。
   // 拆成两步：TS 在嵌套函数里不保留 `if (!x) throw` 的收窄，必须换成非空别名，
   // 否则后面几十处 ctx.xxx 全部报 possibly null。
   const maybeCtx = options.canvas.getContext('2d') as CanvasRenderingContext2D | null;
   if (!maybeCtx) throw new StageError('E_PART_THROW', '<stage>', '主画布拿不到 2d 上下文');
   const ctx: CanvasRenderingContext2D = maybeCtx;
+  const caps = detectCapabilities();
 
   let budgetMs = options.budgetMs && options.budgetMs > 0 ? options.budgetMs : DEFAULT_BUDGET_MS;
   // 初始尺寸优先取 CSS 尺寸；拿不到才退回属性值。属性值是设备像素，直接当 CSS 尺寸会放大 dpr 倍。
@@ -219,9 +241,37 @@ export function createStage(options: StageOptions): Stage {
     const offender = ordered.find((p) => (p.channel ?? 'canvas2d') === 'gl') as PartV2;
     throw new StageError('E_PART_THROW', offender.id, '存在 gl 通道零件，但未提供 glCanvas');
   }
-  if (glCanvas && options.glBlend) {
-    glCanvas.style.mixBlendMode = options.glBlend;
+  /**
+   * 底件不变量：**非空装配必须有至少一件 L0 或 L1**。
+   *
+   * 为什么需要：`renderFrame` **从不 `clearRect`** —— 整幅画面靠一件不透明底件每帧铺满。
+   * 少了底件，切换画面时会残留上一帧像素（气泡尾巴留在天上），而**所有门都是绿的**。
+   *
+   * 两个必须守住的细节（写错会红一片）：
+   * ① **空装配必须放行**（`empty` preset、以及过滤掉 gl 后的空列表走同一条路）；
+   * ② 检查放在**所有既有校验之后**，否则会抢走 `E_MULTI_POST` / `E_DUP_PART_ID` / `E_BAD_BLEND`
+   *    的抛点，`stage-smoke §3` 那三条会红。
+   *
+   * 文案要诚实：只说"L0/L1 全空"，**不写"底不透明"** —— 那半个不变量无法机械校验，
+   * 写上去就是一句假承诺。
+   */
+  if (ordered.length > 0 && !ordered.some((p) => p.layer === 'L0' || p.layer === 'L1')) {
+    throw new StageError('E_NO_BASE', '<stage>', 'L0/L1 全空，画面会残留上一帧像素（stage 不 clearRect）');
   }
+
+  // GL 层不再靠 CSS 叠加（见 StageOptions.glBlend 的注释）。这里只做白名单校验。
+  if (options.glBlend !== undefined && !BLEND_MODES.includes(options.glBlend)) {
+    throw new StageError('E_BAD_BLEND', '<stage>', `glBlend 不在白名单：${String(options.glBlend)}`);
+  }
+  /**
+   * GL 层合成进主画布时用的 blend：显式传入优先，否则用 gl 零件自己声明的 blend。
+   * 装配期算一次（gl 零件整场唯一，见 validateParts 的 E_MULTI_GL）。
+   */
+  const glComposite: GlobalCompositeOperation = (() => {
+    if (options.glBlend) return options.glBlend as GlobalCompositeOperation;
+    const glPart = ordered.find((p) => (p.channel ?? 'canvas2d') === 'gl');
+    return (glPart?.blend ?? 'source-over') as GlobalCompositeOperation;
+  })();
 
   const world = createWorld({
     seed: options.seed,
@@ -444,6 +494,28 @@ export function createStage(options: StageOptions): Stage {
    *
    * @param nowMs 当前时间（毫秒）
    */
+  /**
+   * 把 GL 画布**就地**合成进主 2D 画布。
+   *
+   * ★ 目标矩形必须用 **CSS 尺寸 `width/height`**，不是设备像素 `pxW/pxH`：
+   *   `ctx` 已经在上面的 `applyResize` 里被 `setTransform(dpr,0,0,dpr,0,0)` 缩放过，
+   *   传设备像素会把整幅 GL 画面放大 dpr 倍。现有测试抓不到这个 —— 只有眼睛能看到。
+   *   （`parts-composition` 那条「主画布每帧恰好 1 次 drawImage」是免费的护栏：
+   *   若哪天 compositeGl 变成无条件调用，它会立刻红。）
+   *
+   * ★ 必须在 `instance.draw(f)` 之后的**同一个同步块**里调用：GL/WebGPU 画布的内容是
+   *   "最近一次 present 的纹理"，跨帧去读在某些实现上会拿到空或上一帧。
+   *
+   * @param blend 合成模式（取自 StageOptions.glBlend 或 gl 零件自己的 blend）
+   */
+  function compositeGl(blend: GlobalCompositeOperation): void {
+    if (!glCanvas) return;
+    ctx.save();
+    ctx.globalCompositeOperation = blend;
+    ctx.drawImage(glCanvas as unknown as CanvasImageSource, 0, 0, width, height);
+    ctx.restore();
+  }
+
   function renderFrame(nowMs?: number): void {
     if (disposed) return;
     const timestamp = typeof nowMs === 'number' ? nowMs : now();
@@ -457,11 +529,32 @@ export function createStage(options: StageOptions): Stage {
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
 
+    // **单循环按层序走**（T18）。GL 零件不再"另跑一轮"，而是在它该出现的位置
+    // 就地合成进主画布 —— 插入点由 sortParts 排好的层序决定，不需要额外排序逻辑。
+    // 这样 L2/L3/L4/L5 都能画在 L1 之上（以前它们全被不透明的 GL 画布挡住了）。
     for (const m of mounted) {
       if (m.suspended || m.broken || !m.instance) continue;
       const instance = m.instance;
-      if (m.channel !== 'canvas2d') continue;
-      // GL 零件自己管上下文，不参与 2D 合成
+
+      if (m.channel === 'gl') {
+        try {
+          instance.update?.(f);
+          instance.draw(f);
+          // 同一个同步块里立刻读走：跨帧读 GL 画布可能拿到空或上一帧
+          compositeGl(glComposite);
+          drawn += 1;
+        } catch (error) {
+          m.broken = true;
+          degraded.push({
+            id: m.def.id,
+            layer: m.def.layer,
+            reason: 'suspended',
+            detail: `GL 通道抛错已隔离：${error instanceof Error ? error.message : String(error)}`,
+          });
+        }
+        continue;
+      }
+
       try {
         instance.update?.(f);
         ctx.save();
@@ -478,25 +571,6 @@ export function createStage(options: StageOptions): Stage {
           layer: m.def.layer,
           reason: 'suspended',
           detail: `运行期抛错已隔离：${error instanceof Error ? error.message : String(error)}`,
-        });
-      }
-    }
-
-    // GL 通道独立推进（不参与 2D 合成，靠 CSS mix-blend-mode 叠在外层）
-    for (const m of mounted) {
-      if (m.suspended || m.broken || !m.instance) continue;
-      if (m.channel !== 'gl') continue;
-      try {
-        m.instance.update?.(f);
-        m.instance.draw(f);
-        drawn += 1;
-      } catch (error) {
-        m.broken = true;
-        degraded.push({
-          id: m.def.id,
-          layer: m.def.layer,
-          reason: 'suspended',
-          detail: `GL 通道抛错已隔离：${error instanceof Error ? error.message : String(error)}`,
         });
       }
     }

@@ -19,7 +19,7 @@ const manifest = {
       accessed: '2026-11-18',
     },
     files: [
-      { path: 'ascii-kit/lib/kit.js', bytes: 10992, completeness: 'complete' },
+      { path: 'ascii-kit/lib/kit.js', bytes: 10772, completeness: 'complete' },
     ],
     ported: [
       { symbol: 'RAMPS', kind: 'constant', portedTo: 'shared/parts-library/ascii-kit/index.ts:RAMP_TABLE' },

@@ -184,6 +184,7 @@ export type StageErrorCode =
   | 'E_MULTI_POST'
   | 'E_MULTI_GL'
   | 'E_BAD_BLEND'
+  | 'E_NO_BASE'
   | 'E_BAD_COST'
   | 'E_PART_THROW';
 

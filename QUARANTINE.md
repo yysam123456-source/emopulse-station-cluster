@@ -2,6 +2,8 @@
 
 > **仓库根目录文件**（不放 `shared/parts-library/` 内）——任何人 clone 下来第一眼能看到。
 > 设计依据：`docs/ARCHITECTURE-REUSE.md` §3.4（许可证四级）、§14.1-CF-5（L3 豁免四条硬约束）、§14.1-Q-01（本文件 `Q-01` 条目的唯一来源）。
+> **引用口径**：上述章节号**仅用于溯源，非施工依据**。REUSE 文档已标 ⛔、内容冻结（`verify:reuse` 在运行时解析它，删改会红）。
+> **`/praise` 口径**：本文中所有 `/praise` 提及均指**冻结的 legacy 站**——旧架构冻结存量、399 行代码完整但未启用、无构建产物；**不接入**。产品口径是四站（hug / still / koi / license），不含 praise。
 >
 > **⚠️ 本文件当前状态：只建了「底座缺陷」分区，含 `Q-01`（**已裁「删除」**）与 `Q-02`（**待裁**）两条。**
 > L1 / L2 / L3 豁免 / L4 硬阻断四个分区由 **T-R06** 补写（届时需同时满足 CF-5 的四条硬约束，含顶部风险声明与 L3 豁免条目数 = 8）。
@@ -50,10 +52,10 @@
 **影响**：
 
 1. `site.config.ts` 的 `parts[]` 读起来像一份功能清单，实际只有 glue 里 `this.parts = { … }` 硬编码的那几个零件生效——**配置声明与实际行为不符**。三站 `parts[]` 里**唯一真正被读取的字段是 `options`**（`sites/hug/glue.ts:36` `config.parts.find((p) => p.source === 'blow-input')` 取 `options.autoRequest`），`source` / `enabled` 都只是文字；
-2. **掩盖了 `room-at-dawn` 的真实引用状态**：`sites/license/site.config.ts:28` / `sites/praise/site.config.ts:28` 写着 `source: 'room-at-dawn'` + `enabled: true`，让人以为它在被使用（详见 `docs/ARCHITECTURE-REUSE.md` §14.1-C4）；
+2. **掩盖了 `room-at-dawn` 的真实引用状态**：`sites/license/site.config.ts:28` / `sites/praise/site.config.ts:28` 写着 `source: 'room-at-dawn'` + `enabled: true`，让人以为它在被使用（详见 `docs/ARCHITECTURE-REUSE.md` §14.1-C4；**仅溯源，非施工依据**）；
 3. `shared/parts-library/README.md:28` 的「接入约定」第 2 条也在描述这个不存在的机制（`registerPartFactory(id, factory)` 挂到 `ctx.store.partFactories`）——**文档与代码一起在冒充**；
 4. 任何人按 README 的约定新增零件（即"不改 glue、只加 `parts[]` 一项"），都会得到「**配置写了、页面不出现、且无任何报错**」的结果——**这正是"底座不改"那句注释承诺的能力，而它从未成立**；
-5. `part.manifest.ts` 声明的 `entry`（各零件的 `createPart`）**从未被任何站实例化**：`hug` 的蒲公英/吹气槽位虽然直接 `import` 了 `core/meadow.ts` / `core/detector.ts`（**算法真的搬了**），但走的仍是站点自己的薄包装，不是 `manifest.entry`。**「算法搬了」与「零件被装上了」是两回事。** 这是 `reuse-report.deadRefs[]` 里 5 条红的真正来源（详见 `docs/ARCHITECTURE-REUSE.md` §3.3.5）。
+5. `part.manifest.ts` 声明的 `entry`（各零件的 `createPart`）**从未被任何站实例化**：`hug` 的蒲公英/吹气槽位虽然直接 `import` 了 `core/meadow.ts` / `core/detector.ts`（**算法真的搬了**），但走的仍是站点自己的薄包装，不是 `manifest.entry`。**「算法搬了」与「零件被装上了」是两回事。** 这是 `reuse-report.deadRefs[]` 里 5 条红的真正来源（详见 `docs/ARCHITECTURE-REUSE.md` §3.3.5；**仅溯源，非施工依据**）。
 
 **裁决：已裁「删除」**（主理人 2026-11-18，落地时机 **T-R05 之前**）。两个选项的当日评估留档如下——**「接通」未被采纳**：
 

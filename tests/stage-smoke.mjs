@@ -48,6 +48,9 @@ function makeCanvas(width = 800, height = 600) {
     restore() { log.push({ op: 'restore', blend: this.globalCompositeOperation }); },
     setTransform() {},
     fillRect() {},
+    drawImage(source, dx, dy, dw, dh) {
+      log.push({ op: 'drawImage', dx, dy, dw, dh, blend: this.globalCompositeOperation });
+    },
     getImageData() { return { data: new Uint8ClampedArray(4), width: 1, height: 1 }; },
     putImageData() {},
   };
@@ -215,6 +218,33 @@ const stageMod = await loadTsModule(path.join(REPO_ROOT, 'shared', 'stage', 'ind
     build(stageMod, [{ ...makePart({ id: 'x', layer: 'L0' }, trace), blend: 'copy' }]);
   } catch (error) { badBlend = error.code; }
   check(badBlend === 'E_BAD_BLEND', `copy 不在白名单，应抛 E_BAD_BLEND，实得 ${badBlend}`);
+
+  // ── E_NO_BASE：非空装配必须有 L0/L1（帧循环从不 clearRect，缺底件会残留上一帧像素）──
+  let noBase = null;
+  try {
+    build(stageMod, [makePart({ id: 'only-l2', layer: 'L2' }, trace)]);
+  } catch (error) { noBase = error.code; }
+  check(noBase === 'E_NO_BASE', `只有 L2 时应抛 E_NO_BASE，实得 ${noBase}`);
+
+  // 空装配必须**放行**（empty preset 走同一条路）
+  let emptyOk = true;
+  let emptyCode = null;
+  try {
+    build(stageMod, []);
+  } catch (error) { emptyOk = false; emptyCode = error.code; }
+  check(emptyOk, `空装配应放行，实得 ${emptyCode}`);
+
+  // 有 L1（gl）也算有底件 —— 但不能因缺 glCanvas 而误报 E_NO_BASE
+  const glOnly = (() => {
+    const p = makePart({ id: 'gl-base', layer: 'L1' }, trace);
+    p.channel = 'gl';
+    return p;
+  })();
+  let glCode = null;
+  try {
+    build(stageMod, [glOnly]);
+  } catch (error) { glCode = error.code; }
+  check(glCode !== 'E_NO_BASE', `只有 L1(gl) 时不该报 E_NO_BASE（实得 ${glCode}）`);
 }
 
 // -------------------------------------------- 4. 超预算：降档但**不跳过 draw**
@@ -351,6 +381,208 @@ const stageMod = await loadTsModule(path.join(REPO_ROOT, 'shared', 'stage', 'ind
   } catch (error) { caught = error; }
   check(caught && caught.code === 'E_PART_THROW', `create 抛错应包成 E_PART_THROW，实得 ${caught && caught.code}`);
   check(caught ? caught.partId === 'explosive' : false, '错误必须带零件 id（没有 id 的报错等于没报）');
+}
+
+// ------------------------------------------- 11. 严格画布：不许把主画布锁成 webgl2
+// 这一节的存在理由（2026-11-18 P0 白屏，实测确认）：
+//   HTML 规范规定一个 canvas 只有**一种**上下文模式。`getContext('webgl2')` 成功之后，
+//   `getContext('2d')` 恒返回 null。而原来的 detectCapabilities 是在**主画布**上探测 webgl2 的，
+//   于是真浏览器里每个页面都在构造期抛「主画布拿不到 2d 上下文」→ 白屏。
+//   上面所有用 makeCanvas 的用例都测不出它，因为 makeCanvas 写的是
+//   `getContext(id){ return id === '2d' ? ctx : null }` —— 把真实语义写反了：
+//   它对 webgl2 永远返回 null，所以画布永远不会被锁成 gl 模式。
+//   makeStrictCanvas 按规范实现：首次成功的模式锁定，此后请求其它模式返回 null。
+{
+  /**
+   * 造一个**符合规范**的假画布：一种上下文模式，先到先得。
+   *
+   * @param {number} width CSS 宽
+   * @param {number} height CSS 高
+   * @returns {{canvas: object, mode: () => (string|null)}}
+   */
+  function makeStrictCanvas(width = 800, height = 600) {
+    let mode = null;
+    const ctx = {
+      globalAlpha: 1,
+      globalCompositeOperation: 'source-over',
+      save() {},
+      restore() {},
+      setTransform() {},
+      fillRect() {},
+      clearRect() {},
+      drawImage() {},
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      closePath() {},
+      fill() {},
+      stroke() {},
+      arc() {},
+      createLinearGradient() { return { addColorStop() {} }; },
+      createRadialGradient() { return { addColorStop() {} }; },
+      createPattern() { return {}; },
+      createImageData(w, h) { return { data: new Uint8ClampedArray(w * h * 4), width: w, height: h }; },
+      getImageData(x, y, w, h) { return { data: new Uint8ClampedArray(w * h * 4), width: w, height: h }; },
+      putImageData() {},
+    };
+    const canvas = {
+      width,
+      height,
+      clientWidth: width,
+      clientHeight: height,
+      style: {},
+      getContext(id) {
+        // 真实的 webgl2 上下文对象我们只需要「非 null」这一件事
+        const handle = id === '2d' ? ctx : {};
+        if (mode === null) { mode = id; return handle; }
+        return mode === id ? handle : null;
+      },
+    };
+    return { canvas, mode: () => mode };
+  }
+
+  const strict = makeStrictCanvas();
+  let error = null;
+  let stage = null;
+  try {
+    stage = stageMod.createStage({
+      canvas: strict.canvas,
+      parts: [makePart({ id: 'probe', layer: 'L0' }, [])],
+      biome: 'field',
+      seed: 1,
+      now: () => 0,
+    });
+  } catch (caught) { error = caught; }
+
+  check(error === null, `严格画布上 createStage 不得抛错（白屏根因），实得 ${error && error.message}`);
+  check(
+    strict.mode() === '2d',
+    `主画布应被锁成 '2d' 模式，实得 '${strict.mode()}' —— 若为 webgl2，说明能力探测又跑回主画布了`,
+  );
+  if (stage) {
+    let threw = false;
+    try { stage.frame(16); } catch { threw = true; }
+    check(!threw, '严格画布上推进一帧不得抛错');
+    stage.dispose();
+  }
+}
+
+// ------------------------------------------ 12. L1 就地合成（T18）
+// 这三条是「L1 有没有画对位置」的唯一护栏：
+//   ① 层序：L0 画完 → L1 画完 → **立刻**合成 → L2 画（不是"跑完 2D 再跑 GL"）
+//   ② 目标矩形必须是 CSS 尺寸：ctx 已被 setTransform(dpr) 缩放过，传设备像素会放大 dpr 倍
+//   ③ gl 零件抛错后不得再合成（否则上一帧的 GL 内容会一直糊在画面上 —— 残影）
+{
+  /**
+   * 造一个假 GL 画布。
+   *
+   * @returns {object} 假 canvas
+   */
+  function makeGlCanvas() {
+    return {
+      width: 2560,
+      height: 1440,
+      clientWidth: 1280,
+      clientHeight: 720,
+      style: {},
+      getContext() { return null; },
+    };
+  }
+
+  const trace = [];
+  const glPart = makePart({ id: 'gl-world', layer: 'L1', blend: 'screen' }, trace);
+  glPart.channel = 'gl';
+
+  const { canvas, log } = makeCanvas();
+  canvas.clientWidth = 1280;
+  canvas.clientHeight = 720;
+  const glCanvas = makeGlCanvas();
+  // ★ 必须把 dpr 抬到 2 再建舞台：CSS 尺寸与设备像素只有在 dpr>1 时才不同。
+  //   第一版没抬，于是「目标矩形传设备像素」这个变异**测不出来**（Node 里 dpr=1，两者相等）——
+  //   断言看起来合理，实际没有辨别力。
+  const originalDpr = globalThis.devicePixelRatio;
+  globalThis.devicePixelRatio = 2;
+  let clock = 0;
+  const stage = stageMod.createStage({
+    canvas,
+    glCanvas,
+    parts: [
+      makePart({ id: 'a-base', layer: 'L0' }, trace),
+      glPart,
+      makePart({ id: 'b-eco', layer: 'L2' }, trace),
+    ],
+    biome: 'tide',
+    seed: 7,
+    now: () => clock,
+  });
+
+  clock += 16;
+  stage.frame(clock);
+
+  // ① 层序：a.draw → gl.draw → composite → b.draw
+  const sequence = trace.filter((entry) => entry.kind === 'draw').map((entry) => `draw:${entry.id}`);
+  const compositeAt = log.findIndex((entry) => entry.op === 'drawImage');
+  check(compositeAt >= 0, 'GL 层没有被合成进主画布（一次 drawImage 都没有）');
+  check(sequence.join(' > ') === 'draw:a-base > draw:gl-world > draw:b-eco', `单循环层序应为 L0 → L1 → L2，实得 ${sequence.join(' > ')}`);
+  check(compositeAt >= 0 && compositeAt < log.length, '主画布应有 drawImage 记录');
+
+  // ② 目标矩形 = CSS 尺寸（这一条只有眼睛能看出问题，所以必须由断言锁）
+  check(canvas.width === 2560, `前提不成立：canvas.width 应为 1280×dpr2=2560，实得 ${canvas.width}（否则这条断言没有辨别力）`);
+  const composite = log[compositeAt];
+  check(
+    composite && composite.dx === 0 && composite.dy === 0 && composite.dw === 1280 && composite.dh === 720,
+    `合成目标矩形应为 CSS (0,0,1280,720)，实得 (${composite?.dx},${composite?.dy},${composite?.dw},${composite?.dh}) —— 传设备像素会放大 dpr 倍`,
+  );
+  // 合成 blend 取自 gl 零件自己的 blend（未显式传 glBlend 时）
+  check(composite && composite.blend === 'screen', `合成 blend 应取自 gl 零件的 blend=screen，实得 ${composite?.blend}`);
+
+  // ③ gl 抛错后不得再合成
+  const throwTrace = [];
+  const throwing = makePart({ id: 'gl-boom', layer: 'L1', throwOnDraw: true }, throwTrace);
+  throwing.channel = 'gl';
+  const second = makeCanvas();
+  const secondLog = second.log;
+  let secondClock = 0;
+  const boomStage = stageMod.createStage({
+    canvas: second.canvas,
+    glCanvas: makeGlCanvas(),
+    parts: [makePart({ id: 'base2', layer: 'L0' }, throwTrace), throwing],
+    biome: 'tide',
+    seed: 7,
+    now: () => secondClock,
+  });
+  secondClock += 16;
+  boomStage.frame(secondClock);
+  const compositesAfterFirst = secondLog.filter((entry) => entry.op === 'drawImage').length;
+  secondClock += 16;
+  boomStage.frame(secondClock);
+  const compositesAfterSecond = secondLog.filter((entry) => entry.op === 'drawImage').length;
+  // draw 抛错的 gl 零件一次都不该合成；而且第二帧也不该再尝试（被隔离）
+  check(compositesAfterFirst === 0, `gl 的 draw 抛错后仍合成了 ${compositesAfterFirst} 次（应 0）`);
+  check(compositesAfterSecond === 0, `gl 抛错后第二帧仍在合成（残影）：${compositesAfterSecond} 次`);
+  const boomDraws = throwTrace.filter((entry) => entry.kind === 'draw' && entry.id === 'gl-boom').length;
+  check(boomDraws === 1, `抛错的 gl 零件只该被尝试 1 次，实得 ${boomDraws}`);
+  boomStage.dispose();
+  stage.dispose();
+  globalThis.devicePixelRatio = originalDpr;
+}
+
+// ---------------------------------------- 13. glBlend 必须走 BLEND_MODES 白名单
+{
+  const { canvas } = makeCanvas();
+  let caught = null;
+  try {
+    stageMod.createStage({
+      canvas,
+      glCanvas: { width: 1, height: 1, style: {}, getContext: () => null },
+      parts: [(() => { const p = makePart({ id: 'g', layer: 'L1' }, []); p.channel = 'gl'; return p; })()],
+      biome: 'tide',
+      seed: 1,
+      glBlend: 'copy',
+      now: () => 0,
+    });
+  } catch (error) { caught = error; }
+  check(caught && caught.code === 'E_BAD_BLEND', `glBlend='copy' 应抛 E_BAD_BLEND，实得 ${caught && caught.code}`);
 }
 
 // ------------------------------------------------------------ 结果

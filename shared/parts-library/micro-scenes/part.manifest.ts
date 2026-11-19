@@ -20,12 +20,12 @@ const manifest = {
       accessed: '2026-11-18',
     },
     files: [
-      { path: 'micro-scenes/雨夜便利店.html', bytes: 1377925, completeness: 'complete' },
-      { path: 'micro-scenes/木漏时光.html', bytes: 1431645, completeness: 'complete' },
-      { path: 'micro-scenes/海风之屿.html', bytes: 1372235, completeness: 'complete' },
-      { path: 'micro-scenes/晨雾稻田水车村.html', bytes: 1414877, completeness: 'complete' },
-      { path: 'micro-scenes/雨后紫藤溪谷温室.html', bytes: 1414202, completeness: 'complete' },
-      { path: 'micro-scenes/北京故宫雪景水晶球.html', bytes: 1495936, completeness: 'complete' },
+      { path: 'micro-scenes/雨夜便利店.html', bytes: 1377922, completeness: 'complete' },
+      { path: 'micro-scenes/木漏时光.html', bytes: 1431637, completeness: 'complete' },
+      { path: 'micro-scenes/海风之屿.html', bytes: 1372230, completeness: 'complete' },
+      { path: 'micro-scenes/晨雾稻田水车村.html', bytes: 1414634, completeness: 'complete' },
+      { path: 'micro-scenes/雨后紫藤溪谷温室.html', bytes: 1413792, completeness: 'complete' },
+      { path: 'micro-scenes/北京故宫雪景水晶球.html', bytes: 1495923, completeness: 'complete' },
     ],
     ported: [],
     paramSurface: {

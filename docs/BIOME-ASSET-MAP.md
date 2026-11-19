@@ -1,8 +1,8 @@
 # BIOME-ASSET-MAP
 
-> 目标：四个 biome（tide / field / room / ink）各一站样板，按 L0–L5 装配。本文只做资产映射与可行性判定，不含实现。
+> 目标：四个 biome（tide / field / room / ink）各一站样板，按 L0–L5 装配。**本文写于 2026-11-18 施工前，是可行性判定；现状已回填（见各节 ✅ 行）。** 历史估算（字节数 / 行数）保留为溯源，不代表当前实现。
 >
-> **写入位置说明**：本文件写入我的工作区 `docs/BIOME-ASSET-MAP.md`。仓库未 clone、未修改、未提交；要落进仓库请放到 `docs/BIOME-ASSET-MAP.md`。
+> **本文已入库**（`docs/BIOME-ASSET-MAP.md`，commit 83e19c9）。现状回填见各节；下文的路径与字节数是**施工前经 GitHub Contents API 实测的素材口径**，不是本仓库当前文件清单。
 >
 > **证据口径**：所有路径经 GitHub Contents API 目录列举确认存在；字节数取自 API 返回的 `size` 字段（实测，非估算）。标「估算」的只有 gzip 折算与抽取行数。
 
@@ -10,7 +10,7 @@
 
 ## 一句话总判断
 
-四个 biome 里，**room 只要 2 件、field/tide 各 3 件、ink 2–3 件**就能"看起来像"；真正卡住工作量的不是零件数量，而是 **L0 底材（四个 biome 全缺）** 和 **ASCII 的网格分辨率锁死**——ASCII 那 984 件能上色、能透明叠加、能进我们的画布，但永远只能是一个 `cols×rows` 的字符栅格，不能当"高清纹理"用。
+四个 biome 里，**room 只要 2 件、field/tide 各 3 件、ink 2–3 件**就能"看起来像"；真正卡住工作量的不是零件数量，而是 **L0 底材（施工前四 biome 全缺；现 `paper-ink` / `field-ground` / `tide-medium` 均已实现）** 和 **ASCII 的网格分辨率锁死**——ASCII 那 984 件能上色、能透明叠加、能进我们的画布，但永远只能是一个 `cols×rows` 的字符栅格，不能当"高清纹理"用。
 
 ---
 
@@ -116,7 +116,7 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 |---|---|---|---|---|---|---|---|
 | `orbit-globe` | tide（勉强） | L1 | `src/generated/vendor/pinui/blocx/orbit-globe.ts` | 11,729 | WebGL2 | 需转换 | 需 4 张 equirect 纹理；`MAX_PIXELS = 5_000_000`；`SECONDS_PER_REVOLUTION = 100`（极慢）；自带 ISO 暂停与 context-loss 处理；要进我们的合成只能 `preserveDrawingBuffer` 或 `drawImage(它自己的 canvas)` |
 
-**L1 是真缺口。** portal 里没有"水下 / 草甸 / 室内"任何一个 3D 场景；`public/showcases/*` 里那些看着像 3D 的（rain / 各种 showcase）是**预构建的 Vite bundle**，整块嵌入，不是零件。
+**L1 在施工前是真缺口；现 `voxel-world` 已实现并用于 `/still`（按能力在场，`gl` 通道，整场唯一）。** portal 侧仍没有"水下 / 草甸 / 室内"现成 3D 场景；`public/showcases/*` 里那些看着像 3D 的是**预构建的 Vite bundle**，整块嵌入，不是零件。
 
 ### L2 生态（自走实体）
 
@@ -145,49 +145,49 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 | `pixel-post`（自建） | 全 | L4 | 基于 `pixelfx/core/fx.js` + `fx/transitions/_lib.js` | 5,107 + 8,190 | 帧缓冲 | 能 | 见 §A 说明书：**没有现成 grain/vignette/scanline 文件**，要用 `field()`+`pixels()` 自己写 |
 | `FilmGrain` | 全 | L4 | `public/shaders/runtime/shaders.js`（整包） | 2,594,656（整包；单组件未知） | WebGPU | 否 | 见结论 3 |
 | `Vignette` | 全 | L4 | 同上 | 同上 | WebGPU | 否 | 同上 |
-| `Halftone` / `Dither` | ink, field | L4 | 同上 | 同上 | WebGPU | 否 | 同上 |
+| `Halftone` / `Dither` | ink, field | L4 | 同上 | 同上 | WebGPU | 否 | **本轮无消费者**——产品已裁定 `/koi-pond` 不要半调网点（`dither` 从未执行、已删），见 `PRODUCT-FORM §1.4` |
 
 ---
 
 ## 结论 1：每个 biome 最少需要哪几件
 
-「现有」= 已完成或已在做（bubbles / boids / pixel-post / paper-ink 四个新件 + 11 个本地件）；「提取」= 从 portal 直接拿；「自写」= 仓库里没有，必须写。
+「现有」= 已完成或已在做；**当前实况：`shared/parts/` 7 个正式零件，`shared/parts-library/` 63 个文件**。以下表格里的"现有/自写"是施工前口径，**✅ 行才是现状**；「提取」= 从 portal 直接拿；「自写」= 仓库里没有，必须写。
 
 ### tide `/still` — 3 件
 
 | 层 | 零件 | 状态 |
 |---|---|---|
-| L0 底材 | 深水色阶 + 焦散 | **自写**，约 60 行；噪声用 `pixelfx/core/math.js` 的 `tileFbm`（6,102 B，现成） |
-| L1 世界 | —— | **省略**（没有水下 3D，硬做会假） |
+| L0 底材 | 深水色阶 + 焦散 | ✅ **`tide-medium` 已实现**；定稿为 `glow`（连续上亮下暗 + 雾 + 微粒，**无圆斑、无焦散**，`tide-visual` 2/2）。施工前估算：自写约 60 行，噪声用 `tileFbm`（现成） |
+| L1 世界 | —— | ✅ **`voxel-world` 已实现**（按 webgpu 能力在场；无能力时记 unsupported）。施工前写「省略（没有水下 3D，硬做会假）」 |
 | L2 生态 | `bubbles` | **现有** |
-| L3 交互 | `blow-input` | **现有**（本地） |
+| L3 交互 | `blow-input` | ✅ **不装**（已裁决）：`/still` 是零动作站，用 pointer 连续场，装了就违反界说。施工前写「现有（本地）」 |
 | L4 后处理 | `pixel-post` | **现有** |
 
-→ 新增工作量 = 1 个底材。若还想加"有东西在游"，加 `aquarium`（6,003 B，提取）或 `jellyfish`（7,605 B），但那会把画面语言从"抽象水"拉到"ASCII 水族箱"，**二选一，不要叠**。
+✅ **现状：三个 L0/L1/L4 零件均已装配，L3 不装；新增工作量为 0。** 施工前原文：新增工作量 = 1 个底材。若还想加"有东西在游"，加 `aquarium` 或 `jellyfish` 会把画面语言拉到"ASCII 水族箱"，**二选一，不要叠**。
 
 ### field `/hug` — 3 件
 
 | 层 | 零件 | 状态 |
 |---|---|---|
-| L0 底材 | 暖色纸/草底 + 斜射光 | **自写**，约 40 行 |
+| L0 底材 | 暖色纸/草底 + 斜射光 | ✅ **`field-ground` 已完成**（施工前估算：自写约 40 行） |
 | L1 世界 | —— | **省略** |
 | L2 生态 | `boids` | **现有** |
 | L3 交互 | `blow-input` | **现有**（本地） |
 | L4 后处理 | `pixel-post` | **现有** |
 
-→ 新增工作量 = 1 个底材。`boids` 在这层是"飞虫/鸟群"，不是"鸟群演示"，所以必须把 `count=120` 往下调、把光标斥力调小（参数见 §B）。**不要**再叠 `wind-grass`——两套自走实体抢同一层注意力，画面会脏。
+✅ **现状：L0 `field-ground` 已完成，新增工作量为 0**（`boids` / `dandelion` / `blow-input` / `pixel-post` 均已装配）。施工前原文：新增工作量 = 1 个底材。`boids` 在这层是"飞虫/鸟群"，不是"鸟群演示"，必须把 `count=120` 往下调、把光标斥力调小（参数见 §B）。**不要**再叠 `wind-grass`——两套自走实体抢同一层注意力，画面会脏。
 
 ### room `/license` — 2 件
 
 | 层 | 零件 | 状态 |
 |---|---|---|
-| L0 底材 | `paper-ink` 的纸底部分 | **现有**（在建） |
+| L0 底材 | `paper-ink` 的纸底部分 | ✅ **已完成**（施工前标「现有（在建）」） |
 | L1 世界 | —— | 省略 |
 | L2 生态 | —— | **省略（这一层在 room 里是负资产）** |
-| L3 交互 | —— | 省略（纸本身响应指针即可） |
+| L3 交互 | —— | ✅ **仪式在站内 DOM**（`ritual.ts` / `stay.ts` / `fold.ts`），不是"纸本身响应指针"；与 `PRODUCT-FORM §1.1` 对齐 |
 | L4 后处理 | `pixel-post`（只开 grain + 极轻 vignette） | **现有** |
 
-→ 新增工作量 = **0**。这是四个 biome 里最省的。晨光本身用一条 canvas 线性渐变 + 一个 `fbm` 镂空光斑（复用 `math.js`）就够，不值得为它引一个零件。如果想加一点"活气"，最多加 `god-rays`（5,344 B，pixelfx，320×180 正好当远窗），**但要接受它把画面压在 320×180 的像素感上**。
+✅ **现状：非 0**——`paper-ink` + `pixel-post` 两件零件之外，站内还有仪式 / 停留代码（`stay.ts` + `fold.ts`，wc -l 相加 ≤60 行）。施工前原文：新增工作量 = **0**，这是四个 biome 里最省的。晨光本身用 canvas 线性渐变 + `fbm` 镂空光斑就够，未引 `god-rays`。
 
 ### ink `/koi-pond` — 2–3 件
 
@@ -195,20 +195,20 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 |---|---|---|
 | L0 底材 | `paper-ink`（纸 + 描边） | **现有** |
 | L1 世界 | —— | 省略 |
-| L2 生态 | `koi-pond-ripples`（7,151 B，提取）**或** 自写锦鲤 | 二选一 |
-| L3 交互 | 指针 → 墨在水中扩散 | **自写**，约 30 行（一个位移场 + 三次迭代模糊） |
-| L4 后处理 | `pixel-post`（宣纸 grain） | **现有** |
+| L2 生态 | ✅ **`ascii-field` 已实现**（76×28 字符栅格，δ∈{2,3,4} 轮转，斜向流动；`koi-pond-ripples` 92×34 提取方案未采用） |
+| L3 交互 | 指针 → 墨在水中扩散 | ✅ **站内已实现，约 60 行**（施工前估算 30 行；一个位移场 + 迭代模糊） |
+| L4 后处理 | `pixel-post` | ✅ **已实现（宣纸 grain，无抖动）**——`dither` 从未执行、已删 |
 
-→ 若不用 ASCII 鱼，ink 只要 2 件。**注意**：`koi-pond-ripples` 是 92×34 字符栅格，叠在 `paper-ink` 的 SVG 描边上会**风格打架**（一边是矢量手绘、一边是等宽字符）——要么整站走 ASCII 墨、要么整站走矢量墨。
+✅ **现状：整站 ASCII 墨，无风格二选一问题**（矢量墨方案未采用）。施工前原文：若不用 ASCII 鱼，ink 只要 2 件；`koi-pond-ripples` 的 92×34 栅格叠在 SVG 描边上会风格打架——要么整站 ASCII 墨、要么整站矢量墨。
 
 ### 汇总
 
 | biome | L0 | L1 | L2 | L3 | L4 | 需自写 |
 |---|---|---|---|---|---|---|
-| tide | 自写 | — | bubbles | blow-input | pixel-post | 1（水底材） |
-| field | 自写 | — | boids | blow-input | pixel-post | 1（草底材） |
-| room | paper-ink | — | — | — | pixel-post | 0 |
-| ink | paper-ink | — | koi-pond-ripples 或自写 | 自写墨扩散 | pixel-post | 0–1 |
+| tide | `tide-medium` ✅ | `voxel-world` ✅（按能力） | `bubbles` ✅ | **不装** | `pixel-post` ✅ | 0（均已实现） |
+| field | `field-ground` ✅ | — | `boids` ✅ + `dandelion` ✅ | `blow-input` ✅ | `pixel-post` ✅ | 0 |
+| room | `paper-ink` ✅ | — | — | 仪式在站内 DOM ✅ | `pixel-post` ✅ | 0（零件），站内 ≤165 行 |
+| ink | `paper-ink` ✅（满幅、无边界、无台面） | — | `ascii-field` ✅（76×28，δ 轮转） | 墨扩散（站内 ~60 行）✅ | `pixel-post` ✅（无抖动） | 0 |
 
 ---
 

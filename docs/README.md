@@ -1,26 +1,33 @@
 # 文档索引 · 权威链
 
-> 一个仓库里同时躺着四代文档是危险的 —— 读到旧的那份就会按错的方向施工。**本页是唯一的权威声明**：标 ⛔ 的一律不要作为施工依据。
+> 一个仓库里同时躺着四代文档是危险的 —— 读到旧的那份就会按错的方向施工。**本页是索引，不是权威本身**：权威按域分列于下表；⛔ 见各文档头部，下面「已废弃」与「已归档」两张表都算。
 
 ## 权威顺序（从高到低）
 
 | 序 | 文档 | 状态 | 什么时候读它 |
 |---|---|---|---|
-| 1 | [`HANDOFF.md`](./HANDOFF.md) | ⭐ **唯一权威** | 接手第一份。产品前提 / 已完成 / 缺口任务 / 命令 / 坑 |
-| 2 | [`BIOME-ASSET-MAP.md`](./BIOME-ASSET-MAP.md) | ✅ 有效 | 决定某个 biome 站要装哪几个零件时 |
-| 3 | [`VOXEL-AS-PART.md`](./VOXEL-AS-PART.md) | ✅ 有效 | 动 `shared/parts/voxel-world/` 或想改 `shared/core/` 之前 |
-| 4 | [`ASCII-PIECE-CONTRACT.md`](./ASCII-PIECE-CONTRACT.md) | ✅ 有效 | 做 `ascii-frame` 零件之前 |
-| 5 | [`../QUARANTINE.md`](../QUARANTINE.md) | ✅ 有效 | 想知道为什么 `mountSite()` 没人调用时（Q-02） |
-| 6 | [`evidence/voxel-proof.png`](./evidence/voxel-proof.png) | 证据 | 唯一被浏览器真实跑出来的画面截图 |
+| 1 | [`HANDOFF.md`](./HANDOFF.md) | ⭐ **工程权威** | 接手第一份。装配模型 / 零件口径 / 验证门 / 命令 / 坑；**当前架构设计以其 §3.1「T18：L1 就地合成」为准** |
+| 2 | [`PRODUCT-FORM.md`](./PRODUCT-FORM.md) | ⭐ **产品形态权威** | 四站（hug / still / koi / license）用户看到什么、做什么、带走什么；工程约束仍以 HANDOFF 为准 |
+| 3 | [`COPY-SITES.md`](./COPY-SITES.md) | ⭐ **文案权威 / 构建输入单一来源** | `shared/sites/copy.mjs` 逐字照抄此处，`site-build` 断言逐字命中；改字必须先改本文 |
+| 4 | [`MANUAL-QA.md`](./MANUAL-QA.md) | ⭐ **手测权威** | 唯一能回答「这站能不能给人看」的可执行协议；不靠形容词 |
+| 5 | [`BIOME-ASSET-MAP.md`](./BIOME-ASSET-MAP.md) | ✅ 有效 | 决定某个 biome 站要装哪几个零件时 |
+| 6 | [`VOXEL-AS-PART.md`](./VOXEL-AS-PART.md) | ✅ 有效 | 动 `shared/parts/voxel-world/` 或想改 `shared/core/` 之前 |
+| 7 | [`ASCII-PIECE-CONTRACT.md`](./ASCII-PIECE-CONTRACT.md) | ✅ 有效 | 改 `ascii-field` 零件之前（零件已存在，不是"做之前"） |
+| 8 | [`../QUARANTINE.md`](../QUARANTINE.md) | ✅ 有效 | 隔离台账：`Q-01` 已消解，`Q-02` 待裁（见文内状态） |
+| 9 | [`evidence/voxel-proof.png`](./evidence/voxel-proof.png) · [`evidence/l2-over-l1-bubbles-on-voxel.png`](./evidence/l2-over-l1-bubbles-on-voxel.png) | 证据 | 两张实机截图：初次体素世界 / L2 气泡叠在 L1 之上 |
+| 10 | `docs/system_design.md`（已归档） | ⛔ 归档 | 当前架构设计以 `HANDOFF.md` §2 为准；旧设计见 `archive/2026-11-pre-pivot/system_design.md` |
 
 ## 已废弃但**故意留在原位**
 
 | 文档 | 为什么留 |
 |---|---|
-| [`ARCHITECTURE-REUSE.md`](./ARCHITECTURE-REUSE.md) | 232 KB，D0–D4 / 门 1–10 全套。**方向已废**，但 `shared/parts-library/*/part.manifest.ts`、`shared/contract/parts-registry.ts`、`tests/lib/*.mjs` 里有 20+ 处注释按 §章节号引用它，移动或删除会让引用全部悬空。查阅遗留零件溯源依据时仍需它。 |
+| [`ARCHITECTURE-REUSE.md`](./ARCHITECTURE-REUSE.md) | 232 KB，D0–D4 / 门 1–10 全套。**方向已废**，但 `shared/parts-library/*/part.manifest.ts`、`shared/contract/parts-registry.ts`、`tests/lib/*.mjs` 里有 20+ 处注释按 §章节号引用它；**更要紧的是 `verify:reuse` 在运行时解析它**（见下）。移动或删除会让引用悬空并让门变红。查阅遗留零件溯源依据时仍需它。 |
 | [`PRD-REUSE.md`](./PRD-REUSE.md) | 69 KB，同上。 |
 
 两份文件顶部都有醒目废弃抬头，读到会立刻知道。
+
+> ⚠️ **双重身份，别误处置**：这两份文档是 ⛔ **不得作为施工依据**，但同时也是 **`verify:reuse` 的实时数据输入** —— `tests/verify-provenance.mjs:34-35` 在运行时解析 `ARCHITECTURE-REUSE.md`（注释原文：「算法清单与规则的唯一来源」），`package.json:16` 的 `verify:reuse` 会执行它。
+> **内容冻结；删改会让门变红。** ⛔ 只约束「不要按它施工」，不表示可以清理掉它。
 
 ## 已归档（⛔ 不要据此施工）
 

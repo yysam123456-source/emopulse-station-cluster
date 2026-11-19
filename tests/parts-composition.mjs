@@ -4,6 +4,7 @@
 // 用法：node tests/parts-composition.mjs
 import path from 'node:path';
 import { loadTsModule, REPO_ROOT } from './lib/load-ts.mjs';
+import { guardCtx } from './lib/fake-ctx.mjs';
 
 const failures = [];
 let checks = 0;
@@ -28,7 +29,7 @@ function check(ok, msg) {
  */
 function makeCtx(tag, log) {
   const gradient = { addColorStop() {} };
-  return {
+  const raw = {
     globalAlpha: 1,
     globalCompositeOperation: 'source-over',
     fillStyle: '#000',
@@ -41,6 +42,7 @@ function makeCtx(tag, log) {
     createLinearGradient() { log.push({ tag, op: 'linear' }); return gradient; },
     createRadialGradient() { log.push({ tag, op: 'radial' }); return gradient; },
     fillRect() { log.push({ tag, op: 'fillRect' }); },
+    strokeRect() { log.push({ tag, op: 'strokeRect' }); },
     drawImage() { log.push({ tag, op: 'drawImage' }); },
     beginPath() {},
     moveTo() {},
@@ -50,11 +52,21 @@ function makeCtx(tag, log) {
     fill() { log.push({ tag, op: 'fill' }); },
     stroke() { log.push({ tag, op: 'stroke', blend: this.globalCompositeOperation }); },
     arc() {},
+    clip() { log.push({ tag, op: 'clip' }); },
+    createPattern() { return null; },
+    rect() {},
+    createImageData(w, h) { return { data: new Uint8ClampedArray(w * h * 4), width: w, height: h }; },
     clearRect() {},
   };
+  // 包一层守卫：零件若调用了这里没实现的方法，会**记下来并喊出方法名**，
+  // 而不是变成一句 `ctx.xxx is not a function` 然后零件被隔离、测试继续绿。
+  return guardCtx(raw);
 }
 
 const log = [];
+
+/** 所有假 ctx 的守卫（收尾统一断言"没有未实现的方法"） */
+const guards = [];
 
 /**
  * 造一个假 canvas（可带 ownerDocument 以启用离屏烘焙）。
@@ -66,7 +78,9 @@ const log = [];
  * @returns {object} 假 canvas
  */
 function makeCanvas(w, h, tag, withDoc) {
-  const ctx = makeCtx(tag, log);
+  const guarded = makeCtx(tag, log);
+  const ctx = guarded.ctx;
+  guards.push(guarded);
   const el = {
     width: w,
     height: h,
@@ -78,7 +92,10 @@ function makeCanvas(w, h, tag, withDoc) {
   if (withDoc) {
     el.ownerDocument = {
       createElement() {
-        const off = { width: 0, height: 0, getContext(id) { return id === '2d' ? makeCtx(`${tag}-offscreen`, log) : null; } };
+        // 离屏 canvas 的 ctx 也要包守卫（paper-ink / field-ground 的烘焙都发生在离屏）
+        const offGuard = makeCtx(`${tag}-offscreen`, log);
+        guards.push(offGuard);
+        const off = { width: 0, height: 0, getContext(id) { return id === '2d' ? offGuard.ctx : null; } };
         return off;
       },
     };
@@ -110,12 +127,29 @@ const field = fieldMod.part ?? fieldMod.default;
   clock += 16;
   stage.frame(clock);
 
+  // ★ 这一条是本文件最重要的一条断言，2026-11-18 补：
+  //   之前假 ctx 缺 `ctx.clip`，field-ground 每帧在 draw 开头就抛 TypeError，
+  //   装配器把它隔离（记 broken + degraded），**画到一半就停**——
+  //   于是「每帧 3 次 stroke」这类计数断言反而"恰好"成立，15/15 全绿而零件是坏的。
+  //   任何「零件在测试环境里静默失效」都必须在这里变红。
+  check(
+    stage.degraded.length === 0,
+    `首帧后不应有降级/隔离记录（零件在测试环境里抛错了）：${JSON.stringify(stage.degraded)}`,
+  );
+
   const mainOps = log.filter((e) => e.tag === 'main');
   const offscreenOps = log.filter((e) => e.tag === 'main-offscreen');
   check(offscreenOps.some((e) => e.op === 'radial'), '应有一个离屏底图（含径向暗角），说明烘焙路径生效');
-  check(mainOps.filter((e) => e.op === 'drawImage').length === 1, `主画布每帧应只 1 次 drawImage，实得 ${mainOps.filter((e) => e.op === 'drawImage').length}`);
-  check(mainOps.filter((e) => e.op === 'fill').length === 3, `主画布每帧应 3 次 fill（三层山），实得 ${mainOps.filter((e) => e.op === 'fill').length}`);
-  check(mainOps.filter((e) => e.op === 'stroke').length === 3, `主画布每帧应 3 次 stroke（三档草），实得 ${mainOps.filter((e) => e.op === 'stroke').length}`);
+  // ★ 这条同时是「**没有 gl 零件时不得发生 GL 合成**」的护栏（T18 之后）：
+  //   field-ground 自己每帧只有 1 次 drawImage（整屏底图 blit）。若 compositeGl 被无条件调用，
+  //   这里会变成 2 —— 而那种 bug 在画面上表现为"整幅画面被自己叠了一遍"（亮度翻倍），很难查。
+  check(
+    mainOps.filter((e) => e.op === 'drawImage').length === 1,
+    `主画布每帧应只 1 次 drawImage（本件自身的底图 blit；无 gl 零件时不该有合成），实得 ${mainOps.filter((e) => e.op === 'drawImage').length}`,
+  );
+  check(mainOps.filter((e) => e.op === 'fill').length === 4, `主画布每帧应 4 次 fill（三层山 + 一档草穗），实得 ${mainOps.filter((e) => e.op === 'fill').length}`);
+  check(mainOps.filter((e) => e.op === 'stroke').length === 6, `主画布每帧应 6 次 stroke（3 道山脊亮边 + 3 档草），实得 ${mainOps.filter((e) => e.op === 'stroke').length}`);
+  check(mainOps.some((e) => e.op === 'clip'), '草应被前景山脊裁切（clip 一次）');
   check(mainOps.filter((e) => e.op === 'linear' || e.op === 'radial').length === 0, '主画布每帧不应现建渐变（必须烘在离屏）');
   check(mainOps.every((e) => e.op !== 'stroke' || e.blend === 'source-over'), '草叶描边应在本件的 source-over 下执行');
 
@@ -180,8 +214,16 @@ const field = fieldMod.part ?? fieldMod.default;
   check(mainOps.some((e) => e.op === 'linear'), '降级路径应现建天光渐变');
   // fillRect 与 fill 在假 ctx 里是两个不同的记账项（真实 canvas 也是两个 API）
   check(mainOps.filter((e) => e.op === 'fillRect').length === 1, `降级路径应 1 次 fillRect 铺天光，实得 ${mainOps.filter((e) => e.op === 'fillRect').length}`);
-  check(mainOps.filter((e) => e.op === 'fill').length === 3, `降级路径应 3 次山体 fill，实得 ${mainOps.filter((e) => e.op === 'fill').length}`);
+  check(mainOps.filter((e) => e.op === 'fill').length === 4, `降级路径应 4 次 fill（三层山 + 草穗），实得 ${mainOps.filter((e) => e.op === 'fill').length}`);
   stage.dispose();
+}
+
+// ── 假 ctx 必须覆盖零件调用过的所有方法 ──
+for (const guard of guards) {
+  checks += 1;
+  if (guard.missing.size > 0) {
+    failures.push(`假 ctx 缺少方法：${[...guard.missing].join(', ')}（被零件调用过；真 ctx 有、假 ctx 没有 = 测试跑在了不同的环境里）`);
+  }
 }
 
 if (failures.length === 0) {
