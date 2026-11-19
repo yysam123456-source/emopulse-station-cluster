@@ -27,7 +27,37 @@ try {
     await waitForPreview(page, { frames: 6 });
     await page.waitForFunction(() => typeof globalThis.__site?.exportCard === 'function', null, { timeout: 15000 });
 
-    // ── 1. 三段：点 #cta 开始，逐段收集 DOM 里的词 ──
+    // ── 1. 盖章**之前**的纸：必须已经是一张填好的许可证 ──
+    //    真实缺口：编号/日期曾被押到 approved 之后（"盖章才落上去"），
+    //    于是用户第一眼看到的是一张空纸 + 一个悬浮按钮 —— 也就是"啥都没有"。
+    //    语义上也不对：编号是开票时印上去的，盖章只授予红章。
+    const idle = await page.evaluate(() => {
+      const read = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        return {
+          text: el.textContent.trim(), hidden: el.hidden === true || cs.display === 'none',
+          box: { x: r.x, y: r.y, w: r.width, h: r.height },
+        };
+      };
+      return {
+        serial: read('cert-serial'), date: read('cert-date'), rule: read('cert-rule'),
+        sealSub: read('cert-seal-sub'), seal: read('seal'),
+        stage: document.getElementById('stage-word')?.dataset.stage,
+      };
+    });
+    check(idle.stage === 'idle', `盖章前 stage=${idle.stage}，应 idle`);
+    check(idle.serial?.hidden === false, '盖章前编号就应在纸上（编号是开票即印，不是盖章才给）');
+    check(/^No\.\s*EMP-\d{8}-\d{3}$/.test(idle.serial?.text ?? ''), `盖章前编号格式异常：${JSON.stringify(idle.serial?.text)}`);
+    check(idle.serial?.box.w > 0 && idle.serial?.box.h > 0, '盖章前编号存在但没有可见尺寸');
+    check(idle.date?.hidden === false, '盖章前日期就应在纸上');
+    check(/^\d{4}\.\d{2}\.\d{2}$/.test(idle.date?.text ?? ''), `盖章前日期格式异常：${JSON.stringify(idle.date?.text)}`);
+    check(idle.rule?.hidden === false && idle.rule?.box.w > 100, '页眉印刷线不在（纸缺少版式，读作"一段悬着的文字"）');
+    check(idle.sealSub?.hidden === true, '章下副行"NO COPY KEPT."盖章前就露出来了（它属于红章）');
+
+    // ── 1b. 三段：点 #cta 开始，逐段收集 DOM 里的词 ──
     const seen = [];
     await page.evaluate(() => {
       const el = document.getElementById('stage-word');
@@ -61,6 +91,29 @@ try {
     });
     check(saveState.hidden === false, '#save 在 approved 之后仍隐藏');
     check(saveState.rect === true, '#save 存在但没有可见尺寸');
+
+    // ── 2a. 许可证正文：纸必须真的是一张许可证，不是空白纸 ──
+    //    真实缺口：页眉/宣言/编号/日期全画在导出 PNG 上，屏幕上一个都没有。
+    const cert = await page.evaluate(() => {
+      const read = (id) => {
+        const el = document.getElementById(id);
+        return el ? { text: el.textContent.trim(), hidden: el.hidden } : null;
+      };
+      return {
+        title: read('cert-title'), decl: read('cert-declaration'),
+        serial: read('cert-serial'), date: read('cert-date'), sealSub: read('cert-seal-sub'),
+      };
+    });
+    check(cert.title?.text === 'PERMIT TO REST', `卡标题应为定稿 "PERMIT TO REST"，实际 ${JSON.stringify(cert.title?.text)}`);
+    check(
+      cert.decl?.text === 'This permit entitles the holder to rest, to stop explaining, and to take up space.',
+      `宣言句不是定稿终稿（COPY-SITES §5 第23条），实际 ${JSON.stringify(cert.decl?.text)}`,
+    );
+    check(/^No\.\s*EMP-\d{8}-\d{3}$/.test(cert.serial?.text ?? ''), `编号格式异常：${JSON.stringify(cert.serial?.text)}`);
+    check(cert.serial?.hidden === false, 'approved 后编号应可见');
+    check(/^\d{4}\.\d{2}\.\d{2}$/.test(cert.date?.text ?? ''), `日期格式异常：${JSON.stringify(cert.date?.text)}`);
+    check(cert.date?.hidden === false, 'approved 后日期应可见');
+    check(cert.sealSub?.text === 'NO COPY KEPT.', `章下副行应为定稿 "NO COPY KEPT."，实际 ${JSON.stringify(cert.sealSub?.text)}`);
 
     // ── 2b. 纸角二级提示：approved 后才露出、真的在纸上、可点重盖 ──
     //    真实缺口：三件摆弄（挪光/折角/重盖）代码里都接好了，但页面无提示，

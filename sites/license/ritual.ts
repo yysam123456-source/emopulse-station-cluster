@@ -38,6 +38,8 @@ export interface RitualHandle {
  * @param save 保存按钮（approved 之后才出现）
  * @param reducedMotion 是否压缩时长
  * @param hint 纸角二级提示（approved 之后才出现；重盖时收起，和章一起重新走一遍）
+ * @param onApproved 进入/离开 approved 时的回调（编号、日期等由站点填入，仪式本身不持有它们）
+ * @param cta 首屏按钮（approved 后退场，把唯一按钮位置让给 Save；重盖开始时回来）
  */
 export function createRitual(
   word: HTMLElement | null,
@@ -45,6 +47,8 @@ export function createRitual(
   save: HTMLElement | null,
   reducedMotion: boolean,
   hint?: HTMLElement | null,
+  onApproved?: (approved: boolean) => void,
+  cta?: HTMLElement | null,
 ): RitualHandle {
   let stage: RitualStage = 'idle';
   let elapsed = 0;
@@ -59,9 +63,13 @@ export function createRitual(
       word.dataset.stage = next;
     }
     if (save) save.hidden = next !== 'approved';
+    // 首屏按钮盖章后退场：终态只留 Save 一个按钮（COPY-SITES §3）；
+    // 重盖时它回来，因为纸角的 Stamp again 在 verifying 期间是收起的。
+    if (cta) cta.hidden = next === 'approved';
     // 二级提示与保存按钮同步：只有 approved 之后才露出，重盖时立刻收起。
     // 它属于仪式状态而非独立状态机 —— 不为它增加第五个阶段。
     if (hint) hint.hidden = next !== 'approved';
+    onApproved?.(next === 'approved');
     if (next === 'stamping') {
       round += 1;
       restamp(seal, round);

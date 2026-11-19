@@ -34,7 +34,19 @@ export function attach(handle: Handle): void {
   const serial = makeSerial();
   const date = formatDate();
 
-  const ritual = createRitual(word, seal, save, reduced, playHint);
+  // 编号/日期**开票即印**（这张纸一出生就有编号），盖章只授予红章与章下那句。
+  // 值由站点持有并写入 DOM；仪式只回调"现在是不是 approved"，不持有证书数据。
+  const certSerialValue = document.getElementById('cert-serial-value');
+  const certDate = document.getElementById('cert-date');
+  const certSealSub = document.getElementById('cert-seal-sub');
+  if (certSerialValue) certSerialValue.textContent = serial;
+  if (certDate) certDate.textContent = date;
+  const showCert = (approved: boolean): void => {
+    // 只有章下副行跟着章走；编号/日期常驻（盖章前后都在纸上）。
+    if (certSealSub) certSealSub.hidden = !approved;
+  };
+
+  const ritual = createRitual(word, seal, save, reduced, playHint, showCert, document.getElementById('cta'));
   const stay = createStay(document.body);
   let dragDx = 0;
   let foldOn = false;

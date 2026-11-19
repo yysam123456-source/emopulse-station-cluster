@@ -22,6 +22,12 @@ export const COPY = Object.freeze({
      *  现在没有触发者，所以**不挂 CTA 节点** —— 挂一个点了没反应的按钮比没有更糟。 */
     cta: null,
     ctaCopy: 'Stamp it',
+    // 许可证正文（COPY-SITES §1「/license 卡」+ §5 第 23 条终稿）。
+    // 此前只画在导出 PNG 上、屏幕上没有 —— 纸看起来是空的，就是漏了这一层。
+    cardTitle: 'PERMIT TO REST',
+    serialLabel: 'No.',
+    declaration: 'This permit entitles the holder to rest, to stop explaining, and to take up space.',
+    sealSub: 'NO COPY KEPT.',
   },
   hug: {
     h1: 'Hug',

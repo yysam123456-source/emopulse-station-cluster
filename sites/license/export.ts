@@ -1,5 +1,6 @@
 // 自研② Canvas 凭证导出 · /license 许可证（编号 / 日期 / 印章 / 宣言，零外部资源）。
-import { LICENSE_COPY, formatDate } from '../../content/license';
+import { COPY } from '../../shared/sites/copy.mjs';
+import { LICENSE_COPY } from '../../content/license';
 
 export interface LicenseData {
   serial: string;
@@ -50,15 +51,16 @@ export function renderLicense(data: LicenseData): string {
 
   ctx.textAlign = 'center';
   ctx.fillStyle = '#4a3b2c'; ctx.font = '700 46px system-ui';
-  ctx.fillText('LICENSE TO SIMPLY BE', cx, 150);
+  // 全部文本来自 COPY.license（逐字可追溯 COPY-SITES §1）——
+  // 旧版这里写死 'LICENSE TO SIMPLY BE'、用 content/*.ts 的旧宣言句外加一行中文，
+  // 与屏幕、与定稿都不一致，且产物含 CJK。现在屏上纸与这张卡读同一份定稿。
+  ctx.fillText(COPY.license.cardTitle, cx, 150);
   ctx.font = '500 20px ui-monospace, monospace'; ctx.fillStyle = '#7c6a55';
-  ctx.fillText(`NO. ${data.serial}`, cx, 214);
+  ctx.fillText(`${COPY.license.serialLabel.toUpperCase()} ${data.serial}`, cx, 214);
   ctx.fillText(data.date, cx, 248);
 
   ctx.fillStyle = '#4a3b2c'; ctx.font = '600 27px system-ui';
-  wrapText(ctx, LICENSE_COPY.declarationEn, cx, 360, 900, 44);
-  ctx.font = '500 19px system-ui'; ctx.fillStyle = '#8a7660';
-  wrapText(ctx, LICENSE_COPY.declarationZh, cx, 520, 900, 34);
+  wrapText(ctx, COPY.license.declaration, cx, 360, 900, 44);
 
   // 朱砂印章：与盖章零件同视觉。
   ctx.strokeStyle = '#a3342c'; ctx.lineWidth = 7;
@@ -66,7 +68,7 @@ export function renderLicense(data: LicenseData): string {
   ctx.fillStyle = '#a3342c'; ctx.font = '800 26px system-ui';
   ctx.fillText(LICENSE_COPY.sealText, cx, 694);
   ctx.font = '600 14px ui-monospace, monospace';
-  ctx.fillText('EMOPULSE · EST. 2026', cx, 724);
+  ctx.fillText(COPY.license.sealSub, cx, 724);
 
   ctx.fillStyle = '#8a7660'; ctx.font = '500 16px ui-monospace, monospace';
   ctx.fillText('NO PURCHASE. NO STRINGS. JUST PERMISSION.', cx, 900);

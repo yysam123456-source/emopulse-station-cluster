@@ -46,7 +46,7 @@
 | `L2` | 生态（自走实体） | `boids` ⬜ · `bubbles` ✅ · `dandelion` ⬜ · `ascii-field` ✅ |
 | `L3` | 交互（输入驱动） | `blow-input` ⬜（v1 有 core，未改 PartV2） |
 | `L4` | 后处理（整场唯一） | `pixel-post` ✅（暗角 + 扫描线 + 动能颗粒，每帧 1 次 blit） |
-| `L5` | UI（文字 / 指引 / 调试） | ✅ **DOM 版**：文案单一来源 `shared/sites/copy.mjs`；`site-dom 70/70`（h1/hook/菜单/通道/注入计数/文案在纸内） |
+| `L5` | UI（文字 / 指引 / 调试） | ✅ **DOM 版**：文案单一来源 `shared/sites/copy.mjs`；`site-dom 80/80`（h1/hook/菜单/通道/注入计数/文案在纸内/CTA 可见可点） |
 
 > **通道字段补注**（架构师指出上表原先缺这三样）：`glBlend` = GL 层合成时的 `globalCompositeOperation`（白名单，见 `contract.ts`）；
 > `ctaChannel` = 站点 CTA 属于 `ui` 还是 `world-inject`（**四站合计只允许 `/hug` 一处 world-inject**，见 `site-dom`）；
@@ -379,7 +379,7 @@ field-in-stage: FAIL 8/22
 ### 任务 4｜四座样板站（✅ 壳 + 产物已接；站内逻辑部分未写）
 | 站 | 状态 | 实际零件栈 / 站内 |
 |---|---|---|
-| `/license` | ✅ **全链完成** | `paper-ink` + `pixel-post`；`ritual.ts` 三段出字 + `stay.ts`/`fold.ts` 四开关 + 1410×1000 导出；`license-ritual 13/13`、`license-stay 13/13`、`site-dom 70/70` |
+| `/license` | ✅ **全链完成** | `paper-ink` + `pixel-post`；`ritual.ts` 三段出字 + `stay.ts`/`fold.ts` 四开关 + 1410×1000 导出；屏上纸=许可证（页眉 / 印刷线 / 宣言 / 编号 / 日期 / 红章 / 章下副行），`license-ritual 34/34`、`license-stay 13/13`、`site-dom 80/80` |
 | `/hug` | ⬜ 站内未写 | 壳 + `dist/hug/index.html` 已接；栈 `field-ground` + `pixel-post`；`sites/hug/` 只有 v1 的 bridge/glue/state，**无新架构 ritual/stay**；且依赖任务 1 的 dandelion/blow-input/boids |
 | `/still` | ⬜ 站内未写 | 壳已接；栈 `voxel-world`(L1) + `bubbles`(L2)；**`tide-medium` 已实现但尚未装进 `/still` 栈**，L4 也未装 —— PM 判过「L0 合格 ≠ 站合格」，装 L2/L4 后必须整站复判且不能重新长出圆盘 |
 | `/koi-pond` | ⬜ 站内未写 | 壳已接；栈 `paper-ink` + `ascii-field` + `pixel-post`；K1/K1b 形态判据已绿；**墨扩散（L3）仍无** |

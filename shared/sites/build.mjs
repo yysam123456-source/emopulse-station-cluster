@@ -43,6 +43,23 @@ export const STATIONS = Object.freeze({
       '<div id="sheet" aria-hidden="true"></div>',
       '<div id="sun" aria-hidden="true"></div>',
       '<div id="stage-word" role="status" data-stage="idle" hidden></div>',
+      // 许可证正文：定稿要求屏幕上的纸就是一张许可证，而不只是一张有标题的空纸。
+      //
+      // ★ 哪些内容"盖章前就在"，是语义问题不是视觉问题：
+      //   编号与日期是**开票时打印上去的**（这张纸一出生就有编号），
+      //   盖章只授予一件事 —— 红章与章下那句 "NO COPY KEPT."。
+      //   早前把编号/日期也押到 approved 之后，代价是用户在盖章前看到的
+      //   只是一张空纸 + 一个悬浮按钮（"啥都没有"），而且语义也说不通。
+      '<div id="cert" aria-live="polite">',
+      '<div id="cert-title">__CERT_TITLE__</div>',
+      // 页眉下的印刷细线：没有它，标题/宣言/编号是"悬在纸上的一段文字"；
+      // 有它，纸才读作一张**有版式**的表单。纯装饰，不承载任何文案。
+      '<div id="cert-rule" aria-hidden="true"></div>',
+      '<p id="cert-declaration">__CERT_DECLARATION__</p>',
+      '<div id="cert-serial"><span class="cert-label">__CERT_SERIAL_LABEL__</span> <span id="cert-serial-value" class="cert-value"></span></div>',
+      '<div id="cert-date"></div>',
+      '<div id="cert-seal-sub" hidden>__CERT_SEAL_SUB__</div>',
+      '</div>',
       '<div id="seal" aria-hidden="true">APPROVED</div>',
       // 纸角的二级提示（COPY-SITES §3 定稿「Stamp again」位置）：盖章完成后才出现，
       // 低对比、不做成按钮外观 —— 它是"这张桌子是活的"的暗示，不是功能菜单。
@@ -150,6 +167,7 @@ const STYLE = [
   'background:rgba(10,12,16,.46);border:1px solid rgba(232,238,245,.72);border-radius:999px;',
   'color:var(--ink);font:inherit;font-size:15px;letter-spacing:.06em;padding:.72em 1.9em;',
   'cursor:pointer;box-shadow:0 2px 18px rgba(0,0,0,.35)}',
+  '#cta[hidden]{display:none}',
   '#cta:hover{border-color:var(--ink)}',
   '#cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}',
   '#menu{position:fixed;right:2vw;top:2vh;z-index:4;padding:14px 18px;border-radius:6px;',
@@ -172,6 +190,31 @@ const STYLE = [
   'width:var(--sheet-w);height:var(--sheet-h);z-index:2;pointer-events:none;',
   'mix-blend-mode:soft-light;opacity:.9;',
   'background:linear-gradient(var(--sun-angle,-26deg),rgba(255,248,236,.55),rgba(255,255,255,0) 45%,rgba(26,18,10,.55))}',
+  // 许可证正文（定稿 COPY-SITES §1）：深墨、等宽/衬线混排，落在纸内，避开标题/hook/章/提示。
+  '#cert{position:fixed;z-index:3;pointer-events:none;',
+  'left:calc(var(--sheet-x) + var(--sheet-w)*0.075);width:calc(var(--sheet-w)*0.85);color:rgba(52,42,32,.86)}',
+  '#cert-title{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.30);',
+  'font:600 13px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.24em;color:rgba(74,59,44,.75)}',
+  // 页眉线：1px 深墨、22% 不透明度 —— 只做版式分隔，不抢宣言句。
+  '#cert-rule{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.345);left:0;right:0;',
+  'height:1px;background:rgba(74,59,44,.22)}',
+  '#cert-declaration{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.40);margin:0;',
+  'max-width:calc(var(--sheet-w)*0.62);font:400 clamp(15px,1.5vw,20px)/1.55 ui-serif,Georgia,serif;',
+  'color:rgba(52,42,32,.9)}',
+  // 编号/日期 60%/65%：要同时满足两件事 —— 宣言句下面不留空洞、
+  // 又不要挤进纸底那一条已经站着 hook / approved / 章下副行 / 纸角提示的带子。
+  '#cert-serial{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.60);',
+  'font:500 14px/1.5 ui-monospace,Menlo,monospace;letter-spacing:.04em;pointer-events:auto;',
+  'user-select:text;-webkit-user-select:text;color:rgba(52,42,32,.92)}',
+  '.cert-label{opacity:.6}.cert-value{letter-spacing:.08em}',
+  '#cert-date{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.65);',
+  'font:400 13px/1.4 ui-monospace,Menlo,monospace;color:rgba(74,59,44,.72)}',
+  // 章下副行贴着红章（章在纸右下），不能放在纸底中央 —— 那里有 hook、纸角提示、Save，会叠成一团。
+  '#cert-seal-sub{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.855);',
+  'left:calc(var(--sheet-w)*0.60);width:calc(var(--sheet-w)*0.36);text-align:center;',
+  'font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(163,52,44,.72)}',
+  // 只有章下副行跟着章走；编号/日期是纸自带的，不随 approved 变化。
+  '#cert-seal-sub[hidden]{display:none}',
   '#stage-word{position:fixed;z-index:4;left:50%;transform:translateX(-50%);',
   'bottom:calc(6vh + 46px);letter-spacing:.34em;text-transform:lowercase;',
   'font-size:12px;color:rgba(232,238,245,.8);pointer-events:none}',
@@ -369,6 +412,12 @@ export async function buildSite(options) {
       ? `<button id="cta" type="button" data-channel="${station.ctaChannel ?? 'world-inject'}">${escapeHtml(station.cta)}</button>`
       : ''))
     .replace('__SITE_EXTRA__', () => (station.extra ? station.extra : ''))
+    // 许可证正文：从文案单一来源 COPY.license 注入，逐字可追溯到 COPY-SITES §1。
+    // 占位符只出现在 license 的 extra 里；其他站没有这些串，replace 是空操作。
+    .replace('__CERT_TITLE__', () => escapeHtml(COPY.license.cardTitle))
+    .replace('__CERT_DECLARATION__', () => escapeHtml(COPY.license.declaration))
+    .replace('__CERT_SERIAL_LABEL__', () => escapeHtml(COPY.license.serialLabel))
+    .replace('__CERT_SEAL_SUB__', () => escapeHtml(COPY.license.sealSub))
     .replace('__SITE_BOOT__', () => script);
 
   let outPath = null;
