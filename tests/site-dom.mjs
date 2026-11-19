@@ -80,6 +80,23 @@ try {
           privacy: (document.querySelector('.menu-privacy')?.textContent ?? '').trim(),
           menuTitle: (document.querySelector('.menu-title')?.textContent ?? '').trim(),
           injects: [...document.querySelectorAll('[data-channel="world-inject"]')].length,
+          // CTA 可见性：CSS 语法损坏会让 #cta 基础规则整条失效（退回 static→(0,0)→被 canvas 盖住）。
+          // 只查"存在+文案"抓不到这个，必须查运行时样式与命中元素。
+          ctaStyle: (() => {
+            const el = document.getElementById('cta');
+            if (!el) return null;
+            const cs = getComputedStyle(el);
+            const b = el.getBoundingClientRect();
+            const hit = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+            return {
+              position: cs.position,
+              zIndex: cs.zIndex,
+              rect: { x: b.x, y: b.y, w: b.width, h: b.height },
+              hidden: el.hidden === true,
+              hitSelf: hit === el || el.contains(hit),
+              hitTag: hit ? hit.tagName + '#' + hit.id : null,
+            };
+          })(),
         };
       });
 
@@ -117,6 +134,19 @@ try {
         dom.injects === expectInject,
         `${slug}: world-inject 有 ${dom.injects} 处，应为 ${expectInject}（注入通道不许悄悄多出来）`,
       );
+
+      // 7 CTA 必须真的可见可点（不是只在 DOM 里存在）
+      //    真实事故：build.mjs 一条孤立 CSS 声明吞掉了 #cta 基础规则 → position 退回 static、
+      //    按钮跑到 (0,0) 被 canvas 盖住 → site-dom 其它 70 条全绿，但用户肉眼看不到按钮。
+      if (station.cta !== null) {
+        check(dom.ctaStyle !== null, `${slug}: 有 CTA 配置但产物里没有 #cta`);
+        const c = dom.ctaStyle;
+        check(c && c.hidden === false, `${slug}: #cta 被 hidden`);
+        check(c && c.position === 'fixed', `${slug}: #cta 的 position=${c?.position}，应为 fixed（CSS 规则可能被前面的语法错误吞掉）`);
+        check(c && c.hitSelf, `${slug}: #cta 中心被 ${c?.hitTag} 盖住，用户点不到也看不见`);
+        check(c && c.rect.x > 0 && c.rect.y > 0 && c.rect.w > 40 && c.rect.h > 16,
+          `${slug}: #cta 矩形异常 ${JSON.stringify(c?.rect)}（跑到左上角=样式未生效）`);
+      }
 
       // 6 有纸的站：文案必须落在纸内
       if (station.paperSheet) {

@@ -134,11 +134,12 @@ const STYLE = [
   // 加底会把文字变成贴纸，而这一站的红线是"文字属于纸/场景"。描边只提高可读性，不改变语义。
   'body[data-sheet=off] #lead{left:5vw;bottom:6vh;max-width:44ch;',
   'text-shadow:0 1px 3px rgba(0,0,0,.6),0 0 12px rgba(0,0,0,.35)}',
+  // 纸内文字用深墨（纸是亮的），与桌面上的浅字分开。
+  // 这条声明必须并进 sheet-on 的 #lead 规则里 —— 它曾作为孤立声明单独成行（带 }），
+  // 让 CSS 解析器吞掉后面的 #cta 规则，CTA 退回 static 跑到 (0,0) 被 canvas 盖住，肉眼看不见。
   'body[data-sheet=on] #lead{left:calc(var(--sheet-x) + var(--sheet-w)*0.075);',
   'top:calc(var(--sheet-y) + var(--sheet-h)*0.80);max-width:calc(var(--sheet-w)*0.62);',
-  'text-shadow:0 1px 2px rgba(250,248,242,.55)}',
-  // 纸内文字用深墨（纸是亮的），与桌面上的浅字分开
-  'color:rgba(58,48,38,.82)}',
+  'text-shadow:0 1px 2px rgba(250,248,242,.55);color:rgba(58,48,38,.82)}',
   '#cta{position:fixed;left:50%;bottom:11.5vh;transform:translateX(-50%);z-index:3;',
   'background:rgba(10,12,16,.46);border:1px solid rgba(232,238,245,.72);border-radius:999px;',
   'color:var(--ink);font:inherit;font-size:15px;letter-spacing:.06em;padding:.72em 1.9em;',
