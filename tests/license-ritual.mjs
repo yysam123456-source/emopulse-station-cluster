@@ -62,6 +62,50 @@ try {
     check(saveState.hidden === false, '#save 在 approved 之后仍隐藏');
     check(saveState.rect === true, '#save 存在但没有可见尺寸');
 
+    // ── 2b. 纸角二级提示：approved 后才露出、真的在纸上、可点重盖 ──
+    //    真实缺口：三件摆弄（挪光/折角/重盖）代码里都接好了，但页面无提示，
+    //    用户肉眼只看到一张纸 —— "有交互却不可发现"等于没有交互。
+    const hint = await page.evaluate(() => {
+      const el = document.getElementById('play-hint');
+      const again = document.getElementById('again');
+      const r = el.getBoundingClientRect();
+      const root = getComputedStyle(document.documentElement);
+      return {
+        hidden: el.hidden,
+        rect: { x: r.x, y: r.y, w: r.width, h: r.height },
+        text: (el.textContent ?? '').replace(/\s+/g, ' ').trim(),
+        sheet: {
+          x: parseFloat(root.getPropertyValue('--sheet-x')) || 0,
+          y: parseFloat(root.getPropertyValue('--sheet-y')) || 0,
+          w: parseFloat(root.getPropertyValue('--sheet-w')) || 0,
+          h: parseFloat(root.getPropertyValue('--sheet-h')) || 0,
+        },
+        againHit: (() => {
+          if (!again) return false;
+          const b = again.getBoundingClientRect();
+          const top = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+          return top === again || again.contains(top);
+        })(),
+      };
+    });
+    check(hint.hidden === false, '#play-hint 在 approved 之后仍隐藏（三件摆弄对用户不可发现）');
+    check(hint.againHit === true, '#again（Stamp again）被别的元素盖住，用户点不到');
+    check(
+      hint.rect.x >= hint.sheet.x - 1 && hint.rect.y >= hint.sheet.y - 1
+        && hint.rect.x + hint.rect.w <= hint.sheet.x + hint.sheet.w + 1
+        && hint.rect.y + hint.rect.h <= hint.sheet.y + hint.sheet.h + 1,
+      `#play-hint 落在纸外（${JSON.stringify(hint.rect)} vs 纸 ${JSON.stringify(hint.sheet)}）`,
+    );
+    check(hint.text.includes('Stamp again'), `#play-hint 少了定稿词 "Stamp again"（实际：${hint.text}）`);
+    // 点一次重盖：提示立刻收起、状态回到 verifying（证明它是一个真的可触发的入口，不是死提示）
+    await page.evaluate(() => document.getElementById('again').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    const restamp = await page.evaluate(() => ({
+      stage: document.getElementById('stage-word')?.dataset.stage,
+      hintHidden: document.getElementById('play-hint')?.hidden,
+    }));
+    check(restamp.stage === 'verifying', `点 Stamp again 后 stage=${restamp.stage}，应重新从 verifying 开始`);
+    check(restamp.hintHidden === true, '重盖开始后 #play-hint 应收起');
+
     // ── 3/4. 导出：尺寸 + 比例 + 不变量 ──
     const exp = await page.evaluate(() => {
       const url1 = globalThis.__site.exportCard();

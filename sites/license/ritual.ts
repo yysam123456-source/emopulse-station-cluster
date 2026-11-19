@@ -37,12 +37,14 @@ export interface RitualHandle {
  * @param seal 章节点（重盖时会被写 `--seal-tilt`）
  * @param save 保存按钮（approved 之后才出现）
  * @param reducedMotion 是否压缩时长
+ * @param hint 纸角二级提示（approved 之后才出现；重盖时收起，和章一起重新走一遍）
  */
 export function createRitual(
   word: HTMLElement | null,
   seal: HTMLElement | null,
   save: HTMLElement | null,
   reducedMotion: boolean,
+  hint?: HTMLElement | null,
 ): RitualHandle {
   let stage: RitualStage = 'idle';
   let elapsed = 0;
@@ -57,6 +59,9 @@ export function createRitual(
       word.dataset.stage = next;
     }
     if (save) save.hidden = next !== 'approved';
+    // 二级提示与保存按钮同步：只有 approved 之后才露出，重盖时立刻收起。
+    // 它属于仪式状态而非独立状态机 —— 不为它增加第五个阶段。
+    if (hint) hint.hidden = next !== 'approved';
     if (next === 'stamping') {
       round += 1;
       restamp(seal, round);

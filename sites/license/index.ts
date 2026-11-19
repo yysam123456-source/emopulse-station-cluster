@@ -26,6 +26,7 @@ export function attach(handle: Handle): void {
   const seal = document.getElementById('seal');
   const save = document.getElementById('save');
   const sheet = document.getElementById('sheet');
+  const playHint = document.getElementById('play-hint');
   const reduced = typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -33,7 +34,7 @@ export function attach(handle: Handle): void {
   const serial = makeSerial();
   const date = formatDate();
 
-  const ritual = createRitual(word, seal, save, reduced);
+  const ritual = createRitual(word, seal, save, reduced, playHint);
   const stay = createStay(document.body);
   let dragDx = 0;
   let foldOn = false;
@@ -42,10 +43,13 @@ export function attach(handle: Handle): void {
   /** 按下那一刻的光角 —— 导出卡必须用它，而不是"导出时的光角" */
   let pressAngle = sunAngleAt(0);
 
-  document.getElementById('cta')?.addEventListener('click', () => {
+  // 盖章与重盖是同一个动作（同一段仪式走第二遍），共用一处逻辑，避免两处各自记光角而漂移。
+  const stamp = (): void => {
     pressAngle = sunAngleAt(lastT);
     ritual.start();
-  });
+  };
+  document.getElementById('cta')?.addEventListener('click', stamp);
+  document.getElementById('again')?.addEventListener('click', stamp);
 
   // 拖光：只在画布上拖（UI 上的拖动不挪光，这是输入边界的一部分）
   const canvas = document.getElementById('stage');
@@ -64,7 +68,7 @@ export function attach(handle: Handle): void {
   // 两件搬弄：键盘可达（不靠鼠标）
   window.addEventListener('keydown', (ev) => {
     if (ev.key === 'f') { foldOn = !foldOn; toggleFold(sheet, foldOn); }
-    if (ev.key === 's' && ritual.done()) { ritual.start(); }
+    if (ev.key === 's' && ritual.done()) stamp();
   });
 
   handle.onFrame((t, dt) => {
