@@ -46,7 +46,11 @@
 | `L2` | 生态（自走实体） | `boids` ⬜ · `bubbles` ✅ · `dandelion` ⬜ · `ascii-field` ✅ |
 | `L3` | 交互（输入驱动） | `blow-input` ⬜（v1 有 core，未改 PartV2） |
 | `L4` | 后处理（整场唯一） | `pixel-post` ✅（暗角 + 扫描线 + 动能颗粒，每帧 1 次 blit） |
-| `L5` | UI（文字 / 指引 / 调试） | ✅ **DOM 版**：文案单一来源 `shared/sites/copy.mjs`；`site-dom 80/80`（h1/hook/菜单/通道/注入计数/文案在纸内/CTA 可见可点） |
+| `L5` | UI（文字 / 指引 / 调试） | ✅ **DOM 版**：文案单一来源 `shared/sites/copy.mjs`；`site-dom 80/80`（h1/hook/菜单/通道/注入计数/文案在纸内/CTA 可见可点）；**屏幕上每一段文字都必须能在 COPY / UI 里逐字找到**（`site-build` E 段，117/117） |
+
+> **L5 的 z 序（`/license` 站在用，改层级前先读这段）**：`#stage`(auto) < `#sheet`/`#fold-flap`(z1) < `#sun`(z2) < `#cert`/`#seal`(z3) < `#stage-word`/`#play-hint`/`#save`(z4) < `#boot-error`(z5)。
+> 纸框与折角**必须在光层之下**：折角是要吃到同一束阴影的，放到光之上就会变成一块亮斑。
+> 折角与纸框同层时靠 DOM 顺序决定（`#fold-flap` 在 `#sheet` 之后 → 盖住纸角的 1px 边框）。
 
 > **通道字段补注**（架构师指出上表原先缺这三样）：`glBlend` = GL 层合成时的 `globalCompositeOperation`（白名单，见 `contract.ts`）；
 > `ctaChannel` = 站点 CTA 属于 `ui` 还是 `world-inject`（**四站合计只允许 `/hug` 一处 world-inject**，见 `site-dom`）；
@@ -163,13 +167,14 @@
 解药不是"请注意不要编文案"，而是**编了就构建失败**：
 
 ```
-site-build: FAIL 1/102
+site-build: FAIL 1/102   ← 当时口径 102 条；现在 117 条
   - copy.mjs license.hook = "A permit for a small, unreasonable thing."
     在 COPY-SITES.md 里找不到 —— 代码里的文案不能自己编，必须先改文档
 ```
 
 - 单一代码来源：`shared/sites/copy.mjs`（值逐字照抄文档）
-- 结构：`tests/site-build.mjs` 断言**每个值都能在 `COPY-SITES.md` 里逐字找到**
+- 结构：`tests/site-build.mjs` 断言**每个字符串字段**都能在 `COPY-SITES.md` 里逐字找到
+- **再加一段（E）**：把产物正文里的每一段文字抽出来，必须在 `COPY` / `UI` 里找得到 —— 上面那条只管"COPY 里的值有没有出处"，**管不了"没进 COPY 的手写串"**。`Save this card`（定稿是 `Save it`）和 `drag to move the light · f to fold the corner`（定稿里根本没有）就是这样活了一整轮的。
 - 将来适用于：**色值、时长、比例** —— 任何有"文档定稿"的字段都照这个形状做
 
 **两条前置规则，缺一条数字就只是噪声的形状**：
@@ -386,6 +391,27 @@ field-in-stage: FAIL 8/22
 
 四站均由 `shared/sites/build.mjs` 的 `STATIONS` 注册（`:32-103`），`npm run build:sites` 产出 `dist/<slug>/index.html`，`npm run serve` 绑 `127.0.0.1:8080`。
 
+#### 任务 4.1｜`/license` 的四件摆弄：为什么"看得见"要单独一把尺
+
+用户实测反馈过两次「只有文字，没有效果」。两次的根子都不是"没接线"，而是**变量变了但画面上没有可感变化**。逐件记下来，改这几处之前先读：
+
+**折角（`f`）**——三个坑，全踩过：
+1. **不许用 `#sheet{transform:rotate(var(--fold))}`**。`#sheet` 只是个空 div + 1px `inset` 边框，转它的实际效果是**一条 1px 斜线划过整张纸、穿过正文**，纸本身没动。看得见的那一面必须是 `#fold-flap`（128px 三角 = 纸背 + 折痕投影）。
+2. **`#fold-flap` 的 z-index 必须低于 `#sun`**（z1 对 z2）。放到光层之上，它就吃不到同一束阴影，在一张被压暗的纸上变成一块亮斑（读作"角落漏光"）。
+3. **必须半透明着色**。纸角的暗角是画布画的，刷不透明色等于把暗角抹掉 → 折角永远比周围亮。用 alpha 档位，让纸自己的明暗透上来。
+   配套：`#cert-seal-sub` 宽度只能到 86%——纸角那 128px 是折角的地盘，探进去会被盖掉半截。
+
+**拖光**——灵敏度和混合模式都要给够：
+- 第一版 `soft-light` + 两端 `.55` + `DRAG_RANGE=14`：满量程拖动的整纸像素差 **mean 3.85 ≈ 世界噪声 3.24**，肉眼分不出。
+- 现在 `multiply` 阴影带（白=不改变纸面、深棕=阴影，转角度=把影子的边界扫过纸面）+ `DRAG_RANGE=32` + `7px/°`：整纸 **mean 10.2、>8 的像素 45%**，噪声底 1.5。
+
+**尺（`tests/license-stay.mjs` 的 F 段）**——这是本轮真正的产出：
+- 先量**噪声底**（什么都不做连拍两帧），再比交互差异。不比字节：世界自己每帧都在动（纸纹），"变了"毫无意义。
+- 拖光看整纸 `mean` / `pctOver8`；折角只看纸角一块，**并要求纸的其余部分基本不动**——上一版那条划过正文的斜线，正是被这条抓出来的。
+- **截图必须 `scale:'css'`**：页面 dpr=2，默认截图是 2560×1440 设备像素，而 `getBoundingClientRect` 给 CSS 像素；不统一就一直在量**错误的那块区域**（折角曾因此永远读成噪声）。
+- 变异自检（每轮必做）：折角层 `opacity→0` 得 1.53 vs 噪声 1.48 → `FAIL 折角看不出`；光退回 `soft-light .55` 得 5.85 顶到下限 6 → `FAIL 拖光看不出`。恢复 → `PASS 17/17`。
+- 阈值是 `max(噪声×2.5, 绝对值下限)`：**必须有绝对下限**，否则某次噪声恰好为 0 时，一个几乎看不见的效果也能"通过"。
+
 ### 任务 5｜ASCII 通用零件（✅ 已实现，不再是"拆成两个零件"）
 `shared/parts/ascii-field/index.ts` 是**单一零件**，`variant: 'keys' | 'plain'`：
 - `keys`：字符 + 同几何的颜色键字符串 + `palette` 对象，GlyphAtlas 预烘；
@@ -448,8 +474,9 @@ npm run serve                               # 127.0.0.1:8080（只绑本机，�
 #         /license  ← **唯一走通全链的站**（L5 + 三段仪式 + 停留 + 导出）
 #         /hug /still /koi ← 壳与零件已通、**站内逻辑未写**（只有首屏与 Esc 菜单）
 #   ⚠️ 别让看的人以为四座都能演示：只有 /license 是完整的。
-npm run verify:sites                        # 102 断言
-npm run verify:dom                          # 70 断言：L5（DOM）的 h1/hook/菜单/通道/文案在纸内
+npm run verify:sites                        # 117 断言（含 E 段：屏幕文字必须在 COPY/UI 里）
+npm run verify:dom                          # 80 断言：L5（DOM）的 h1/hook/菜单/通道/文案在纸内/CTA 可见可点
+npm run verify:license                      # 51 断言：license-ritual 34 + license-stay 17（含像素尺）
 npm run verify:fingerprint                  # 7 断言：四站色相（抓"方向反了"）：零外链 / 单脚本 / 零件真在产物里 / 壳骨架齐全
 npm run shot                                # → dist/preview/shot-field.png
 node tests/lib/browser.mjs --shot dist/preview/room.html --out dist/preview/shot-room.png

@@ -1,8 +1,6 @@
 // 站内「停留」层：慢变量（光线角度）+ 拖光。**不产生任何结果。**
-// 光角由 `sunAngleAt(t)` 决定，屏幕与导出卡 import 同一个函数 —— 导出传 `sunAngleAt(t_press)`，
-// "图里的光 = 你按下去那一刻"才是真的；导出自己再算一遍角度会让这条承诺变假。
-// 四件摆弄都挂 `STAY` 开关，关掉后画面必须变（死 flag 由 tests/license-stay.mjs 抓）。
-// 四件摆弄的开关。**故意可变**：门要能逐项置 false 验「画面确实变了」；不可变会让死 flag 测不出来。
+// 光角由 `sunAngleAt(t)` 决定，屏幕与导出卡 import 同一个函数（导出传 `sunAngleAt(t_press)`）。
+// 拖光"看得出"的像素证据与踩过的坑见 `docs/HANDOFF.md` §任务 4。
 export const STAY: { drift: boolean; dragLight: boolean; restamp: boolean; fold: boolean } = {
   drift: true, dragLight: true, restamp: true, fold: true,
 };
@@ -20,8 +18,9 @@ export function sunAngleAt(t: number): number {
   return SUN_START + (clamped / STAY_SECONDS) * SUN_DRIFT;
 }
 
-const DRAG_RANGE = 32;   // 一次停留里最多把光挪这么多度，挪完不回弹（摆弄，不是动画）
-const DRAG_PX_PER_DEG = 7;   // 手感：拖 100px ≈ 14°，满量程约 224px
+// 满量程 32°、7px/°（拖 100px ≈ 14°）。14° 那版实测像素差 ≈ 世界噪声 —— 动了，看不出。
+const DRAG_RANGE = 32;
+const DRAG_PX_PER_DEG = 7;
 
 /**
  * 把慢变量写到 CSS 变量（DOM 只叠一层光，不重绘世界）。
