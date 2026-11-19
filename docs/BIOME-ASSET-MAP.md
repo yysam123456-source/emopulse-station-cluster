@@ -187,7 +187,7 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 | L3 交互 | —— | ✅ **仪式在站内 DOM**（`ritual.ts` / `stay.ts` / `fold.ts`），不是"纸本身响应指针"；与 `PRODUCT-FORM §1.1` 对齐 |
 | L4 后处理 | `pixel-post`（只开 grain + 极轻 vignette） | **现有** |
 
-✅ **现状：非 0**——`paper-ink` + `pixel-post` 两件零件之外，站内还有仪式 / 停留代码（`stay.ts` + `fold.ts`，wc -l 相加 ≤60 行）。施工前原文：新增工作量 = **0**，这是四个 biome 里最省的。晨光本身用 canvas 线性渐变 + `fbm` 镂空光斑就够，未引 `god-rays`。
+✅ **现状：非 0**——`paper-ink` + `pixel-post` 两件零件之外，站内还有仪式 / 停留代码（`stay.ts` 37 + `fold.ts` 20 = 57 行；该上限已于 2026-11-19 撤销，见 PRODUCT-FORM §0）。施工前原文：新增工作量 = **0**，这是四个 biome 里最省的。晨光本身用 canvas 线性渐变 + `fbm` 镂空光斑就够，未引 `god-rays`。
 
 ### ink `/koi-pond` — 2–3 件
 
