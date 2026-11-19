@@ -89,6 +89,31 @@ for (const slug of Object.keys(STATIONS)) {
     check(!html.includes('id="cta"'), `${slug}: 没配 CTA 但产物里有 #cta`);
   }
 
+  // E. **屏幕上出现的每一段文字都必须来自 COPY / UI** —— 模板里不许手写文案。
+  //    事故：`Save this card`（定稿是 `Save it`）和 `drag to move the light · f to fold the corner`
+  //    （定稿里根本没有这句）都是模板里的手写串，活了整整一轮，用户看到的是"代码自己编的话"。
+  //    上一条断言管不到它们：那条只校验 COPY 里的值能在文档里找到，**管不了没进 COPY 的字**。
+  {
+    const { COPY: C, UI } = await import('../shared/sites/copy.mjs');
+    const allowed = new Set();
+    for (const entry of Object.values(C)) {
+      for (const v of Object.values(entry)) if (typeof v === 'string' && v) allowed.add(v);
+    }
+    for (const v of [UI.menuTitle, UI.creditsValue, UI.privacy]) if (v) allowed.add(v);
+    for (const item of UI.items) { allowed.add(item.label); if (item.value) allowed.add(item.value); }
+    const body = markup.replace(/^[\s\S]*?<body[^>]*>/i, '');
+    const runs = [...body.matchAll(/>([^<>]+)</g)]
+      .map((m) => m[1].replace(/\s+/g, ' ').trim())
+      .filter((t) => t.length > 0);
+    // 动态值（编号/日期）与纯符号不算文案
+    const dynamic = /^(?:EMP-|No\.\s|20\d\d\.)/;
+    const stray = runs.filter((t) => !allowed.has(t) && !dynamic.test(t) && !/^[·—–\-|/]$/.test(t));
+    check(
+      stray.length === 0,
+      `${slug}: 模板里有手写文案（不在 COPY / UI 里）：${JSON.stringify(stray.slice(0, 6))}`,
+    );
+  }
+
   summary.push({ slug, bytes: built.bytes, parts: built.order.join(',') || '(none)', gl: built.hasGl });
 }
 
@@ -102,17 +127,15 @@ for (const slug of Object.keys(STATIONS)) {
   const doc = readFileSync(docPath, 'utf8');
   const { COPY } = await import('../shared/sites/copy.mjs');
   for (const [key, entry] of Object.entries(COPY)) {
-    for (const field of ['h1', 'hook']) {
-      const value = entry[field];
+    // ★ 必须遍历**每一个**字符串字段，不能只挑 h1/hook：
+    //   上一版只查这两个，于是 cardTitle / declaration / serialLabel / sealSub / saveLabel
+    //   全都没被这条门看过 —— 门是绿的，但"文档是唯一来源"其实只管着两个字段。
+    for (const [field, value] of Object.entries(entry)) {
       if (typeof value !== 'string' || value.length === 0) continue;
       check(
         doc.includes(value),
         `copy.mjs ${key}.${field} = ${JSON.stringify(value)} 在 COPY-SITES.md 里找不到 —— 代码里的文案不能自己编，必须先改文档`,
       );
-    }
-    // cta 只在真的挂上节点时要求（未实现交互的站故意留 null）
-    if (typeof entry.cta === 'string' && entry.cta.length > 0) {
-      check(doc.includes(entry.cta), `copy.mjs ${key}.cta = ${JSON.stringify(entry.cta)} 在 COPY-SITES.md 里找不到`);
     }
   }
 }

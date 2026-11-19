@@ -41,6 +41,8 @@ export const STATIONS = Object.freeze({
     /** 站内专用 DOM：纸框（可折角）/ 光层（--sun-angle）/ 阶段词 / 章 / 保存 */
     extra: [
       '<div id="sheet" aria-hidden="true"></div>',
+      // 折角的那一面：纸角翻起来露出的背面（三角形 + 折痕阴影）。默认 opacity:0。
+      '<div id="fold-flap" aria-hidden="true"></div>',
       '<div id="sun" aria-hidden="true"></div>',
       '<div id="stage-word" role="status" data-stage="idle" hidden></div>',
       // 许可证正文：定稿要求屏幕上的纸就是一张许可证，而不只是一张有标题的空纸。
@@ -60,14 +62,16 @@ export const STATIONS = Object.freeze({
       '<div id="cert-date"></div>',
       '<div id="cert-seal-sub" hidden>__CERT_SEAL_SUB__</div>',
       '</div>',
-      '<div id="seal" aria-hidden="true">APPROVED</div>',
+      '<div id="seal" aria-hidden="true">__SEAL_TEXT__</div>',
       // 纸角的二级提示（COPY-SITES §3 定稿「Stamp again」位置）：盖章完成后才出现，
       // 低对比、不做成按钮外观 —— 它是"这张桌子是活的"的暗示，不是功能菜单。
+      // ⚠️ 动作词（__PLAY_NOTE__）在 COPY 里，不许在这里现编：上一版这行是我手写编的，
+      //    它宣传的两个动作当时几乎没有可见效果 —— "文字在，效果不在"。
       '<div id="play-hint" hidden>',
-      '<button id="again" type="button" data-channel="ui">Stamp again</button>',
-      '<span class="play-note">drag to move the light &nbsp;·&nbsp; f to fold the corner</span>',
+      '<button id="again" type="button" data-channel="ui">__AGAIN_LABEL__</button>',
+      '<span class="play-note">__PLAY_NOTE__</span>',
       '</div>',
-      '<button id="save" type="button" data-channel="ui" hidden>Save this card</button>',
+      '<button id="save" type="button" data-channel="ui" hidden>__SAVE_LABEL__</button>',
     ].join(''),
     biome: 'room',
     seed: 20261118,
@@ -183,13 +187,39 @@ const STYLE = [
   // ── /license 的站内叠层（纸框 / 光 / 阶段词 / 章 / 保存）──
   // 它们都是 DOM 叠在画布之上：L5 走 DOM，所以这些不占 `costMs`、不需要每帧重绘。
   'body[data-sheet=on] #sheet{position:fixed;left:var(--sheet-x);top:var(--sheet-y);',
-  'width:var(--sheet-w);height:var(--sheet-h);z-index:2;pointer-events:none;',
-  'transform:rotate(var(--fold,0deg));transform-origin:100% 100%;',
+  'width:var(--sheet-w);height:var(--sheet-h);z-index:1;pointer-events:none;',
   'box-shadow:inset 0 0 0 1px rgba(120,100,80,.25)}',
+  // ★ 折角**不许**用 transform 转 #sheet。上一版就是 `transform:rotate(var(--fold))`，
+  //   而 #sheet 只是一个空 div + 1px inset 边框，于是"折角"的实际效果是
+  //   **一条 1px 斜线划过整张纸**（穿过正文），纸本身没动 —— 既不像折角，还像渲染故障。
+  //   折角必须是一个**看得见的面**：纸角被翻起来的背面 + 折痕阴影。
+  //   ★ 对比度是这件的全部难点：第一版用了 #f8f3e8→#b6a687（都是浅纸色），
+  //   实测纸角差异 mean 3.33 ≈ 噪声 3.43 —— 三角形**画了，但看不出来**。
+  //   纸的背面必须比正面明显更深，折痕必须有影，否则读者只会觉得"角落有点脏"。
+  '#fold-flap{position:fixed;z-index:1;pointer-events:none;',
+  'left:calc(var(--sheet-x) + var(--sheet-w) - 128px);top:calc(var(--sheet-y) + var(--sheet-h) - 128px);',
+  'width:128px;height:128px;opacity:0;transition:opacity .22s ease;',
+  //   方向要物理对：折起来的那一面，**贴折痕处最暗**（离开桌面、被折痕挡住光），
+  //   翘起的尖端略暗一点（纸往下卷）—— 中间才是同一批纸的背面本色。
+  //   上一版把尖端做成 #fbf6ea（比被阴影压暗的纸面亮得多），读起来像"角落漏光"。
+  // ★ 必须**半透明着色**，不能刷不透明色。纸是画布画的，四角被像素后处理的暗角压着；
+  //   不透明色等于把暗角抹掉 —— 于是折角永远比周围亮，读作"角落漏光"（实测了三版）。
+  //   半透明色让纸自己的明暗透上来，折角才和纸是一体的。
+  'background:linear-gradient(135deg,rgba(64,44,22,.78) 0%,rgba(122,98,62,.50) 6%,',
+  'rgba(255,253,248,.66) 21%,rgba(252,245,229,.56) 52%,rgba(122,98,62,.42) 100%);',
+  'clip-path:polygon(100% 0,100% 100%,0 100%);',
+  'filter:drop-shadow(-3px -3px 4px rgba(40,26,10,.62)) drop-shadow(-11px -11px 17px rgba(40,26,10,.30))}',
+  // ★ z-index 是这一件的关键：折角必须**排在光层之下**（z1 < 光的 z2），
+  //   这样同一束阴影也压在它身上，它的明暗才跟纸一致；放在光之上就会变成一块亮斑。
+  'body[data-fold=on] #fold-flap{opacity:1}',
   'body[data-sheet=on] #sun{position:fixed;left:var(--sheet-x);top:var(--sheet-y);',
   'width:var(--sheet-w);height:var(--sheet-h);z-index:2;pointer-events:none;',
-  'mix-blend-mode:soft-light;opacity:.9;',
-  'background:linear-gradient(var(--sun-angle,-26deg),rgba(255,248,236,.55),rgba(255,255,255,0) 45%,rgba(26,18,10,.55))}',
+  // 光要**看得见**才叫"拖光"。第一版：soft-light + 两端 0.55 不透明度，
+  // 实测满量程拖动的整纸像素差 mean 3.85 ≈ 世界噪声 3.24 —— 拖了，看不见。
+  // 第二版改成 **multiply 阴影带**（物理上"光被挡住的地方变暗"就是这么来的）：
+  // 白 = 不改变纸面，深棕 = 阴影；转角度就是把这道影子的边界扫过纸面。
+  'mix-blend-mode:multiply;',
+  'background:linear-gradient(var(--sun-angle,-26deg),#fff 0%,#fff 44%,rgba(96,74,50,.48) 100%)}',
   // 许可证正文（定稿 COPY-SITES §1）：深墨、等宽/衬线混排，落在纸内，避开标题/hook/章/提示。
   '#cert{position:fixed;z-index:3;pointer-events:none;',
   'left:calc(var(--sheet-x) + var(--sheet-w)*0.075);width:calc(var(--sheet-w)*0.85);color:rgba(52,42,32,.86)}',
@@ -210,8 +240,10 @@ const STYLE = [
   '#cert-date{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.65);',
   'font:400 13px/1.4 ui-monospace,Menlo,monospace;color:rgba(74,59,44,.72)}',
   // 章下副行贴着红章（章在纸右下），不能放在纸底中央 —— 那里有 hook、纸角提示、Save，会叠成一团。
+  // 宽度只到 86%：纸角那 128px 是折角的地盘（折起来会盖住纸角），
+  // 章下副行探进去就会被盖掉半截 —— 折角后截图上确实发生了。
   '#cert-seal-sub{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.855);',
-  'left:calc(var(--sheet-w)*0.60);width:calc(var(--sheet-w)*0.36);text-align:center;',
+  'left:calc(var(--sheet-w)*0.58);width:calc(var(--sheet-w)*0.28);text-align:center;',
   'font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(163,52,44,.72)}',
   // 只有章下副行跟着章走；编号/日期是纸自带的，不随 approved 变化。
   '#cert-seal-sub[hidden]{display:none}',
@@ -270,7 +302,9 @@ const TEMPLATE = [
   '<div class="menu-privacy">__SITE_PRIVACY__</div>',
   '</div>',
   '__SITE_CTA__',
-  '<div id="dbg" role="status">state booting</div>',
+  // 调试条内容由使用者写入；这里**不放占位句** —— `state booting` 从来没被任何代码更新过，
+  // 它是一句只会在 ?debug 下出现、且永远显示"正在启动"的假文案（被 site-build 的 E 段抓出来）。
+  '<div id="dbg" role="status"></div>',
   '<div id="boot-error" hidden></div>',
   '<script>__SITE_BOOT__</script>',
   '</body>',
@@ -418,6 +452,10 @@ export async function buildSite(options) {
     .replace('__CERT_DECLARATION__', () => escapeHtml(COPY.license.declaration))
     .replace('__CERT_SERIAL_LABEL__', () => escapeHtml(COPY.license.serialLabel))
     .replace('__CERT_SEAL_SUB__', () => escapeHtml(COPY.license.sealSub))
+    .replace('__PLAY_NOTE__', () => escapeHtml(COPY.license.playNote))
+    .replace('__SAVE_LABEL__', () => escapeHtml(COPY.license.saveLabel))
+    .replace('__SEAL_TEXT__', () => escapeHtml(COPY.license.sealText))
+    .replace('__AGAIN_LABEL__', () => escapeHtml(COPY.license.againLabel))
     .replace('__SITE_BOOT__', () => script);
 
   let outPath = null;

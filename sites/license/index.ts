@@ -25,7 +25,6 @@ export function attach(handle: Handle): void {
   const word = document.getElementById('stage-word');
   const seal = document.getElementById('seal');
   const save = document.getElementById('save');
-  const sheet = document.getElementById('sheet');
   const playHint = document.getElementById('play-hint');
   const reduced = typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -79,8 +78,11 @@ export function attach(handle: Handle): void {
 
   // 两件搬弄：键盘可达（不靠鼠标）
   window.addEventListener('keydown', (ev) => {
-    if (ev.key === 'f') { foldOn = !foldOn; toggleFold(sheet, foldOn); }
-    if (ev.key === 's' && ritual.done()) stamp();
+    // 带修饰键的组合键不是我们的事（⌘F / Ctrl+F 是浏览器查找，不许被折角抢走）
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    const key = ev.key.toLowerCase();
+    if (key === 'f') { foldOn = !foldOn; toggleFold(document.body, foldOn); }
+    if (key === 's' && ritual.done()) stamp();
   });
 
   handle.onFrame((t, dt) => {

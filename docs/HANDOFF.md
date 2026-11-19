@@ -379,7 +379,7 @@ field-in-stage: FAIL 8/22
 ### 任务 4｜四座样板站（✅ 壳 + 产物已接；站内逻辑部分未写）
 | 站 | 状态 | 实际零件栈 / 站内 |
 |---|---|---|
-| `/license` | ✅ **全链完成** | `paper-ink` + `pixel-post`；`ritual.ts` 三段出字 + `stay.ts`/`fold.ts` 四开关 + 1410×1000 导出；屏上纸=许可证（页眉 / 印刷线 / 宣言 / 编号 / 日期 / 红章 / 章下副行），`license-ritual 34/34`、`license-stay 13/13`、`site-dom 80/80` |
+| `/license` | ✅ **全链完成** | `paper-ink` + `pixel-post`；`ritual.ts` 三段出字 + `stay.ts`/`fold.ts` 四开关 + 1410×1000 导出；屏上纸=许可证（页眉 / 印刷线 / 宣言 / 编号 / 日期 / 红章 / 章下副行），`license-ritual 34/34`、`license-stay 17/17`（含**像素尺**：拖光 7×噪声、折角 6×噪声且纸的其余部分 0 变化）、`site-dom 80/80` |
 | `/hug` | ⬜ 站内未写 | 壳 + `dist/hug/index.html` 已接；栈 `field-ground` + `pixel-post`；`sites/hug/` 只有 v1 的 bridge/glue/state，**无新架构 ritual/stay**；且依赖任务 1 的 dandelion/blow-input/boids |
 | `/still` | ⬜ 站内未写 | 壳已接；栈 `voxel-world`(L1) + `bubbles`(L2)；**`tide-medium` 已实现但尚未装进 `/still` 栈**，L4 也未装 —— PM 判过「L0 合格 ≠ 站合格」，装 L2/L4 后必须整站复判且不能重新长出圆盘 |
 | `/koi-pond` | ⬜ 站内未写 | 壳已接；栈 `paper-ink` + `ascii-field` + `pixel-post`；K1/K1b 形态判据已绿；**墨扩散（L3）仍无** |

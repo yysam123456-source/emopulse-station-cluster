@@ -1,6 +1,6 @@
 # MANUAL-QA — 四站手测协议
 
-> 自动化现已覆盖 6+ 门：`paper-visual` 10 · `field-visual` 6 · `tide-visual` 2 · `site-fingerprint` 7 · `site-dom` 80 · `license-ritual` 34 · `license-stay` 13 · `preview-build` 738 · `input` 23 · `clock` 5 · `site-build` 102。**本文仍负责它们测不到的"这站能不能给人看"**——判据要可执行、可复现、可对照截图，不靠形容词。
+> 自动化现已覆盖 6+ 门：`paper-visual` 10 · `field-visual` 6 · `tide-visual` 2 · `site-fingerprint` 7 · `site-dom` 80 · `license-ritual` 34 · `license-stay` 17 · `preview-build` 738 · `input` 23 · `clock` 5 · `site-build` 117。**本文仍负责它们测不到的"这站能不能给人看"**——判据要可执行、可复现、可对照截图，不靠形容词。
 >
 > **总时长：四站 ≤ 40 分钟**（实测预算：前置 2 分钟 + 每站 3 分钟 + 记录 6 分钟 ≈ 20 分钟，留一倍余量）。
 >

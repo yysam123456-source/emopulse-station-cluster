@@ -20,7 +20,8 @@ export function sunAngleAt(t: number): number {
   return SUN_START + (clamped / STAY_SECONDS) * SUN_DRIFT;
 }
 
-const DRAG_RANGE = 14;   // 一次停留里最多把光挪这么多度，挪完不回弹（摆弄，不是动画）
+const DRAG_RANGE = 32;   // 一次停留里最多把光挪这么多度，挪完不回弹（摆弄，不是动画）
+const DRAG_PX_PER_DEG = 7;   // 手感：拖 100px ≈ 14°，满量程约 224px
 
 /**
  * 把慢变量写到 CSS 变量（DOM 只叠一层光，不重绘世界）。
@@ -30,7 +31,7 @@ export function createStay(root: HTMLElement): { tick: (t: number, dragDx: numbe
   let dragOffset = 0;
   return {
     tick(t: number, dragDx: number): void {
-      if (STAY.dragLight) dragOffset = Math.max(-DRAG_RANGE, Math.min(DRAG_RANGE, dragDx / 24));
+      if (STAY.dragLight) dragOffset = Math.max(-DRAG_RANGE, Math.min(DRAG_RANGE, dragDx / DRAG_PX_PER_DEG));
       root.style.setProperty('--sun-angle', `${((STAY.drift ? sunAngleAt(t) : SUN_START) + dragOffset).toFixed(2)}deg`);
     },
   };

@@ -28,6 +28,17 @@ export const COPY = Object.freeze({
     serialLabel: 'No.',
     declaration: 'This permit entitles the holder to rest, to stop explaining, and to take up space.',
     sealSub: 'NO COPY KEPT.',
+    /** 纸角二级提示里的两个动作词（COPY-SITES §3「审批完成后（低对比，二级）」）。
+     *  ⚠️ 这两个动作必须**真的看得见**才配写在这儿：`tests/license-stay.mjs` 的像素段
+     *  会量"拖光 / 折角"各自改变了多少像素，低于世界自身噪声就算失败。 */
+    playNote: 'drag to move the light · f to fold the corner',
+    /** 终态唯一按钮（COPY-SITES §3:130「审批完成后的唯一按钮 | Save it」）。
+     *  此前模板里手写着 `Save this card`，与定稿不一致 —— 属于"代码自己编文案"的同一个洞。 */
+    saveLabel: 'Save it',
+    /** 章面文字（COPY-SITES §3:127）。此前写在模板里，属于"屏幕上的字不都来自 COPY"。 */
+    sealText: 'APPROVED',
+    /** 纸角二级按钮（COPY-SITES §3:131）。同上。 */
+    againLabel: 'Stamp again',
   },
   hug: {
     h1: 'Hug',

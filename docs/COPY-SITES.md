@@ -126,9 +126,10 @@ Microphone on. Nothing is recorded. Wind only.
 |---|---|---|
 | 盖章落下（章面） | `APPROVED` | 纸面，朱砂 |
 | 章下副行（小字） | `NO COPY KEPT.` | 纸面，等宽 |
-| 审批完成、编号出现 | `No.` + `EMP-YYYYMMDD-NNN` | 纸面，等宽，**可选中** |
+| 开票即印（盖章前后都在） | `No.` + `EMP-YYYYMMDD-NNN` | 纸面，等宽，**可选中**。编号是这张纸一出生就有的，不是盖章授予的 |
 | 审批完成后的唯一按钮 | `Save it` | 纸下方 |
 | 审批完成后（低对比，二级） | `Stamp again` | 纸角 |
+| 审批完成后（低对比，二级） | `drag to move the light · f to fold the corner` | 纸角，`Stamp again` 下一行 |
 | 保存完成 | `Saved.` | 按钮原位，2s 后回退为 `Save it` |
 
 > 三段状态机（`verifying` / `stamping` / `approved`）**不上首屏**。若要显示，只在 `About` 里作为一句说明，不进画面。
