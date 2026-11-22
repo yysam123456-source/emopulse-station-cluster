@@ -153,7 +153,10 @@ try {
     await waitForPreview(page, { frames: 6 });
     await page.waitForFunction(() => Boolean(globalThis.__stay), null, { timeout: 15000 });
     await setFlag('drift', false);   // 冻结慢漂：否则"光自己在动"会被当成"拖光有效"
-    await page.waitForTimeout(900);
+    // ★ 基线必须等 `#veil` 的 1.4s 启动遮罩淡出**结束**。
+    //   之前只等 900ms：n1 还在遮罩半透明里，n2 已接近透明，整页 mean 7.6 的"噪声"
+    //   其实是遮罩在退场，把拖光/折角的真实差异淹掉了。
+    await page.waitForTimeout(1800);
 
     const px = await page.evaluate(() => {
       const r = document.getElementById('sheet').getBoundingClientRect();

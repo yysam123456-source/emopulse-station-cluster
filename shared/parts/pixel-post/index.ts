@@ -44,8 +44,14 @@ const DEFAULTS: Required<PixelPostOptions> = {
   vignette: 0.08,
 };
 
-/** 颗粒换相用的 tile 张数（24Hz、8 张 → 3 秒一循环，肉眼辨不出重复）。 */
-const GRAIN_PHASES = 8;
+/**
+ * 颗粒换相用的整屏覆盖图张数。
+ *
+ * 旧值 8：1440p 下 8×14.7MB ≈ 118MB 显存/内存，只为了 24Hz 的相位抖动。
+ * 抖动的目的是破掉「静态脏点」，2 张（24Hz、0.083s 换相）已经足够；
+ * 真正的胶片颗粒感来自 tile 的噪声分布，不是相位数。
+ */
+const GRAIN_PHASES = 2;
 
 /** 颗粒换相频率（Hz）。与"相位 = `floor(t*Hz)`"那条时钟规则一致。 */
 const GRAIN_HZ = 24;

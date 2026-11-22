@@ -1,14 +1,19 @@
 # 交接书 — 情绪价值单页站 · 零件装配体系
 
-> 写于 2026-11-18 17:10。读者是**接手的另一个 agent**。请先读完本文再动任何文件，本文里每一条「不可违反」都是有人在上面栽过的。
+> 写于 2026-11-18 17:10。读者是**接手的另一个 agent**。请先读完 `DECISIONS.md` 与本文再动任何文件，本文里每一条「不可违反」都是有人在上面栽过的。
+>
+> **2026-11-20 koi 完整移植补注（优先于 2026-11-19 补注）**：`/koi` 不再是「六个 JS + 只 ink」。`shared/parts-library/koi/` 已归档上游 **26 项**并逐文件 SHA 对齐；`shared/parts/koi-pond/index.ts` 接回 real / paint / ink 三条渲染路径、三种相机、三种触摸、三种池底、三档雨、程序化水声与音乐。栈改为 `paper-ink + koi-pond`（不再叠 `pixel-post`），预算 **12ms**。Esc 菜单新增 Look / Touch / Camera / Water / Weather / Music；`?style=` 等深链接已由 `verify:site` 覆盖。`verify:site` 现为 **51/51**；`verify:preview` 现为 **599/599**（下文的 617/738 等旧数不作口径）。`still` 的 CTA 帧差改为整屏截图比较，因为体素世界在 `#gl`（z-index:-1），只读 `#stage` 会把 Sit 判成 0。
+>
+> **2026-11-19 A1 补注（优先于下文旧状态）**：四站已全部接回，且 `/koi` 用真 three.js 锦鲤池；`world` 通道与单 GL 画布已落地；`voxel-world.costMs` 已从 0.05 改为 **9**（诚实的申报）；`verify:preview` 现在是 **617/617**（不是下文的 738）；新增 `/hug` 蒲公英/鸟/日、`/still` Sit/下沉、`/koi` 墨鲤、`/license` 裁主画布导出。**下文 §0/§2.1/§3.1/§3.2/§6 的旧数字与「未接」描述已被 `DECISIONS.md` 取代；有冲突以 `DECISIONS.md` + 代码为准。**
 
 ---
 
 ## 0. 一句话现状
 
-**装配运行时已完工并验真；7 个正式零件已实现；四站壳与产物已接，`/license` 走通全链。**
-仍缺：`boids` / `dandelion` / `blow-input` 三个零件；`/hug` `/still` `/koi` 的**站内逻辑未写**；`/praise` 是**旧架构冻结存量**——代码完整、typecheck 通过、零外链，但**未启用、不进构建**。
-（2026-11-19 对齐后的真实现状；旧句"零件只到 2/6、四站一座都没接"已作废。）
+**装配运行时已完工并验真；10 个正式零件已注册；四站全部接回并走通首屏；`/license` 走通全链，`/hug`/`/still`/`/koi` 各有真世界零件。**
+已落地：`boids` / `dandelion` / `sun` / `still-sink` / `koi-pond` 五个新零件；`/hug` 有蒲公英/鸟/日与分享链接；`/still` 有 Sit 与下沉镜头；`/koi` 是三风格完整锦鲤池（ink / paint / real，11 条鱼）；`/license` 导出裁主画布纸矩形。
+仍缺：`blow-input` 的原始算法没有进产物（Wind 已接 `shared/sites/mic.ts`：只读响度/分频 → `stage.setAudio` → `dandelion` 风强，不触发释放）；`room-at-dawn`/`grand-atelier` 仍是 D0/缺模块，**故意不接**；`/praise` 是旧架构冻结存量，不进构建。
+（2026-11-19 A1 后的真实现状；旧句"零件只到 2/6、四站一座都没接"已作废。）
 
 ---
 
@@ -42,9 +47,9 @@
 | 层 | 语义 | 谁在这里 |
 |---|---|---|
 | `L0` | 底材（纸 / 水 / 草 / 雾） | `field-ground` ✅ · `paper-ink` ✅ · 水底材 `tide-medium` ✅ |
-| `L1` | 世界（3D） | `voxel-world` ✅（`channel: 'gl'`，整场唯一；`glBlend` 走白名单） |
-| `L2` | 生态（自走实体） | `boids` ⬜ · `bubbles` ✅ · `dandelion` ⬜ · `ascii-field` ✅ |
-| `L3` | 交互（输入驱动） | `blow-input` ⬜（v1 有 core，未改 PartV2） |
+| `L1` | 世界（3D） | `voxel-world` ✅（`channel: 'world'`/`gl`，整场唯一 GL 画布）· `koi-pond` ✅（`world` + `space:'subject'`，只画纸内） |
+| `L2` | 生态（自走实体） | `boids` ✅ · `bubbles` ✅ · `dandelion` ✅ · `sun` ✅（L3 screen） · `ascii-field` ✅（legacy） |
+| `L3` | 交互 / 氛围（输入驱动） | `still-sink` ✅（240s 沉水）· `blow-input` ⬜（v1 有 core，未接站点） |
 | `L4` | 后处理（整场唯一） | `pixel-post` ✅（暗角 + 扫描线 + 动能颗粒，每帧 1 次 blit） |
 | `L5` | UI（文字 / 指引 / 调试） | ✅ **DOM 版**：文案单一来源 `shared/sites/copy.mjs`；`site-dom 80/80`（h1/hook/菜单/通道/注入计数/文案在纸内/CTA 可见可点）；**屏幕上每一段文字都必须能在 COPY / UI 里逐字找到**（`site-build` E 段，117/117） |
 
@@ -271,7 +276,7 @@ field-in-stage: FAIL 8/22
 
 ## 3. 已完成（含验证证据）
 
-### 3.1 装配运行时 `shared/stage/` — 1101 行
+### 3.1 装配运行时 `shared/stage/` — 约 1.5k 行（2026-11-19 A1）
 
 | 文件 | 内容 |
 |---|---|
@@ -298,7 +303,7 @@ field-in-stage: FAIL 8/22
 | 零件 | 层 | 行数 | 状态 |
 |---|---|---|---|
 | `shared/parts/field-ground/` | L0 | 343 | 黄昏草甸：天光 + 雾带 + 三层丘陵视差 + 520 根按风摆动的草。`costMs 3.4`（**估算**，见下） |
-| `shared/parts/voxel-world/` | L1 `gl` | 265 + `engine.js` 2324 | `shared/core` 体素海洋世界包成零件，20 条具名补丁，基线零字节改动 |
+| `shared/parts/voxel-world/` | L1 `world` | 265 + `engine.js` 2324 | `shared/core` 体素海洋世界包成零件，20 条具名补丁，基线零字节改动 |
 | `shared/parts/paper-ink/` | L0 | 465 | **一张纸**（不是底纹）：台面 + 投影 + 纸面场 + 方向光 + 双线框，全烘在离屏，每帧 1 次 blit。**不平铺**（整张一次生成，无周期）；**暗角不在这里**（归 L4）。`costMs 1.3`（估算；真浏览器 JS 侧 0.00ms，成本全在填充）。`tests/paper-visual.mjs` 10 条断言 |
 | `shared/parts/pixel-post/` | L4 | 330 | **只走快路径**：烘一张覆盖图（暗角 + 扫描线 + 动能颗粒），每帧 1 次带 alpha 的 blit。`costMs 1.85`（估算；带扫描线 2.21）。**无 `getImageData`；仅 `bakeGrainTile` 在离屏 tile 上一次性 `putImageData`，不写主画布，每帧为 0** —— 删掉了 dither 与 blockPx，`expendable: true` |
 
@@ -312,7 +317,7 @@ field-in-stage: FAIL 8/22
 > ③ 「四角比中心 ≤8%」有方向光后**必然失败** → 改成**先减光平面再看残差角/中比**（实测 0.992）。
 > 但 ② 我实现时**又漏了去趋势**（方向光的斜坡在任何 lag 上都相关 → 首次量出 0.517），补 40px 高通后才到 0.060。**同一个坑认了两次。**
 
-**组合都实测过**：`node tests/parts-composition.mjs` → **22/22 PASS**（单件装配 / 与 L5 叠加的层序 / 无离屏能力时的降级路径）；`node tests/preview-build.mjs` → **738/738**（逐 preset 的零外链 / 占位符 / 零件真在产物里 / Node 装配冒烟 / **产物脚本在假 DOM 里真跑 3 帧**）。
+**组合都实测过**：`node tests/parts-composition.mjs` → **22/22 PASS**（单件装配 / 与 L5 叠加的层序 / 无离屏能力时的降级路径）；`node tests/preview-build.mjs` → **617/617**（逐 preset 的零外链 / 占位符 / 零件真在产物里 / Node 装配冒烟 / **产物脚本在假 DOM 里真跑 3 帧**）。
 
 **voxel-world 是真的画出来了**，不是「能 import」：`docs/evidence/voxel-proof.png` 是同一次 headless Edge + CDP 运行的截图，`state: ready`，海床/海藻/鱼群/光柱齐全，上面叠着 `lighter` 混合的 2D 光点 —— 即「L1 GL 层 + L2 canvas2d 层复合」跑通的证据。
 
@@ -325,7 +330,7 @@ field-in-stage: FAIL 8/22
 **`costMs` 的口径必须看清**（这是本轮最容易自欺的一处）：
 
 - `field-ground` 的 3.4 ms 是**按填充率常数估的**（`0.35 ms/Mpx` 不透明 blit、`0.30` 实色填充、`0.8 ms/千段` 描边），不是浏览器实测。Node 里没有 canvas 实现，假 ctx 测出来是 **0.004 ms**，那是个陷阱 —— 它只测 JS 指令发射，不含 GPU 填充，而本件 99% 的成本在填充。
-- `voxel-world` 的 0.05 ms 是 SwiftShader 软件后端下的 CPU 提交耗时，**不能外推到真机**。
+- `voxel-world` 的 **9 ms 是 2026-11-19 A1 修正后的申报值**（旧 0.05 ms 是 SwiftShader 软件后端下的 CPU 提交耗时，**不能外推到真机**；实测 44ms/帧的旧账见 `REVIEW-2026-11-19`）。
 - **上站后必须用 `performance.now()` 在真实浏览器采一次替换掉。** `shared/parts/*/bench.mjs` 会打印指令计数与估算对账，那两项是可核对的。
 
 ### 3.3 两份能直接用的算法内核（上一轮的遗产，别删）
@@ -358,21 +363,24 @@ field-in-stage: FAIL 8/22
 
 ## 4. 缺口（按依赖顺序）—— 2026-11-19 对齐后的真实状态
 
-> 旧标题"这就是你的 TODO"已作废：下面多数项**已经交付**，只有明确标 ⬜ 的才是缺口。
+> **2026-11-19 A1 历史注记**：本节是 11-18 的缺口清单，**已不作为施工依据**。A1 已交付
+> `dandelion`/`boids`/`sun`/`still-sink`/`koi-pond`、四站站内接线、`world` 通道与 `/license` 裁图导出；
+> 仍缺的只有 `blow-input` 的原始算法（Wind 已接 `mic.ts`）和 D0 资产的主动不接。下面的 ⬜ 是历史，
+> 不是当前待办；现状以 `DECISIONS.md` + 代码 + `npm run verify:site` 为准。
 
-### 任务 1｜把 dandelion / blow-input 改成 PartV2（⬜ **确实未做**）
+### 任务 1｜把 dandelion / blow-input 改成 PartV2（历史：dandelion ✅；blow-input 算法未接）
 - 新建 `shared/parts/dandelion/`：复用 `shared/parts-library/dandelion/core/meadow.ts` 的全部数学 + `sites/hug/parts/dandelion.ts` 的绘制层（LOD 分档 44/23/14/5/2 段、8 档透明度分桶）。`layer: 'L2'`，`blend: 'source-over'`。
 - 新建 `shared/parts/blow-input/`：**不要**把麦克风塞进零件。`WorldFrame.audio` 是**stage 级输入**（和 pointer 同级），由 `stage.setAudio({level, bands})` 注入，麦克风采集是零件之外的一个小服务。
 - 机器证据：`shared/parts/{dandelion,blow-input}/` 均不存在；`verify:reuse` 尾行报两者 `ported[].params 全空 → 死参数探针无可测面`，`Mode B ⏳ 无目标`。
 
-### 任务 2｜四个真零件（✅ 已交付三个，⬜ 仅余 boids）
+### 任务 2｜四个真零件（✅ 已交付四个；boids 也已落地）
 | id | 状态 | 证据 |
 |---|---|---|
 | `paper-ink` | ✅ | L0 一张纸（台面 + 投影 + 纸面场 + 方向光 + 双线框），无平铺、暗角归 L4；`paper-visual 10/10` |
 | `pixel-post` | ✅ | L4 只走快路径（暗角 + 扫描线 + 动能颗粒），每帧 1 次 blit；无 `getImageData`；bench 六条断言 |
 | `bubbles` | ✅ | L2 70 个气泡 + 第二个实心圆高光，`screen` 混合；bench PASS |
 | `tide-medium` | ✅ | L0 潮：上亮下暗连续梯度 + 雾下厚 + 微粒，**无圆盘**（`glow:'none'`）；`tide-visual 2/2` |
-| `boids` | ⬜ | `shared/parts/boids/` 不存在；全仓只命中 `preview/build.mjs:97` 的一句"还没做"注释 |
+| `boids` | ✅ | `shared/parts/boids/`：60 只（low 26）V 形两笔，flocking + 指针排斥 + `cue('release')` |
 
 已交付四件均满足：`costMs` bench 对账、`setLod('low')` 真减量、`draw`/`update` 零每帧分配、`dispose` 幂等、不碰 core、零外部依赖、`reducedMotion` 降速、不许 `Math.random` / `addEventListener`。
 **boids 的旧口径仍有效**（将来做时照这个来）：源 `animata/background/boids-ecosystem.tsx`（7,672 B），`count=120` `PERCEPTION=36` `MAX_SPEED=1.8`，分离半径 `18` 权重 `0.04/0.0006/0.06`；原文无 dt（px/帧），只改积分 `x += vx*dt*60`，**力不要乘 dt**；原文每帧铺 87% 不透明底做拖尾 —— **绝对禁止**，改成内部离屏 `destination-out` 衰减后 `drawImage`。
@@ -385,9 +393,9 @@ field-in-stage: FAIL 8/22
 | 站 | 状态 | 实际零件栈 / 站内 |
 |---|---|---|
 | `/license` | ✅ **全链完成** | `paper-ink` + `pixel-post`；`ritual.ts` 三段出字 + `stay.ts`/`fold.ts` 四开关 + 1410×1000 导出；屏上纸=许可证（页眉 / 印刷线 / 宣言 / 编号 / 日期 / 红章 / 章下副行），`license-ritual 34/34`、`license-stay 17/17`（含**像素尺**：拖光 7×噪声、折角 6×噪声且纸的其余部分 0 变化）、`site-dom 80/80` |
-| `/hug` | ⬜ 站内未写 | 壳 + `dist/hug/index.html` 已接；栈 `field-ground` + `pixel-post`；`sites/hug/` 只有 v1 的 bridge/glue/state，**无新架构 ritual/stay**；且依赖任务 1 的 dandelion/blow-input/boids |
-| `/still` | ⬜ 站内未写 | 壳已接；栈 `voxel-world`(L1) + `bubbles`(L2)；**`tide-medium` 已实现但尚未装进 `/still` 栈**，L4 也未装 —— PM 判过「L0 合格 ≠ 站合格」，装 L2/L4 后必须整站复判且不能重新长出圆盘 |
-| `/koi-pond` | ⬜ 站内未写 | 壳已接；栈 `paper-ink` + `ascii-field` + `pixel-post`；K1/K1b 形态判据已绿；**墨扩散（L3）仍无** |
+| `/hug` | ✅ 全链 | 栈 `field-ground + dandelion + boids + sun + pixel-post`；`attach.ts` 接 `Let it go`、`?from=hug` 分享、Wind 麦克风；60fps/ready |
+| `/still` | ✅ 全链 | 栈 `tide-medium + voxel-world + bubbles + still-sink + pixel-post`；`Sit` 镜头下沉 2.4s；申报 13.52>12，诚实降 low（headless 约 40fps） |
+| `/koi-pond` | ✅ 全链 | 栈 `paper-ink + koi-pond + pixel-post`；11 条 three.js 墨鲤（low 7）、浮萍、鱼尾拖墨；无 CTA（连续场） |
 
 四站均由 `shared/sites/build.mjs` 的 `STATIONS` 注册（`:32-103`），`npm run build:sites` 产出 `dist/<slug>/index.html`，`npm run serve` 绑 `127.0.0.1:8080`。
 
@@ -472,7 +480,7 @@ npm run build:sites                         # → dist/<slug>/index.html × 4 + 
 npm run serve                               # 127.0.0.1:8080（只绑本机，不绑 0.0.0.0）
 #   演示：http://127.0.0.1:8080/          → 四站索引
 #         /license  ← **唯一走通全链的站**（L5 + 三段仪式 + 停留 + 导出）
-#         /hug /still /koi ← 壳与零件已通、**站内逻辑未写**（只有首屏与 Esc 菜单）
+#         /hug /still /koi ← 壳与零件已通、站内逻辑已接（A1）
 #   ⚠️ 别让看的人以为四座都能演示：只有 /license 是完整的。
 npm run verify:sites                        # 117 断言（含 E 段：屏幕文字必须在 COPY/UI 里）
 npm run verify:dom                          # 80 断言：L5（DOM）的 h1/hook/菜单/通道/文案在纸内/CTA 可见可点
@@ -505,10 +513,10 @@ npm run verify:reuse                  # 5 个门：装配 / 溯源 / 措辞 / �
 shared/stage/              ← 新装配体系（唯一入口 index.ts）
 shared/stage/preview/      ← 单文件预览构建器（build.mjs）+ 浏览器侧宿主（host.ts）——**入库，不放 _scratch/**
 shared/sites/              ← **上线**：壳（shell.ts）+ 站点构建器（build.mjs）+ 本地 serve（serve.mjs）
-shared/parts/              ← 7 个正式零件全 ✅：field-ground / voxel-world / paper-ink / pixel-post / ascii-field / bubbles / tide-medium；⬜ boids / dandelion / blow-input 未做
+shared/parts/              ← 10 个正式零件全 ✅：field-ground / voxel-world / paper-ink / pixel-post / ascii-field / bubbles / tide-medium / dandelion / boids / koi-pond；另 sun / still-sink 为站内氛围件
 shared/parts-library/      ← 上一轮的 v1 零件（含两份真算法内核，别删；manifest 体系待裁）
 shared/core/               ← 体素引擎基线，BASELINE.sha256 锁着，**一个字节都不许改**
-sites/{hug,license,still,koi}/ ← license 已走**新全链**；hug/still/koi 只有 v1 站内文件 + 新壳（站内逻辑未写）
+sites/{hug,license,still,koi}/ ← 四站均走**新全链**；hug/still 有 attach.ts，license 有 ritual/export/stay
 sites/praise/              ← 旧架构完整（399 行、typecheck 通过、零外链），**冻结未启用**，不进构建
 tests/                     ← 门都在这里；stage-* / parts-composition / preview-build 是新体系的
 tests/lib/png.mjs          ← 零依赖 PNG 编码器（无浏览器时导出零件像素取证用）
@@ -526,7 +534,7 @@ QUARANTINE.md              ← 两个待裁隔离项，Q-02 就是 §4 任务 6.
 2. **任务 2 的四个零件**（口径已钉死，照着写最省事）
 3. **`/license` 站**（只要 2 件，最快验证「2 件零件能否立住一个站」）
 4. **任务 1 的两个 wrap**（`dandelion` / `blow-input`）→ 接 `/hug`
-5. 任务 5 的 ASCII 零件 → 接 `/koi-pond`
+5. 旧 ASCII 方案已删除；`/koi` 用 `koi-pond` 完整移植，不再走 ASCII
 6. 任务 3 的水底材 → 接 `/still`
 
 ---
@@ -565,7 +573,7 @@ QUARANTINE.md              ← 两个待裁隔离项，Q-02 就是 §4 任务 6.
 |---|---|---|
 | `/license`、`/hug` | 60 | 无（快路径 L4 ≈1.85ms） |
 | `/still` | 30 | **体素引擎**（33ms/帧） |
-| `/koi-pond` | ~49（headless） | 后处理 1.85 + ASCII 0.56 + 纸 1.3 ≈ **7.08ms < 8ms → 不再降档**（删 dither/blockPx 之后） |
+| `/koi` | ~60（headless，1280×800） | `paper-ink + koi-pond`，预算 **12ms**；real/paint/ink 三风格，high LOD 11 条鱼；不再叠 `pixel-post` |
 
 **预算 `DEFAULT_BUDGET_MS = 8` 不许为任何一站提高。** 它是一条**产品级声明**（"普通机器上跑满 60fps"），
 不是某台机器的实测值；为一站放宽到 12，下一站会要 16。

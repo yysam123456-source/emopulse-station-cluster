@@ -13,18 +13,23 @@ export type {
   AudioState,
   BiomeId,
   BlendMode,
+  CueVerb,
   DegradedEntry,
   Lod,
   PartChannel,
   PartEnv,
+  PartGeometry,
   PartInstance,
   PartLayer,
   PartV2,
   PointerState,
+  Rect,
   StageErrorCode,
   StageSize,
   WorldFrame,
 } from './contract';
+
+export { CUE_VERBS } from './contract';
 
 export {
   DEFAULT_BUDGET_MS,
@@ -34,7 +39,7 @@ export {
   validateParts,
 } from './stage';
 
-export type { Stage, StageOptions, StageStats } from './stage';
+export type { Stage, StageGeometry, StageOptions, StageStats } from './stage';
 
 export {
   MAX_DT_SECONDS,

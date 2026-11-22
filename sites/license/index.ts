@@ -14,6 +14,11 @@ interface Handle {
   onFrame(fn: (t: number, dt: number) => void): void;
   tap(nx?: number, ny?: number): void;
   setModal(open: boolean): void;
+  readonly stage: {
+    readonly geometry: {
+      readonly sheet: { x: number; y: number; w: number; h: number } | null;
+    };
+  };
 }
 
 /**
@@ -91,8 +96,18 @@ export function attach(handle: Handle): void {
     ritual.tick(dt);
   });
 
-  // 导出：**不重渲染场景**，只把主画布按比例缩到卡片上（同一任务里，stage.frame 之后）
-  const exportCard = (): string => renderLicense({ serial, date, sunAngle: pressAngle });
+  // 导出：**裁切主画布的纸矩形**，不是重画一张纸。
+  // 屏幕上的纸纹、光、纸边因此逐像素进入卡片；文字/章按与 CSS 同一组百分比重排。
+  const exportCard = (): string => {
+    const canvas = document.getElementById('stage') as HTMLCanvasElement | null;
+    const rect = handle.stage.geometry.sheet;
+    return renderLicense({
+      serial,
+      date,
+      sunAngle: pressAngle,
+      paper: canvas && rect ? { canvas, rect } : null,
+    });
+  };
   save?.addEventListener('click', () => {
     const url = exportCard();
     const a = document.createElement('a');

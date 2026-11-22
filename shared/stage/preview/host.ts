@@ -110,6 +110,36 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
 
   if (document.body) document.body.dataset.state = 'booting';
 
+  // `?clean=1` 只隐藏调试条，给“产品截图”用；不影响装配、成本、快照。
+  try {
+    if (new URLSearchParams(location.search).get('clean') === '1') {
+      (document.body?.classList as { add?: (name: string) => void } | undefined)?.add?.('clean');
+    }
+  } catch {
+    // file:// / 假 DOM 下 classList 可能缺失；失败不影响装配。
+  }
+
+  // 零件的“仪式提示”走自定义事件，不把印章/归档的业务文案硬编码进宿主。
+  // 监听必须在 createStage 之前挂上：零件第一帧就会派发初始提示。
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('preview:dawn-desk', (event: Event) => {
+      const detail = (event as CustomEvent<{ phase?: string; hint?: string; end?: boolean }>).detail;
+      const guide = document.getElementById('dawn-guide');
+      const guideText = document.getElementById('dawn-guide-text');
+      const end = document.getElementById('dawn-end');
+      if (guideText && detail?.hint) guideText.textContent = detail.hint;
+      if (guide) guide.dataset.mode = detail?.end ? 'quiet' : detail?.phase ?? '';
+      if (end) {
+        end.classList.toggle('show', Boolean(detail?.end));
+        end.setAttribute('aria-hidden', detail?.end ? 'false' : 'true');
+      }
+      if (detail?.end) {
+        const again = document.getElementById('dawn-again');
+        (again as HTMLElement | null)?.focus?.();
+      }
+    });
+  }
+
   let stage: Stage;
   try {
     stage = createStage({
@@ -140,6 +170,17 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
   /** 层查表：一次建好，刷新调试条时不再遍历零件找层。 */
   const layerOf = new Map<string, PartLayer>();
   for (const part of parts) layerOf.set(part.id, part.layer);
+
+  // 预览页里的按钮只声明「要对世界说哪个动词」，不把站点业务塞进宿主。
+  // `data-cue` 是预览专用接线：按钮 click → stage.cue(verb)，未知动词由零件静默忽略。
+  // 假 DOM（预览构建测试）没有 querySelectorAll，这里必须容错，否则整个预览脚本跑不起来。
+  if (typeof document.querySelectorAll === 'function') {
+    for (const node of document.querySelectorAll<HTMLElement>('[data-cue]')) {
+      const verb = node.dataset?.cue;
+      if (!verb) continue;
+      node.addEventListener('click', () => stage.cue(verb));
+    }
+  }
 
   /** 绘制顺序（层 + id），只算一次 —— 装配后顺序不会变。 */
   const orderLabel = stage.order

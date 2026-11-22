@@ -86,7 +86,10 @@ export const STATIONS = Object.freeze({
     paperSheet: true,
     parts: [
       'paper-ink',
-      { id: 'pixel-post', opts: { grain: 0.04, scanline: 0, vignette: 0.08 } },
+      // 许可证是一张**静止的纸**：不要 12Hz 闪动的胶片颗粒。
+      // 旧值 grain .04 让整纸噪声底 mean 8（压过了拖光的 10.2），
+      // 用户看到的"光在动"被颗粒闪动盖掉；纸张自身的纹理已由 paper-ink 烘好。
+      { id: 'pixel-post', opts: { grain: 0, scanline: 0, vignette: 0.08 } },
     ],
   },
   hug: {
@@ -96,37 +99,48 @@ export const STATIONS = Object.freeze({
     // /hug 的唯一 CTA：点它 = 放走（世界收到**一次**按下，由壳注入）
     cta: COPY.hug.cta,
     ctaChannel: 'world-inject',
+    /** /hug 的放走 = 对蒲公英说 release；站点作用域只负责把 cue 递进去 */
+    attach: 'sites/hug/attach.ts',
     biome: 'field',
     seed: 20260614,
-    budgetMs: 8,
-    parts: [
-      'field-ground',
-      { id: 'pixel-post', opts: { grain: 0.05, scanline: 0, vignette: 0.06 } },
-    ],
+    // 原站同构的三维草甸：一件 L1 world 自己铺满整屏。
+    // 旧的 field-ground/dandelion/boids/sun 栈是「平面草坡 + 线框球」，
+    // 用户已明确否定；这里不再保留任何 2D 底材，避免它从 GL 下面透出来。
+    budgetMs: 9,
+    parts: ['hug-meadow'],
   },
   still: {
     slug: 'still',
     title: COPY.still.h1,
     lead: COPY.still.hook,
-    cta: null,
+    // 定稿 CTA 'Sit'：坐下 = 把体素世界的视角沉到近景（cue('sit')）
+    cta: COPY.still.cta,
+    ctaChannel: 'ui',
+    attach: 'sites/still/attach.ts',
     biome: 'tide',
     seed: 20260901,
-    budgetMs: 8,
-    parts: ['voxel-world', 'bubbles'],
+    budgetMs: 12,
+    parts: ['tide-medium', 'voxel-world', 'bubbles', 'still-sink',
+      { id: 'pixel-post', opts: { grain: 0.03, scanline: 0, vignette: 0.18 } },
+    ],
   },
   koi: {
     slug: 'koi',
     title: COPY.koiPond.h1,
     lead: COPY.koiPond.hook,
     cta: null,
+    attach: 'sites/koi/attach.ts',
+    ambience: false,
     biome: 'ink',
     seed: 20260312,
-    budgetMs: 8,
-    paperSheet: true,
+    // real 路径（池底 + 焦散 + composite + grade）申报 8.5ms；paper 只做 unsupported 兜底。
+    // 12ms 预算让 11 条鱼保持 high，而不是一上来就被 post 的 1.3ms 拖到 low。
+    budgetMs: 12,
+    // 原件自带纸/水彩/胶片 finish，不再叠 pixel-post：多一层暗角会把 real 压暗、把 ink 压冷。
+    paperSheet: false,
     parts: [
       'paper-ink',
-      { id: 'ascii-field', opts: { variant: 'plain', ink: 'rgba(34,40,50,0.80)', blend: 'multiply' } },
-      { id: 'pixel-post', opts: { grain: 0.02, scanline: 0, vignette: 0.14 } },
+      'koi-pond',
     ],
   },
 });
@@ -155,18 +169,46 @@ const STYLE = [
   '.menu-item:hover{color:#fff}',
   '.menu-value{color:var(--dim);font-size:12px}',
   '.menu-privacy{margin-top:10px;font-size:11px;color:var(--dim)}',
+  '#menu-note{margin-top:8px;max-width:230px;font-size:11px;line-height:1.5;color:var(--dim)}',
+  '#menu-note[hidden]{display:none}',
   '#lead{position:fixed;z-index:3;margin:0;',
   'color:rgba(232,238,245,.82);font-size:15px;line-height:1.5;letter-spacing:.01em}',
   // L5 文字压在"有内容的画布"上（草地 / ASCII 水纹）时，靠**柔和描边**而不是底色块：
   // 加底会把文字变成贴纸，而这一站的红线是"文字属于纸/场景"。描边只提高可读性，不改变语义。
   'body[data-sheet=off] #lead{left:5vw;bottom:6vh;max-width:44ch;',
   'text-shadow:0 1px 3px rgba(0,0,0,.6),0 0 12px rgba(0,0,0,.35)}',
+  // `/hug` 是编辑式版面：大字标题 + 标题下的一行说明，不要「左上角一个 34px 标签 +
+  // 左下角一句孤立 hook」的展示页默认排版。花球从画面中部开始，左上留白正好给字。
+  // GL 不可用时不能只剩一块黑幕：这层草甸色只在 WebGL2 缺席时露出来。
+  'body[data-slug=hug]{background:radial-gradient(140% 110% at 72% 22%,#4b4a2e 0%,#283a2c 46%,#172c29 100%)}',
+  'body[data-slug=hug] #h1{left:5vw;top:8.5vh;font-size:clamp(52px,8.6vw,104px);',
+  'line-height:.94;letter-spacing:-.015em;text-shadow:0 2px 24px rgba(0,0,0,.38)}',
+  // 桌面把 hook 放大成原站那种「画面左侧的一句正文」，而不是标题下的 15px 注脚。
+  'body[data-slug=hug] #lead{left:5vw;bottom:auto;max-width:20ch;top:27vh;',
+  'font-size:clamp(24px,2.1vw,30px);line-height:1.26;color:rgba(238,240,226,.88);text-wrap:balance;',
+  'text-shadow:0 2px 18px rgba(0,0,0,.35)}',
+  // 手机上大字号会压到花球，保留标题下的小注脚。
+  '@media (max-width:600px){body[data-slug=hug] #lead{top:calc(8.5vh + 62px + 16px);',
+  'max-width:26ch;font-size:14px;line-height:1.6;color:rgba(232,238,226,.78)}}',
+  // 桌面上按钮让开主花茎，落到右下角，和左上标题形成对角；窄屏仍居中，拇指够得着。
+  '@media (min-width:601px){body[data-slug=hug] #cta{left:auto;right:5vw;transform:none;bottom:9vh}}',
+  '@media (min-width:601px){body[data-slug=hug] #share-note{left:auto;right:5vw;transform:none;text-align:right;bottom:15vh;max-width:26ch}}',
+  // ink 是**整屏浅纸**：浅字会直接消失（/koi 第一版标题就是白纸白字）。
+  'body[data-biome=ink] #h1{color:rgba(38,42,48,.92);text-shadow:0 1px 2px rgba(250,248,242,.45)}',
+  'body[data-biome=ink] #lead{color:rgba(42,46,52,.80);text-shadow:0 1px 2px rgba(250,248,242,.40)}',
   // 纸内文字用深墨（纸是亮的），与桌面上的浅字分开。
   // 这条声明必须并进 sheet-on 的 #lead 规则里 —— 它曾作为孤立声明单独成行（带 }），
   // 让 CSS 解析器吞掉后面的 #cta 规则，CTA 退回 static 跑到 (0,0) 被 canvas 盖住，肉眼看不见。
   'body[data-sheet=on] #lead{left:calc(var(--sheet-x) + var(--sheet-w)*0.075);',
   'top:calc(var(--sheet-y) + var(--sheet-h)*0.80);max-width:calc(var(--sheet-w)*0.62);',
   'text-shadow:0 1px 2px rgba(250,248,242,.55);color:rgba(58,48,38,.82)}',
+  // /hug 的分享状态：落在 CTA 上方，低对比，和 hook 同一套衬线。
+  // 它**不是**第二个 CTA：不接收点击，只报告一次已经发生的动作。
+  '#share-note{position:fixed;z-index:3;left:50%;bottom:18.5vh;transform:translateX(-50%);',
+  'margin:0;font:400 12px/1.5 ui-serif,Georgia,"Songti SC",serif;letter-spacing:.02em;',
+  'color:rgba(255,244,226,.88);max-width:min(44ch,80vw);text-align:center;',
+  'text-shadow:0 1px 3px rgba(40,24,12,.55)}',
+  '#share-note[hidden]{display:none}',
   '#cta{position:fixed;left:50%;bottom:11.5vh;transform:translateX(-50%);z-index:3;',
   'background:rgba(10,12,16,.46);border:1px solid rgba(232,238,245,.72);border-radius:999px;',
   'color:var(--ink);font:inherit;font-size:15px;letter-spacing:.06em;padding:.72em 1.9em;',
@@ -243,7 +285,10 @@ const STYLE = [
   // 宽度只到 86%：纸角那 128px 是折角的地盘（折起来会盖住纸角），
   // 章下副行探进去就会被盖掉半截 —— 折角后截图上确实发生了。
   '#cert-seal-sub{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.855);',
-  'left:calc(var(--sheet-w)*0.58);width:calc(var(--sheet-w)*0.28);text-align:center;',
+  // 中心对齐朱砂章（章心 = 86% - 48px ≈ 81.3%）。
+  // #cert 本身从 7.5% 起、宽 85%，所以这里的百分比是**相对 #cert** 算的；
+  // 直接用 sheet 宽折算：left .648w + width .18w → 中心 .738w，再加 #cert 的 .075 = .813。
+  'left:calc(var(--sheet-w)*0.648);width:calc(var(--sheet-w)*0.18);text-align:center;',
   'font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(163,52,44,.72)}',
   // 只有章下副行跟着章走；编号/日期是纸自带的，不随 approved 变化。
   '#cert-seal-sub[hidden]{display:none}',
@@ -258,7 +303,10 @@ const STYLE = [
   'display:flex;align-items:center;justify-content:center;transform:rotate(var(--seal-tilt,0deg));',
   'opacity:0;transition:opacity .28s ease}',
   '#seal.is-set{opacity:1}',
-  '#save{position:fixed;z-index:4;left:50%;transform:translateX(-50%);bottom:4.5vh;',
+  // Save 必须落在纸**内**：纸底距视口 4.2%，按钮再往上 4.5% —— 之前 4.5vh
+  // 在 800 高时正好压在纸边外，截图里半截悬空。
+  '#save{position:fixed;z-index:4;left:50%;transform:translateX(-50%);',
+  'bottom:calc((100vh - var(--sheet-h)) / 2 + var(--sheet-h)*0.045);',
   'background:rgba(10,12,16,.5);border:1px solid rgba(232,238,245,.6);border-radius:999px;',
   'color:var(--ink);font:inherit;font-size:13px;padding:.5em 1.3em;cursor:pointer}',
   '#save[hidden]{display:none}',
@@ -272,9 +320,20 @@ const STYLE = [
   'text-underline-offset:3px;text-decoration-color:rgba(64,52,40,.25)}',
   '#again:hover{color:rgba(64,52,40,.78)}',
   '.play-note{display:block;opacity:.85}',
-  '#boot-error{position:fixed;left:8px;top:8px;z-index:5;max-width:92vw;padding:8px 10px;',
+  // 启动遮罩：不是装饰，是「世界还没就绪」的唯一诚实表达（/still 的体素要 2–4s）。
+  // 无文字（文案只能来自 COPY），只有一层与 --veil 同色的渐变；就绪后淡出。
+  '#veil{position:fixed;inset:0;z-index:6;background:radial-gradient(120% 90% at 50% 42%,#141922 0%,#07090c 72%);',
+  'opacity:1;transition:opacity 1.4s ease;pointer-events:none}',
+  'body[data-state=ready] #veil,body[data-state=degraded] #veil,body[data-state=failed] #veil{opacity:0}',
+  '#boot-error{position:fixed;left:8px;top:8px;z-index:7;max-width:92vw;padding:8px 10px;',
   'background:rgba(80,12,16,.92);border:1px solid rgba(255,120,120,.45);border-radius:4px;',
   'font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap;color:#ffd7d7}',
+  // /koi 的 real 是深色水面：ink 站默认的深墨标题会沉进水里。
+  // 只改这一种 look 的文字角色，不动站点骨架；paint/ink 仍是浅纸深墨。
+  'body[data-koi-style=real] #h1{color:rgba(246,242,232,.96);',
+  'text-shadow:0 1px 2px rgba(0,0,0,.7),0 0 20px rgba(0,0,0,.55)}',
+  'body[data-koi-style=real] #lead{color:rgba(242,238,228,.9);',
+  'text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 14px rgba(0,0,0,.45)}',
 ].join('');
 
 /** HTML 模板（注意：**不允许任何 src/href/http**，由测试断言）。 */
@@ -288,17 +347,22 @@ const TEMPLATE = [
   '<!-- __SITE_META__ -->',
   '<style>__SITE_STYLE__</style>',
   '</head>',
-  '<body data-state="booting" data-modal="closed" data-debug="off" data-sheet="off">',
+  '<body data-state="booting" data-modal="closed" data-debug="off" data-sheet="off" data-biome="neutral">',
   '<canvas id="stage" aria-hidden="true"></canvas>',
   '__SITE_GL__',
   // L5 的第一块内容：站点的一句话。**必须真的渲染出来** ——
   // 之前 `lead` 只存在于配置里、模板没有对应节点，那是个死字段（声明了但没人用）。
   '<h1 id="h1">__SITE_H1__</h1>',
   '<p id="lead">__SITE_LEAD__</p>',
+  // /hug 的「带走链接」状态行：默认不占位；只有复制成功/收到回赠时才出现。
+  // 它不是第二个 CTA —— 不接收点击，只报告一次已发生的动作。
+  '<p id="share-note" role="status" hidden></p>',
   '__SITE_EXTRA__',
+  '<div id="veil" aria-hidden="true"></div>',
   '<div id="menu" role="dialog" aria-label="__SITE_MENU_TITLE__" hidden>',
   '<div class="menu-title">__SITE_MENU_TITLE__</div>',
   '__SITE_MENU_ITEMS__',
+  '<div id="menu-note" hidden></div>',
   '<div class="menu-privacy">__SITE_PRIVACY__</div>',
   '</div>',
   '__SITE_CTA__',
@@ -358,7 +422,10 @@ export async function buildSite(options) {
   const { defs, validateParts, sortParts } = await loadPartDefs(station.parts);
   validateParts(defs);
   const order = sortParts(defs).map((def) => def.id);
-  const hasGl = defs.some((def) => (def.channel ?? 'canvas2d') === 'gl');
+  const hasGl = defs.some((def) => {
+    const channel = def.channel ?? 'canvas2d';
+    return channel === 'gl' || channel === 'world';
+  });
 
   const config = {
     slug: station.slug,
@@ -371,6 +438,10 @@ export async function buildSite(options) {
     glBlend: null,
     hasGl,
     paperSheet: station.paperSheet === true,
+    privacy: UI.privacy,
+    credits: UI.creditsValue,
+    // /koi 的声音由零件自己持有（原作的水声/音乐），壳的通用环境声必须让位。
+    ambience: station.ambience !== false,
   };
 
   // 浏览器入口：壳 + 零件（工厂优先，opts 与 preview 同一套规则）
@@ -434,7 +505,10 @@ export async function buildSite(options) {
     // ⚠️ 必须 replaceAll：模板里 `__SITE_MENU_TITLE__` 出现两次（aria-label 与可见标题），
     //   `String.replace` 只换第一处 → 可见标题直接显示占位符（截图抓到过）。
     .replaceAll('__SITE_MENU_TITLE__', escapeHtml(UI.menuTitle))
-    .replace('__SITE_MENU_ITEMS__', () => UI.items.map((item) => {
+    .replace('__SITE_MENU_ITEMS__', () => UI.items
+      .filter((item) => (item.only ? item.only === station.slug : true)
+        && (item.id !== 'menu-wind' || station.slug === 'hug'))
+      .map((item) => {
       const value = item.id === 'menu-credits' ? UI.creditsValue : item.value;
       return '<button class="menu-item" type="button" id="' + item.id
         + '" data-channel="' + item.channel + '">'

@@ -3,7 +3,7 @@
 // 为什么单独一层：零件不许互相调用（契约硬约束 1），所以它们之间的**唯一共享状态**
 // 就是 WorldFrame。这一层是那个共享状态的全部实现，任何新增的共享量都必须加在这里，
 // 而不是让两个零件私下拉手。
-import type { AudioState, BiomeId, Lod, PointerState, StageSize, WorldFrame } from './contract';
+import type { AudioState, BiomeId, Lod, PointerState, Rect, StageSize, WorldFrame } from './contract';
 
 /** 一秒内允许的最大帧时长，防止切后台回来时整个世界瞬移。 */
 export const MAX_DT_SECONDS = 0.1;
@@ -132,6 +132,8 @@ export interface World {
   readonly pointer: PointerTracker;
   setAudio(audio: AudioState | null): void;
   setReducedMotion(value: boolean): void;
+  /** 纸矩形（CSS px）；world 零件每帧从这里读 */
+  setSheet(sheet: Rect | null): void;
   /** 复位时钟（测试用，保证可重放） */
   reset(): void;
 }
@@ -149,6 +151,7 @@ export function createWorld(options: WorldOptions): World {
   let dpr = options.dpr && options.dpr > 0 ? options.dpr : 1;
   let audio: AudioState | null = options.audio ?? null;
   let reducedMotion = options.reducedMotion === true;
+  let sheet: Rect | null = null;
 
   let lastDt = 0;
 
@@ -168,6 +171,7 @@ export function createWorld(options: WorldOptions): World {
     get biome() { return options.biome; },
     get reducedMotion() { return reducedMotion; },
     get size() { return size; },
+    get sheet() { return sheet; },
   };
 
   return {
@@ -191,6 +195,11 @@ export function createWorld(options: WorldOptions): World {
     },
     setReducedMotion(value: boolean): void {
       reducedMotion = value === true;
+    },
+    setSheet(next: Rect | null): void {
+      sheet = next
+        ? { x: next.x, y: next.y, w: next.w, h: next.h }
+        : null;
     },
     reset(): void {
       t = 0;

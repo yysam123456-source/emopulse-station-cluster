@@ -28,8 +28,30 @@ export const LAYER_LABEL: Readonly<Record<PartLayer, string>> = {
   L5: 'UI（文字、指引、调试条）',
 };
 
-/** 渲染通道。GL 通道整场只有一个画布，用于 L1 的体素世界。 */
-export type PartChannel = 'canvas2d' | 'gl';
+/**
+ * 渲染通道。
+ *
+ * `gl` 与 `world` 共用**整场唯一**那一个 GL 画布（`E_MULTI_GL` 合并计数）：
+ *   · `gl`    = 自己写满整块画布（体素 raymarcher 这类「世界就是全屏」的零件）
+ *   · `world` = three.js 场景渲染到透明 RT，再合成到**纸的矩形**里（鱼、鸟、水下）
+ * 分开命名不是为了多一条通道，而是为了把「这张 GL 图该铺满屏还是只铺在纸上」
+ * 变成契约字段，而不是每个站点自己算一遍。
+ */
+export type PartChannel = 'canvas2d' | 'gl' | 'world';
+
+/** 轴对齐矩形（CSS px，原点左上）。 */
+export interface Rect {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
+
+/** 零件在「给定尺寸下」会占据的几何。 */
+export interface PartGeometry {
+  /** 纸/卡片矩形。只有 L0 底材需要给；world 零件据此决定合成范围。 */
+  readonly sheet?: Rect | null;
+}
 
 /**
  * 允许的混合模式。
@@ -112,6 +134,14 @@ export interface WorldFrame {
   /** 无障碍降级：为 true 时零件必须关掉大幅位移/闪烁 */
   readonly reducedMotion: boolean;
   readonly size: StageSize;
+  /**
+   * 本帧「被框住的那张纸」的矩形（CSS px）。
+   *
+   * 为什么放进 WorldFrame：`/koi` 的鱼只能活在纸里，`/hug` 的太阳可以落在纸外。
+   * 这是零件唯一能读到的布局量；没有它，每个 world 零件都要自己猜纸在哪。
+   * 无纸站点为 null（world 零件按整屏处理）。
+   */
+  readonly sheet: Rect | null;
 }
 
 /** 零件构造环境。 */
@@ -128,6 +158,14 @@ export interface PartEnv {
   readonly biome: BiomeId;
   /** 初始画质档位 */
   readonly lod: Lod;
+  /**
+   * 异步失败的回传通道（可选）。
+   *
+   * `create()` 是同步的，但 GPU 设备丢失 / 解码失败 / 远端资源失败往往发生在几帧之后；
+   * 没有这条通道，装配器只能看到「实例存在、readiness=1」，用户看到的是「世界没了但页面说 ready」。
+   * 零件只在**真的无法继续画**时调用；普通异常仍应抛 `E_PART_THROW`。
+   */
+  readonly onError?: (detail: string) => void;
 }
 
 /** 零件实例。`draw` 必填 —— 不会画的不是零件。 */
@@ -138,8 +176,26 @@ export interface PartInstance {
   resize?(size: StageSize): void;
   /** 降档/升档。不实现 = 该零件无 LOD 能力，超预算时只能被挂起 */
   setLod?(lod: Lod): void;
+  /**
+   * 站点对零件说一句「做那件事」。
+   *
+   * 为什么不是 `release()` / `sit()` 这种具名方法：那样壳就要认识每个零件的业务，
+   * 站点与零件又长回 v1 的硬编码槽位。cue 是一组**动词白名单**（见 CUE_VERBS），
+   * 词表是契约，行为是零件自己的事；不认识的 cue 静默忽略。
+   */
+  cue?(verb: string): void;
+  /** 首帧/资源就绪度 0..1；不实现视为 1。壳据此决定是否收起 boot 遮罩。 */
+  readiness?(): number;
+  /** 当前几何（纸矩形等）；只在 L0 底材需要实现。 */
+  describe?(): PartGeometry | null;
   dispose?(): void;
 }
+
+/** 站点可以说的动词（白名单 —— 拼错/未知一律静默忽略，不打断画面）。 */
+export const CUE_VERBS = ['release', 'sit', 'stand', 'ripple', 'reset'] as const;
+
+/** 站点 cue 的动词。 */
+export type CueVerb = (typeof CUE_VERBS)[number];
 
 /** 零件定义（静态，构造前即可读）。 */
 export interface PartV2 {
@@ -148,6 +204,12 @@ export interface PartV2 {
   readonly layer: PartLayer;
   /** 缺省 'source-over' */
   readonly blend?: BlendMode;
+  /**
+   * `world` 通道的合成范围：
+   *   · 'screen'（缺省）= 铺满整块画布
+   *   · 'subject'      = 只铺在 L0 给出的纸矩形内（鱼在纸里，不在桌面）
+   */
+  readonly space?: 'screen' | 'subject';
   /**
    * 实测单帧开销（毫秒）。**必须实测**，不接受估计值 —— 装配器的降档决策全靠它。
    */
@@ -165,6 +227,8 @@ export interface PartV2 {
   readonly expendable?: boolean;
   /** 该零件依赖的浏览器能力，装配器据此跳过不支持的零件并记入 degraded */
   readonly requires?: readonly ('webgl2' | 'webgpu' | 'mic' | 'pointer')[];
+  /** 仅 L0 底材实现：在给定尺寸下先算出纸矩形，供 world 通道在 create 前就知道画在哪 */
+  readonly describe?: (size: StageSize, biome: BiomeId) => PartGeometry | null;
   readonly create: (env: PartEnv) => PartInstance;
 }
 

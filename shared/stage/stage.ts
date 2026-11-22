@@ -20,6 +20,7 @@ import {
   type PartChannel,
   type PartInstance,
   type PartV2,
+  type Rect,
   type StageSize,
   type WorldFrame,
 } from './contract';
@@ -65,12 +66,26 @@ export interface StageStats {
   readonly fps: number;
   /** 最近一帧的零件总耗时（毫秒） */
   readonly cpuMs: number;
+  /** 平滑后的帧间隔（毫秒）—— 这是唯一能看见真实瓶颈的数，不是 static costMs */
+  readonly frameMs: number;
   /** 配置声明的总开销（毫秒） */
   readonly budgetCostMs: number;
   readonly budgetMs: number;
   /** 最近一帧实际绘制的零件数（含被挂起前） */
   readonly drawn: number;
   readonly frames: number;
+  /** 当前渲染缩放（1 = 原生 DPR；<1 = 自动降分辨率） */
+  readonly renderScale: number;
+  /** 所有在画零件的就绪度最小值（0..1） */
+  readonly readiness: number;
+}
+
+/** 几何快照（壳用它来摆 DOM，不再自己抄一套公式）。 */
+export interface StageGeometry {
+  /** 纸矩形；无纸站点为 null */
+  readonly sheet: Rect | null;
+  /** world 通道的合成矩形（subject 空间 = 纸；否则整屏） */
+  readonly world: Rect;
 }
 
 /** 装配好的舞台。 */
@@ -80,6 +95,8 @@ export interface Stage {
   /** 实际绘制顺序（零件 id） */
   readonly order: readonly string[];
   readonly world: World;
+  /** 当前几何（纸/世界矩形），壳可直接读 */
+  readonly geometry: StageGeometry;
   /** 推进并绘制一帧 */
   frame(nowMs?: number): void;
   start(): void;
@@ -88,6 +105,14 @@ export interface Stage {
   resize(width: number, height: number, dpr?: number): void;
   setBudget(budgetMs: number): void;
   setAudio(audio: AudioState | null): void;
+  /** 无障碍降级：传给 world，零件每帧读 frame.reducedMotion */
+  setReducedMotion(value: boolean): void;
+  /** 手动渲染缩放（0.55..1）；调用后默认关闭自动缩放，避免和用户选择打架 */
+  setRenderScale(scale: number): void;
+  /** 自动分辨率开关（菜单 Quality 用） */
+  setAutoScale(enabled: boolean): void;
+  /** 对零件说一句动词（release / sit / ripple / reset）；不认识的静默忽略 */
+  cue(verb: string): void;
   /** 写入归一化指针（0..1），测试与桥接共用 */
   setPointer(nx: number, ny: number, down?: boolean): void;
   dispose(): void;
@@ -98,6 +123,7 @@ interface Mounted {
   readonly def: PartV2;
   readonly channel: PartChannel;
   readonly blend: string;
+  readonly space: 'screen' | 'subject';
   readonly instance: PartInstance | null;
   lod: Lod;
   suspended: boolean;
@@ -133,11 +159,14 @@ export function validateParts(parts: readonly PartV2[]): void {
       }
     }
     const channel = part.channel ?? 'canvas2d';
-    if (channel === 'gl') {
+    if (channel === 'gl' || channel === 'world') {
       glCount += 1;
       if (glCount > 1) {
-        throw new StageError('E_MULTI_GL', part.id, 'GL 通道整场唯一（单 WebGL 上下文）');
+        throw new StageError('E_MULTI_GL', part.id, 'GL 通道整场唯一（gl 与 world 共用同一块画布/上下文）');
       }
+    }
+    if (part.space === 'subject' && channel !== 'world') {
+      throw new StageError('E_PART_THROW', part.id, "space:'subject' 只对 channel:'world' 有意义");
     }
     if (part.blend !== undefined && !BLEND_MODES.includes(part.blend)) {
       throw new StageError('E_BAD_BLEND', part.id, `混合模式不在白名单：${String(part.blend)}`);
@@ -233,13 +262,42 @@ export function createStage(options: StageOptions): Stage {
     (globalThis as unknown as { devicePixelRatio?: number }).devicePixelRatio ?? 1,
     maxDpr,
   );
+  /** 用户/自动降分辨率系数（1 = 原生；与 dpr 相乘后才是真正的像素比）。 */
+  let renderScale = 1;
+  let autoScale = true;
 
-  // GL 画布只在真的有 gl 零件时才需要
+  // ---- 几何：先让 L0 底材报出纸矩形，world 通道才能在 create 前知道画在哪 ----
+  let sheet: Rect | null = null;
+  for (const def of ordered) {
+    if (def.layer !== 'L0' || typeof def.describe !== 'function') continue;
+    try {
+      const g = def.describe({ w: width, h: height, dpr }, options.biome);
+      if (g?.sheet && g.sheet.w > 0 && g.sheet.h > 0) sheet = g.sheet;
+    } catch {
+      // 描述失败不阻断装配：没有纸就按整屏处理
+    }
+  }
+  const wantsSubject = ordered.some((p) => (p.channel ?? 'canvas2d') === 'world' && p.space === 'subject');
+  let worldRect: Rect = wantsSubject && sheet
+    ? { x: sheet.x, y: sheet.y, w: sheet.w, h: sheet.h }
+    : { x: 0, y: 0, w: width, h: height };
+  const geometry: StageGeometry = {
+    get sheet() { return sheet; },
+    get world() { return worldRect; },
+  };
+
+  // GL 画布只在真的有 gl/world 零件时才需要
   const glCanvas = options.glCanvas ?? null;
-  const hasGl = ordered.some((p) => (p.channel ?? 'canvas2d') === 'gl');
+  const hasGl = ordered.some((p) => {
+    const channel = p.channel ?? 'canvas2d';
+    return channel === 'gl' || channel === 'world';
+  });
   if (hasGl && !glCanvas) {
-    const offender = ordered.find((p) => (p.channel ?? 'canvas2d') === 'gl') as PartV2;
-    throw new StageError('E_PART_THROW', offender.id, '存在 gl 通道零件，但未提供 glCanvas');
+    const offender = ordered.find((p) => {
+      const channel = p.channel ?? 'canvas2d';
+      return channel === 'gl' || channel === 'world';
+    }) as PartV2;
+    throw new StageError('E_PART_THROW', offender.id, '存在 gl/world 通道零件，但未提供 glCanvas');
   }
   /**
    * 底件不变量：**非空装配必须有至少一件 L0 或 L1**。
@@ -269,7 +327,10 @@ export function createStage(options: StageOptions): Stage {
    */
   const glComposite: GlobalCompositeOperation = (() => {
     if (options.glBlend) return options.glBlend as GlobalCompositeOperation;
-    const glPart = ordered.find((p) => (p.channel ?? 'canvas2d') === 'gl');
+    const glPart = ordered.find((p) => {
+      const channel = p.channel ?? 'canvas2d';
+      return channel === 'gl' || channel === 'world';
+    });
     return (glPart?.blend ?? 'source-over') as GlobalCompositeOperation;
   })();
 
@@ -288,18 +349,34 @@ export function createStage(options: StageOptions): Stage {
   let drawn = 0;
   let cpuMs = 0;
   let fps = 0;
+  let frameMs = 0;
   let running = false;
   let disposed = false;
   let rafId: number | null = null;
   let lastNow = -1;
+  let pendingScale: number | null = null;
+  let slowFrames = 0;
+  let fastFrames = 0;
+  let lastScaleAt = 0;
 
   const stats: StageStats = {
     get fps() { return fps; },
     get cpuMs() { return cpuMs; },
+    get frameMs() { return frameMs; },
     get budgetCostMs() { return totalCost(); },
     get budgetMs() { return budgetMs; },
     get drawn() { return drawn; },
     get frames() { return frame; },
+    get renderScale() { return renderScale; },
+    get readiness() {
+      let min = 1;
+      for (const m of mounted) {
+        if (m.suspended || m.broken || !m.instance) continue;
+        const value = m.instance.readiness?.();
+        if (typeof value === 'number' && Number.isFinite(value)) min = Math.min(min, Math.max(0, value));
+      }
+      return min;
+    },
   };
 
   /**
@@ -320,11 +397,25 @@ export function createStage(options: StageOptions): Stage {
    */
   function replan(): void {
     degraded.length = 0;
+    // 构造期自报 `E_UNSUPPORTED` 的零件：instance 为 null，但它们的 def.requires 可能是满足的
+    // （例如 fake DOM 里 webgl2 探针为真、真实画布事件却不可用）。replan 必须把这类零件
+    // 重新记成 unsupported，否则 `degraded` 被清空后它会**静默消失**，而 drawn 又少一件。
+    for (const m of mounted) {
+      if (m.instance !== null || m.broken) continue;
+      m.suspended = true;
+      degraded.push({
+        id: m.def.id,
+        layer: m.def.layer,
+        reason: 'unsupported',
+        detail: '没有可用实例（环境缺少该零件需要的画布/能力）',
+      });
+    }
     // 能力不足的直接标记 unsupported，不构造
     for (const m of mounted) {
       const requires = m.def.requires;
       if (requires && requires.some((cap) => !caps.has(cap))) {
         m.suspended = true;
+        if (degraded.some((entry) => entry.id === m.def.id && entry.reason === 'unsupported')) continue;
         degraded.push({
           id: m.def.id,
           layer: m.def.layer,
@@ -334,7 +425,7 @@ export function createStage(options: StageOptions): Stage {
       }
     }
 
-    const candidates = mounted.filter((m) => !m.suspended);
+    const candidates = mounted.filter((m) => !m.suspended && !m.broken);
     const lodCapable = new Set<string>(
       candidates.filter((m) => m.instance && typeof m.instance.setLod === 'function').map((m) => m.def.id),
     );
@@ -385,6 +476,7 @@ export function createStage(options: StageOptions): Stage {
   for (let i = 0; i < ordered.length; i += 1) {
     const def = ordered[i];
     const channel: PartChannel = def.channel ?? 'canvas2d';
+    const space: 'screen' | 'subject' = channel === 'world' ? (def.space ?? 'screen') : 'screen';
 
     const requires = def.requires;
     const missing = requires ? requires.filter((cap) => !caps.has(cap)) : [];
@@ -393,6 +485,7 @@ export function createStage(options: StageOptions): Stage {
         def,
         channel,
         blend: def.blend ?? 'source-over',
+        space,
         instance: null,
         lod: 'high',
         suspended: true,
@@ -408,18 +501,62 @@ export function createStage(options: StageOptions): Stage {
     }
 
     let instance: PartInstance | null = null;
+    // 异步失败要落进 degraded；create() 还没返回时先攒着，返回后立刻补记。
+    let mountedEntry: Mounted | null = null;
+    const pendingErrors: string[] = [];
+    const onError = (detail: string): void => {
+      if (disposed) return;
+      if (!mountedEntry) {
+        pendingErrors.push(detail);
+        return;
+      }
+      if (mountedEntry.broken) return;
+      mountedEntry.broken = true;
+      mountedEntry.suspended = true;
+      degraded.push({
+        id: def.id,
+        layer: def.layer,
+        reason: 'suspended',
+        detail: `异步失败：${detail}`,
+      });
+    };
     try {
+      const isWorld = channel === 'world';
       instance = def.create({
-        canvas: channel === 'gl' ? (glCanvas as HTMLCanvasElement) : options.canvas,
-        ctx: channel === 'gl' ? null : ctx,
-        width,
-        height,
+        canvas: channel === 'canvas2d' ? options.canvas : (glCanvas as HTMLCanvasElement),
+        ctx: channel === 'canvas2d' ? ctx : null,
+        width: isWorld ? worldRect.w : width,
+        height: isWorld ? worldRect.h : height,
         dpr,
         seed: hashSeed(options.seed, def.id, i),
         biome: options.biome,
         lod: 'high',
+        onError,
       });
     } catch (error) {
+      // 零件可以自报「这个环境没有我要的画布/能力」（E_UNSUPPORTED）：
+      // 例如 koi-pond 在 Node 假 DOM 里没有真实 WebGL 画布。
+      // 这是**能力不足**，不是运行期 bug，必须落到 unsupported 而不是 E_PART_THROW。
+      const code = (error as { code?: string } | null)?.code;
+      if (code === 'E_UNSUPPORTED') {
+        mounted.push({
+          def,
+          channel,
+          blend: def.blend ?? 'source-over',
+          space,
+          instance: null,
+          lod: 'high',
+          suspended: true,
+          broken: false,
+        });
+        degraded.push({
+          id: def.id,
+          layer: def.layer,
+          reason: 'unsupported',
+          detail: error instanceof Error ? error.message : String(error),
+        });
+        continue;
+      }
       throw new StageError(
         'E_PART_THROW',
         def.id,
@@ -434,11 +571,14 @@ export function createStage(options: StageOptions): Stage {
       def,
       channel,
       blend: def.blend ?? 'source-over',
+      space,
       instance,
       lod: 'high',
       suspended: false,
       broken: false,
     });
+    mountedEntry = mounted[mounted.length - 1]!;
+    for (const detail of pendingErrors) onError(detail);
   }
 
   replan();
@@ -456,18 +596,47 @@ export function createStage(options: StageOptions): Stage {
     height = nextHeight > 0 ? nextHeight : 1;
     if (nextDpr && nextDpr > 0) dpr = Math.min(nextDpr, maxDpr);
 
-    const pxW = Math.max(1, Math.round(width * dpr));
-    const pxH = Math.max(1, Math.round(height * dpr));
-    for (const target of [options.canvas, glCanvas]) {
-      if (!target) continue;
-      target.width = pxW;
-      target.height = pxH;
-      target.style.width = `${width}px`;
-      target.style.height = `${height}px`;
+    // 纸矩形可能随视口比例变化（paper-ink 的 0.90/0.82 规则），所以每次 resize 重算，
+    // 而不是只信构造期那一次。world 零件据此换画布尺寸。
+    let nextSheet: Rect | null = null;
+    for (const def of ordered) {
+      if (def.layer !== 'L0' || typeof def.describe !== 'function') continue;
+      try {
+        const g = def.describe({ w: width, h: height, dpr }, options.biome);
+        if (g?.sheet && g.sheet.w > 0 && g.sheet.h > 0) nextSheet = g.sheet;
+      } catch {
+        // 忽略：没有纸就整屏
+      }
     }
-    if (typeof ctx.setTransform === 'function') ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    world.resize(width, height, dpr);
-    notifyResize({ w: width, h: height, dpr });
+    sheet = nextSheet;
+    worldRect = wantsSubject && sheet
+      ? { x: sheet.x, y: sheet.y, w: sheet.w, h: sheet.h }
+      : { x: 0, y: 0, w: width, h: height };
+    world.setSheet(sheet);
+
+    const effDpr = dpr * renderScale;
+    const pxW = Math.max(1, Math.round(width * effDpr));
+    const pxH = Math.max(1, Math.round(height * effDpr));
+
+    options.canvas.width = pxW;
+    options.canvas.height = pxH;
+    options.canvas.style.width = `${width}px`;
+    options.canvas.style.height = `${height}px`;
+
+    if (glCanvas) {
+      const glW = worldRect.w;
+      const glH = worldRect.h;
+      glCanvas.width = Math.max(1, Math.round(glW * effDpr));
+      glCanvas.height = Math.max(1, Math.round(glH * effDpr));
+      glCanvas.style.left = `${worldRect.x}px`;
+      glCanvas.style.top = `${worldRect.y}px`;
+      glCanvas.style.width = `${glW}px`;
+      glCanvas.style.height = `${glH}px`;
+    }
+
+    if (typeof ctx.setTransform === 'function') ctx.setTransform(effDpr, 0, 0, effDpr, 0, 0);
+    world.resize(width, height, effDpr);
+    notifyResize({ w: width, h: height, dpr: effDpr });
   }
 
   // 构造期就落一次尺寸：否则零件拿到的 width/height 与画布像素不一致
@@ -482,7 +651,11 @@ export function createStage(options: StageOptions): Stage {
     for (const m of mounted) {
       if (!m.instance || m.broken) continue;
       try {
-        m.instance.resize?.(size);
+        if (m.channel === 'world') {
+          m.instance.resize?.({ w: worldRect.w, h: worldRect.h, dpr: size.dpr });
+        } else {
+          m.instance.resize?.(size);
+        }
       } catch {
         m.broken = true;
       }
@@ -508,11 +681,29 @@ export function createStage(options: StageOptions): Stage {
    *
    * @param blend 合成模式（取自 StageOptions.glBlend 或 gl 零件自己的 blend）
    */
-  function compositeGl(blend: GlobalCompositeOperation): void {
+  function compositeGl(blend: GlobalCompositeOperation, rect: Rect | null): void {
     if (!glCanvas) return;
+    const target = rect ?? { x: 0, y: 0, w: width, h: height };
     ctx.save();
     ctx.globalCompositeOperation = blend;
-    ctx.drawImage(glCanvas as unknown as CanvasImageSource, 0, 0, width, height);
+    const full = target.x === 0 && target.y === 0 && target.w === width && target.h === height;
+    if (full) {
+      // 全屏：5 参数形式，源画布的整块像素铺满 CSS 尺寸（不是设备像素）
+      ctx.drawImage(glCanvas as unknown as CanvasImageSource, 0, 0, width, height);
+    } else {
+      // world/subject：源画布的像素尺寸就是 worldRect，铺到纸矩形里
+      ctx.drawImage(
+        glCanvas as unknown as CanvasImageSource,
+        0,
+        0,
+        glCanvas.width || 1,
+        glCanvas.height || 1,
+        target.x,
+        target.y,
+        target.w,
+        target.h,
+      );
+    }
     ctx.restore();
   }
 
@@ -536,12 +727,15 @@ export function createStage(options: StageOptions): Stage {
       if (m.suspended || m.broken || !m.instance) continue;
       const instance = m.instance;
 
-      if (m.channel === 'gl') {
+      if (m.channel === 'gl' || m.channel === 'world') {
         try {
           instance.update?.(f);
           instance.draw(f);
           // 同一个同步块里立刻读走：跨帧读 GL 画布可能拿到空或上一帧
-          compositeGl(glComposite);
+          compositeGl(
+            glComposite,
+            m.channel === 'world' && m.space === 'subject' ? worldRect : null,
+          );
           drawn += 1;
         } catch (error) {
           m.broken = true;
@@ -580,6 +774,35 @@ export function createStage(options: StageOptions): Stage {
     if (dt > 0) {
       const instant = 1 / dt;
       fps = fps === 0 ? instant : fps * 0.9 + instant * 0.1;
+      frameMs = frameMs === 0 ? dt * 1000 : frameMs * 0.9 + dt * 1000 * 0.1;
+    }
+
+    // ---- 实测 governor：static costMs 只能做装配决策，真实瓶颈只能用帧间隔抓 ----
+    // 只在「看起来像正常前台帧」的间隔上判断（<80ms），避免切后台回来把分辨率误降到底。
+    if (autoScale && dt > 0 && frame > 3 && dt < 0.08) {
+      if (fps < 48) {
+        slowFrames += 1;
+        fastFrames = 0;
+      } else if (fps > 57) {
+        fastFrames += 1;
+        slowFrames = 0;
+      } else {
+        slowFrames = 0;
+        fastFrames = 0;
+      }
+      if (slowFrames >= 12 && renderScale > 0.56 && timestamp - lastScaleAt > 1200) {
+        pendingScale = Math.max(0.55, renderScale * 0.85);
+        slowFrames = 0;
+      } else if (fastFrames >= 240 && renderScale < 1 && timestamp - lastScaleAt > 3000) {
+        pendingScale = Math.min(1, renderScale * 1.08);
+        fastFrames = 0;
+      }
+    }
+    if (pendingScale !== null) {
+      renderScale = pendingScale;
+      pendingScale = null;
+      lastScaleAt = timestamp;
+      applyResize(width, height, dpr);
     }
   }
 
@@ -599,6 +822,7 @@ export function createStage(options: StageOptions): Stage {
     stats,
     get order() { return ordered.map((p) => p.id); },
     world,
+    geometry,
     frame(nowMs?: number): void {
       renderFrame(nowMs);
     },
@@ -631,6 +855,27 @@ export function createStage(options: StageOptions): Stage {
     },
     setAudio(audio: AudioState | null): void {
       world.setAudio(audio);
+    },
+    setReducedMotion(value: boolean): void {
+      world.setReducedMotion(value);
+    },
+    setRenderScale(scale: number): void {
+      autoScale = false;
+      renderScale = Math.min(1, Math.max(0.55, scale));
+      applyResize(width, height, dpr);
+    },
+    setAutoScale(enabled: boolean): void {
+      autoScale = enabled === true;
+    },
+    cue(verb: string): void {
+      for (const m of mounted) {
+        if (m.suspended || m.broken || !m.instance) continue;
+        try {
+          m.instance.cue?.(verb);
+        } catch {
+          // cue 是「建议」不是「命令」：零件不接/接错都不该让整场崩
+        }
+      }
     },
     setPointer(nx: number, ny: number, down?: boolean): void {
       world.pointer.move(nx * width, ny * height);

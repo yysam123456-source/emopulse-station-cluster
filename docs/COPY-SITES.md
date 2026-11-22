@@ -4,8 +4,11 @@
 >
 > **这份文档现在是一条构建输入的单一来源**：`shared/sites/copy.mjs` 逐字照抄这里，`site-build` 断言每个值都能在本文找到原文（变异验证过：塞回旧句立刻红）。**所以改任何一个字都是协同改动**：先改这里，再改 `copy.mjs`，否则构建红。**不许为了过门去改本文——本文是标准，不是产物。** **`content/*.ts` 是未迁移的旧文案源**：虽被站点 TS 文件 import，但**不进构建产物**；现行门只校验 `copy.mjs`。§5/§6 的替换表是历史迁移记录，今天照它跑 grep 会在 content/ 上全红而构建全绿——这是"两套源并存"的已标注现状，**不是构建坏了**。
 >
-> **praise = 冻结 legacy**：仓库有 `sites/praise/`（源码完整、仍在注册表），但**无构建产物、不进 `copy.mjs`、不接入本期产品口径**。本文 §5/§6 里所有 `praise.ts` 行都是**历史句式规范**（给将来复用者看），**不是本站待办**。四站口径仍是 `/license` `/hug` `/still` `/koi-pond`。
+> **praise = 冻结 legacy**：仓库有 `sites/praise/`（源码完整、仍在注册表），但**无构建产物、不进 `copy.mjs`、不接入本期产品口径**。本文 §5/§6 里所有 `praise.ts` 行都是**历史句式规范**（给将来复用者看），**不是本站待办**。四站口径仍是 `/license` `/hug` `/still` `/koi`。
 >
+
+> **2026-11-20 现状（优先于本文历史迁移段）**：路由是 `/koi`（不是 `/koi-pond`），承载 zz85 完整锦鲤池的 ink / paint / real 三种 look。`/koi` 没有主按钮，也没有「Keep this frame」；Look / Touch / Camera / Water / Weather / Music 是 Esc 菜单里的二级控制，`?style=` 是正式深链接。§6.4 中「风格切换器不存在、只做 pond 一条路由」是旧 ASCII 方案的迁移记录，已作废；保留它只为解释历史，不再作为施工口径。
+
 > 三条铁律（每句都过了一遍）：**不声称任何健康/疗愈效果** · **不编造社交证据**（不出现"有人回赠""已送达""有人在等你"——零服务端不可能知道） · **不出现**消费引导、外部链接、注册入口、连续天数、打卡、进度成就、"你今天完成了"。
 >
 > 词数按 §2.1 的三层限制：H1 ≤ 2 词、hook ≤ 12 词、主按钮 ≤ 3 词。**以下全部是终稿，没有备选。**
@@ -38,12 +41,15 @@
 | hook | `Nothing here needs an answer.` | 5 |
 | 主按钮 | `Sit` | 1 |
 
-### `/koi-pond` · ink
+### `/koi` · ink / paint / real
 
 | 层 | 英文 | 词数 |
 |---|---|---|
 | H1 | `Koi Pond` | 2 |
 | hook | `Watch the fish. That is all.` | 6 |
+| 主按钮 | **无** | 0 |
+
+> **2026-11-19 A1 裁决**：这一站是连续场，读位置不读「决定」；`COPY.koiPond.cta = null`。旧文档里的 `Watch` 按钮**不实现**——一个不改变任何东西的按钮会把「看鱼」降级成「任务」。
 | 主按钮 | `Watch` | 1 |
 
 **首屏除此之外一个字都没有。** 没有副标题、没有页脚、没有版本号、没有"向下滚动"、没有第二个按钮、没有跨站链接。
@@ -57,10 +63,10 @@
 | 菜单标题 | `MENU` | — | — |
 | 第 1 项 | `Sound` | `Off` / `On` | `Off` |
 | 第 2 项 | `Motion` | `Full` / `Reduced` | 跟随系统；系统为 reduce 时 `Reduced` |
-| 第 3 项 | `Quality` | `Low` / `Normal` | `Normal` |
+| 第 3 项 | `Quality` | `High` / `Normal` / `Low` | `High` |
 | 第 4 项（仅 `/hug`） | `Wind` | `Off` / `On` | `Off` |
 | 第 5 项 | `About` | 见下（每站一段，≤ 30 词） | — |
-| 第 6 项 | `Credits` | `Parts adapted from public demos. Each part names its source in its README.` | — |
+| 第 6 项 | `Credits` | `Parts are adapted from public demos or written here. Each part names its source in its README.` | — |
 | 固定末行 | — | `Nothing here is sent anywhere.` | — |
 | 关闭 | `Close` | — | — |
 
@@ -79,7 +85,7 @@ Microphone on. Nothing is recorded. Wind only.
 | `/license` | `A desk, a sheet of paper, a stamp. The number on your card is the only copy.` |
 | `/hug` | `A meadow at dusk. The link carries one thing: which page it came from.` |
 | `/still` | `Water, and a light that goes down. No one is counting how long you stay.` |
-| `/koi-pond` | `A pond drawn in characters. Move the pointer to push the ink. The address keeps this pond.` |
+| `/koi` | `A koi pond in ink, watercolour, or real water. Move the pointer to stir it. Nothing is sent anywhere.` |
 
 ### 2.1 每一项走哪条通道（审计结果：**全四站只有 1 处「世界注入」**）
 
@@ -97,8 +103,14 @@ Microphone on. Nothing is recorded. Wind only.
 | 四站 | `MENU`（标题）/ `About` / `Credits` / `Close` | 纯 UI | — |
 | 四站 | `Sound`（Off/On） | 纯 UI：音频**输出**开关 | 不改世界，只决定你有没有声音 |
 | 四站 | `Motion`（Full/Reduced） | 世界参数 | 零件读它降速，是一次设定不是事件 |
-| 四站 | `Quality`（Low/Normal） | 世界参数 | `setLod` / 预算，同上 |
+| 四站 | `Quality`（High/Normal/Low） | 世界参数 | `setRenderScale` / 预算，同上 |
 | `/hug` | `Wind`（Off/On） | 世界输入（连续） | 走 `stage.setAudio`，只有 level/bands，无"决定" |
+| `/koi` | `Look`（Ink / Watercolour / Real） | 世界参数 | 切三条渲染路径，不是滤镜 |
+| `/koi` | `Touch`（Ripple / Feed / Call） | 世界参数 | 改触摸模式，读位置不读"决定" |
+| `/koi` | `Camera`（Top / 2.5D / Orbit） | 世界参数 | 相机档位，可连续转 |
+| `/koi` | `Water`（Pebble / Sky / Dark） | 世界参数 | 池底材质 |
+| `/koi` | `Weather`（Dry / Drizzle / Rain） | 世界参数 | 雨档 |
+| `/koi` | `Music`（Off / Still / Flow） | 世界参数 | 音乐档，Sound 开关仍归零件 |
 | — | — | — | **以上全部加起来，世界注入 = 0** |
 
 **菜单之外的两处，也要分清**：
@@ -110,9 +122,9 @@ Microphone on. Nothing is recorded. Wind only.
 | `/license` | `Stamp again` | 纯 UI + 站点内时序 | **在纸上，不在 Esc 菜单**——把一次仪式动作藏进菜单，它就不是仪式了 |
 | `/license` | `Save it` / 复制编号 | 纯 UI（导出是裁切当前帧） | 纸下方 |
 | `/still` | `Sit` | 纯 UI + 站点内状态切换 | 首屏 |
-| `/still` | `Copy the line` | 纯 UI | 停留 ≥60s 后 |
-| `/koi-pond` | `Watch` | **纯 UI，不注入** | 首屏——这一站是连续场，读位置不读"决定"，给它注入等于凭空造一个决定 |
-| `/koi-pond` | `Keep this frame` / `Copy the seed link` | 纯 UI | 停留 ≥60s 后 |
+| `/still` | `Copy the line` | 纯 UI（**未实现**） | 停留 ≥60s 后；见 §开放项 |
+| `/koi` | **无主按钮** | — | 首屏——连续场，读位置不读"决定"；`cta=null` |
+| `/koi` | — | — | 不设带走入口；看鱼本身就是目的 |
 
 **审计结论**：全四站 **1 处世界注入**（`/hug` 的 `Let it go`），且它不在任何菜单里。四站里三站完全不需要注入——**这个比例说明「站点是翻译层」是对的：默认不翻译，只在 UI 真的驱动世界时翻译一次。** 若将来算出多于一处，那不是文案问题，是有地方把 UI 当成了世界入口，要先改设计。
 
@@ -132,7 +144,7 @@ Microphone on. Nothing is recorded. Wind only.
 | 审批完成后（低对比，二级） | `drag to move the light · f to fold the corner` | 纸角，`Stamp again` 下一行 |
 | 保存完成 | `Saved.` | 按钮原位，2s 后回退为 `Save it` |
 
-> 三段状态机（`verifying` / `stamping` / `approved`）**不上首屏**。若要显示，只在 `About` 里作为一句说明，不进画面。
+> **2026-11-19 A1 裁决**：三段状态机**不画进度条、不列三步**；只允许一个极小的状态词（`approved`）落在纸面底部，作为「章已落下」的回声。完整三段只在 Esc 的 About 里说明。
 
 ### `/hug`
 
@@ -142,9 +154,9 @@ Microphone on. Nothing is recorded. Wind only.
 | `drifting` | `It is on its way.` |
 | `away`（种子离场 3s 后） | `Gone. Keep some for yourself.` |
 | `away` 之后出现的按钮 | `Copy the link` |
-| 从 `?from=hug` 进入时的 hook 下加一行 | `Someone sent you this link.` |
+| 从 `?from=hug` 进入时的 hook 下加一行 | `Someone sent you a little warmth.` |
 | 从 `?from=hug` 进入时主按钮变为 | `Send one on` |
-| 麦克风打开时（一次性，2s） | `Wind is on. Nothing is recorded.` |
+| 麦克风打开后（停留到关闭） | `Microphone on. Nothing is recorded. Wind only.` |
 
 ### `/still`
 
@@ -166,7 +178,7 @@ Microphone on. Nothing is recorded. Wind only.
 
 > 第 5 句是全站落点，**不要改**。五句都不含数字。
 
-### `/koi-pond`
+### `/koi`
 
 | 触发 | 英文 |
 |---|---|
@@ -220,12 +232,12 @@ No reply needed. None expected.
 
 正文即 §3 那五档之一（按当前光的状态），**不含任何数字**：没有时长、没有米数、没有百分比、没有日期时间。复制范围只含那一句，不含站名、不含 URL。
 
-### `/koi-pond` 图与链接
+### `/koi` 图与链接
 
 | 项 | 规定 |
 |---|---|
 | 图 | PNG，一帧池面。**无边框、无标题、无水印、无任何文字**（含站名与编号） |
-| 链接形状 | `https://<host>/koi-pond?s=<seed>`（seed 为十进制非负整数） |
+| 深链接 | `https://<host>/koi?style=ink|paint|real`；另有 `mode/cam/floor/rain/music` 可组合 |
 | 链接说明 | 无。由 `Copy the seed link` 的按钮标签自解释，不加提示语 |
 
 ---
@@ -334,7 +346,7 @@ No reply needed. None expected.
 | 11 | 4 | V | `A permit to simply be. No strings attached.` | `A permit to simply be.` |
 | 12 | 10 | C | `You are hereby permitted to rest, to begin again, and to take up space.` | `This permit entitles the holder to rest, to stop explaining, and to take up space.` |
 
-> 第 8 行 `stages` **保留**（`verifying` / `stamping` / `approved`），但**不上首屏**，只在 Esc 的 About 里作为一句说明（§1.1 的形状裁决）。
+> 第 8 行 `stages` **保留**（`verifying` / `stamping` / `approved`），但**不画进度条/不列三步**；首屏只允许一个极小的 `approved` 状态词，完整说明在 Esc 的 About 里（§1.1 的形状裁决，2026-11-19 A1）。
 > 第 13 行 `sealText: 'APPROVED'` 保留；章下副行 `NO COPY KEPT.` 是本轮新增，加在 `LICENSE_COPY` 里（键名建议 `sealSub`）。
 > 第 14 行 `exportedEn: 'Your license is ready.'` 保留。
 
@@ -417,6 +429,6 @@ export const ENTRY = {
   license:   { h1: 'License',  hook: 'A permit to simply be.',            cta: 'Stamp it' },
   hug:       { h1: 'Hug',      hook: 'Send a little warmth as a link.',   cta: 'Let it go' },
   still:     { h1: 'Still',    hook: 'Nothing here needs an answer.',     cta: 'Sit' },
-  koiPond:   { h1: 'Koi Pond', hook: 'Watch the fish. That is all.',      cta: 'Watch' },
+  koiPond:   { h1: 'Koi Pond', hook: 'Watch the fish. That is all.',      cta: null },
 } as const;
 ```

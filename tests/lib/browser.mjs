@@ -148,7 +148,7 @@ export async function launch(options = {}) {
  *
  * @param {object} browser launch() 返回的 browser
  * @param {string} filePath 本地 HTML 路径（repo 相对或绝对）
- * @param {{ width?: number, height?: number, dpr?: number }} [viewport]
+ * @param {{ width?: number, height?: number, dpr?: number, query?: string }} [viewport]
  * @returns {Promise<{ page: object, close: () => Promise<void>, console: Array<object>, errors: Array<string> }>}
  */
 export async function openFile(browser, filePath, viewport = {}) {
@@ -172,7 +172,9 @@ export async function openFile(browser, filePath, viewport = {}) {
   });
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
 
-  await page.goto(pathToFileURL(absolute).href, { waitUntil: 'load' });
+  const url = pathToFileURL(absolute);
+  if (viewport.query) url.search = viewport.query;
+  await page.goto(url.href, { waitUntil: 'load' });
   return {
     page,
     console: messages,

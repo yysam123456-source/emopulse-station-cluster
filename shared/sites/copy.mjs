@@ -48,8 +48,8 @@ export const COPY = Object.freeze({
   still: {
     h1: 'Still',
     hook: 'Nothing here needs an answer.',
-    /** 定稿 CTA 是 'Sit' —— 但"坐下"这件事还没有实现，先不挂。 */
-    cta: null,
+    /** 定稿 CTA 是 'Sit' —— 现在真的把世界视角沉下去（cue('sit')）。 */
+    cta: 'Sit',
     ctaCopy: 'Sit',
   },
   // 注意：文档里这一项的 key 是 `koiPond`，站点 slug 是 `koi`
@@ -77,12 +77,21 @@ export const UI = Object.freeze({
   items: [
     { id: 'menu-sound', label: 'Sound', value: 'Off', channel: 'ui' },
     { id: 'menu-motion', label: 'Motion', value: 'Full', channel: 'world-param' },
-    { id: 'menu-quality', label: 'Quality', value: 'Normal', channel: 'world-param' },
+    { id: 'menu-quality', label: 'Quality', value: 'High', channel: 'world-param' },
+    // 只给 /hug：麦克风是**可选输入**，不是默认权限请求。build.mjs 按 slug 过滤。
+    { id: 'menu-wind', label: 'Wind', value: 'Off', channel: 'world-input' },
+    // /koi 的原作控制：都藏在 Esc 里，首屏仍然只有标题、引导和画面。
+    { id: 'menu-look', label: 'Look', value: 'Ink', channel: 'world-param', only: 'koi' },
+    { id: 'menu-touch', label: 'Touch', value: 'Ripple', channel: 'world-param', only: 'koi' },
+    { id: 'menu-camera', label: 'Camera', value: 'Top', channel: 'world-param', only: 'koi' },
+    { id: 'menu-water', label: 'Water', value: 'Pebble', channel: 'world-param', only: 'koi' },
+    { id: 'menu-weather', label: 'Weather', value: 'Dry', channel: 'world-param', only: 'koi' },
+    { id: 'menu-music', label: 'Music', value: 'Off', channel: 'world-param', only: 'koi' },
     { id: 'menu-about', label: 'About', value: '', channel: 'ui' },
     { id: 'menu-credits', label: 'Credits', value: '', channel: 'ui' },
     { id: 'menu-close', label: 'Close', value: '', channel: 'ui' },
   ],
-  creditsValue: 'Parts adapted from public demos. Each part names its source in its README.',
+  creditsValue: 'Parts are adapted from public demos or written here. Each part names its source in its README.',
   privacy: 'Nothing here is sent anywhere.',
 });
 

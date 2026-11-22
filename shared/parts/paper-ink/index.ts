@@ -17,7 +17,7 @@
 // 暗角不在这里：产品判定「纸上边缘发暗会读成旧照片滤镜」，暗角归 L4 `pixel-post`。
 //
 // 帧预算纪律：draw 里零 new、零 createGradient、零字符串拼接、零 Math.random。
-import type { PartEnv, PartInstance, PartV2, StageSize, WorldFrame } from '../../stage/contract';
+import type { BiomeId, PartEnv, PartInstance, PartV2, Rect, StageSize, WorldFrame } from '../../stage/contract';
 import { mulberry32 } from '../../stage/world';
 
 /**
@@ -30,6 +30,38 @@ import { mulberry32 } from '../../stage/world';
  *   所以：**屏上纸与导出卡必须同比例**，`tests/site-build.mjs` 会断言站点常量与本常量一致。
  */
 export const SHEET_ASPECT = 1.4142;
+
+/**
+ * 纸矩形（CSS px）—— 壳与 world 通道的**唯一**布局来源。
+ *
+ * 从前 `shared/sites/shell.ts` 手抄了 1.4142 / 0.90 / 0.82 三个数字，
+ * 纸一改比例，DOM 文字和画布纸面就会错位。现在只在这里算一次。
+ *
+ * `ink` biome 是整屏纸（/koi 的纸铺到画布外，没有台面），所以返回 null：
+ * world 通道按整屏合成，DOM 也不该被框进一个不存在的纸矩形。
+ *
+ * @param width CSS 宽
+ * @param height CSS 高
+ * @param biome 站点 biome
+ */
+export function sheetRect(width: number, height: number, biome?: BiomeId): Rect | null {
+  if (biome === 'ink') return null;
+  const w = width > 0 ? width : 1;
+  const h = height > 0 ? height : 1;
+  let sheetH = Math.round(h * 0.90);
+  let sheetW = Math.round(sheetH * SHEET_ASPECT);
+  const maxW = Math.round(w * 0.82);
+  if (sheetW > maxW) {
+    sheetW = maxW;
+    sheetH = Math.round(sheetW / SHEET_ASPECT);
+  }
+  return {
+    x: Math.round((w - sheetW) / 2),
+    y: Math.round((h - sheetH) / 2),
+    w: sheetW,
+    h: sheetH,
+  };
+}
 
 /** 纸面场生成分辨率上限（CSS px）。超过就按比例缩，避免大屏上一次性烘焙过久。 */
 const FIELD_MAX_SIDE = 1024;
@@ -331,15 +363,13 @@ export function create(env: PartEnv): PartInstance {
 
     // 纸的高 ≈ 90% 画幅高；宽度按 1.41 反推，并保证不超出 82% 画幅宽。
     // 两者冲突时（极端窄视口）以"宽度不越界"为准 —— 宁可纸矮一点，也不要贴到边上。
-    let sheetH = Math.round(pxH * 0.90);
-    let sheetW = Math.round(sheetH * SHEET_ASPECT);
-    const maxW = Math.round(pxW * 0.82);
-    if (sheetW > maxW) {
-      sheetW = maxW;
-      sheetH = Math.round(sheetW / SHEET_ASPECT);
-    }
-    const sheetX = Math.round((pxW - sheetW) / 2);
-    const sheetY = Math.round((pxH - sheetH) / 2);
+    // 公式只在 sheetRect 里写一次（壳/导出/world 通道都读它）。
+    const rect = sheetRect(w, h, env.biome);
+    if (!rect) return;
+    const sheetW = Math.round(rect.w * dpr);
+    const sheetH = Math.round(rect.h * dpr);
+    const sheetX = Math.round(rect.x * dpr);
+    const sheetY = Math.round(rect.y * dpr);
 
     // ── 台面（暖中暗，L*≈20）：纸以外的那圈背景 ──
     const desk = g.createLinearGradient(0, 0, pxW * 0.75, pxH);
@@ -510,6 +540,9 @@ export const part: PartV2 = {
   channel: 'canvas2d',
   // L0 是整站底色，不许被挂起：挂掉就是纯黑屏
   expendable: false,
+  describe(size, biome) {
+    return { sheet: sheetRect(size.w, size.h, biome) };
+  },
   create,
 };
 

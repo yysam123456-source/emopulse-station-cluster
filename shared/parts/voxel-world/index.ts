@@ -117,8 +117,10 @@ export const part: PartV2 = {
   // 引擎走 WebGPU（navigator.gpu + adapter + device），不是 WebGL2：
   // 见 shared/core/src/main.js:19 `if (!navigator.gpu) fail(...)`，全篇 getContext('webgpu')。
   requires: ['webgpu'],
-  // 实测值（headless Edge + SwiftShader 软件后端，1920×1080@dpr1）见 README。
-  costMs: 0.05,
+  // ★ 旧值 0.05ms 是**假数**：它只计了 JS 调用，没计 GPU。实测 1280×800@dpr2
+  //   在 M2 上 22.7fps（≈44ms/帧），是四站里唯一真正的瓶颈。现在按实测填 9ms，
+  //   /still 的 12ms 预算会让它和 post 一起降到 low（dpr 1 + 内部 0.6）。
+  costMs: 9,
   kb: 0,
   create(env: PartEnv): PartInstance {
     let engine: VoxelEngine | null = null;
@@ -132,6 +134,11 @@ export const part: PartV2 = {
     let smoothMs = 0;
     let draws = 0;
     const bootStart = nowMs();
+    /** 默认视角（引擎 POSES[0]）与「坐下」近景（POSES[9]）。 */
+    const BASE_POSE = [-16, -37, -84, 0, -22, -108] as const;
+    const SIT_POSE = [-6, -39.2, 44.5, 4, -37, 70] as const;
+    let currentPose: number[] = BASE_POSE.slice();
+    let glide: { from: number[]; to: number[]; t: number; dur: number } | null = null;
 
     telemetry = {
       ready: false,
@@ -173,6 +180,8 @@ export const part: PartV2 = {
           },
           onLost: (reason: string) => {
             error = `device lost: ${reason}`;
+            // 异步设备丢失：装配器要能从 degraded 里看到，而不是只看到「还剩一层水」。
+            env.onError?.(error);
           },
         })) as VoxelEngine;
 
@@ -193,6 +202,7 @@ export const part: PartV2 = {
       } catch (e) {
         error = e instanceof Error ? e.message : String(e);
         telemetry = { ...telemetry, error };
+        env.onError?.(error);
       }
     })();
 
@@ -208,6 +218,26 @@ export const part: PartV2 = {
         if (disposed || !engine) return;
         const started = nowMs();
         const p = frame.pointer;
+        if (glide) {
+          glide.t += frame.dt;
+          const k = Math.min(1, glide.t / glide.dur);
+          // easeInOutCubic：起步和落座都慢，中间快 —— 像人坐下，不像镜头瞬移
+          const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+          for (let i = 0; i < 6; i += 1) {
+            currentPose[i] = glide.from[i]! + (glide.to[i]! - glide.from[i]!) * e;
+          }
+          engine.setView(currentPose[0]!, currentPose[1]!, currentPose[2]!, currentPose[3]!, currentPose[4]!, currentPose[5]!);
+          if (k >= 1) glide = null;
+          lastX = p.x;
+          lastY = p.y;
+          sawPointer = true;
+          engine.render(frame.t * 1000);
+          const ms = nowMs() - started;
+          smoothMs = draws === 0 ? ms : smoothMs * 0.9 + ms * 0.1;
+          draws += 1;
+          telemetry = { ...telemetry, drawMs: smoothMs, draws, error };
+          return;
+        }
         if (sawPointer) {
           const dx = (p.x - lastX) * frame.size.w * POINTER_GAIN;
           const dy = (p.y - lastY) * frame.size.h * POINTER_GAIN;
@@ -244,6 +274,20 @@ export const part: PartV2 = {
         lod = next;
         telemetry = { ...telemetry, lod, scale: LOD[lod].scale };
         applyLayout();
+      },
+
+      cue(verb: string): void {
+        if (disposed) return;
+        if (verb === 'sit') {
+          glide = { from: currentPose.slice(), to: SIT_POSE.slice(), t: 0, dur: 2.4 };
+        } else if (verb === 'stand' || verb === 'reset') {
+          glide = { from: currentPose.slice(), to: BASE_POSE.slice(), t: 0, dur: 2.4 };
+        }
+      },
+
+      readiness(): number {
+        // 未就绪=0（壳保持 boot 遮罩）；失败=1（让 tide 底材露出来，不能让用户看黑屏）
+        return engine ? 1 : (error ? 1 : 0);
       },
 
       dispose(): void {

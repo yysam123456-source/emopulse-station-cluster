@@ -22,6 +22,7 @@ import {
   type PartV2,
   type Stage,
 } from '../stage/index';
+import { createAmbience, type Ambience } from './audio';
 
 /** 站点配置（生成期写死进 HTML）。 */
 export interface SiteConfig {
@@ -35,9 +36,15 @@ export interface SiteConfig {
   readonly seed: number;
   readonly budgetMs: number;
   readonly glBlend: BlendMode | null;
+  /** 站内自持声音时关掉壳的通用环境声（/koi 的原作水声/音乐）。 */
+  readonly ambience?: boolean;
   readonly hasGl: boolean;
   /** L0 画的是"一张纸"时，L5 文案要落在纸内（纸的几何由 `paper-ink` 的 `SHEET_ASPECT` 决定） */
   readonly paperSheet?: boolean;
+  /** 菜单 About 的一句（来自 COPY/UI，不在壳里现编） */
+  readonly privacy: string;
+  /** 菜单 Credits 的一句（来自 COPY/UI） */
+  readonly credits: string;
 }
 
 /** 站点快照（供 CDP / 测试读取）。 */
@@ -50,6 +57,9 @@ export interface SiteSnapshot {
   readonly frames: number;
   readonly fps: number;
   readonly cpuMs: number;
+  readonly frameMs: number;
+  readonly readiness: number;
+  readonly renderScale: number;
   readonly degraded: readonly { id: string; layer: PartLayer; reason: string; detail: string }[];
   /** 主按钮是否已经可以按（L5 的显示时机由壳决定，先暴露成数据） */
   readonly ctaEnabled: boolean;
@@ -68,6 +78,8 @@ export interface SiteHandle {
   setModal(open: boolean): void;
   /** 每帧回调：时间来自 `stage.frame`（站内不许自持时钟） */
   onFrame(fn: (t: number, dt: number) => void): void;
+  /** 释放舞台与环境声（测试/热重载用） */
+  dispose(): void;
 }
 
 /** 调试条刷新间隔（毫秒）。 */
@@ -99,9 +111,13 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
   const errBox = document.getElementById('boot-error');
   const cta = document.getElementById('cta');
   const menu = document.getElementById('menu');
+  const menuNote = document.getElementById('menu-note');
+  const ambience: Ambience | null = config.ambience === false ? null : createAmbience(config.biome);
 
   if (document.body) {
     document.body.dataset.state = 'booting';
+    document.body.dataset.slug = config.slug;
+    document.body.dataset.biome = config.biome;
     // 调试条只在 `?debug` 时出现：它是开发工具，默认不该出现在产品画面里
     document.body.dataset.debug = /(?:^|[?&])debug\b/.test(window.location.search) ? 'on' : 'off';
   }
@@ -187,8 +203,89 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     if (uiModalOpen) {
       down = false;
       pushPointer();
+      // 焦点进入模态：键盘用户按 Esc 打开后，下一次 Tab 不该从页面顶部重新开始
+      window.setTimeout(() => {
+        (document.getElementById('menu-sound') as HTMLElement | null)?.focus();
+      }, 0);
+    } else {
+      (document.activeElement as HTMLElement | null)?.blur?.();
     }
   }
+
+  // ── Esc 菜单：六个按钮必须真的做事（第一版全是死按钮，点了没反应）──
+  const menuValue = (id: string): HTMLElement | null => {
+    const button = document.getElementById(id);
+    if (!button) return null;
+    let span = button.querySelector<HTMLElement>('.menu-value');
+    if (!span) {
+      span = document.createElement('span');
+      span.className = 'menu-value';
+      button.appendChild(span);
+    }
+    return span;
+  };
+
+  const setMenuValue = (id: string, text: string): void => {
+    const span = menuValue(id);
+    if (span) span.textContent = text;
+  };
+
+  const showMenuNote = (text: string): void => {
+    if (!menuNote) return;
+    if (menuNote.hidden || menuNote.textContent !== text) {
+      menuNote.textContent = text;
+      menuNote.hidden = false;
+    } else {
+      menuNote.hidden = true;
+    }
+  };
+
+  const motionQuery = typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+  let reducedMotion = motionQuery?.matches === true;
+  setMenuValue('menu-motion', reducedMotion ? 'Reduced' : 'Full');
+  setMenuValue('menu-quality', 'High');
+  setMenuValue('menu-sound', 'Off');
+
+  let qualityStep = 0; // 0=High(1.0) 1=Normal(0.85) 2=Low(0.7)
+  const QUALITY: readonly { label: string; scale: number }[] = [
+    { label: 'High', scale: 1 },
+    { label: 'Normal', scale: 0.85 },
+    { label: 'Low', scale: 0.7 },
+  ];
+
+  document.getElementById('menu-sound')?.addEventListener('click', () => {
+    // 站内自持声音：/koi 的 attach 接管这个按钮，壳不叠第二套水声。
+    if (!ambience) return;
+    if (ambience.enabled) {
+      ambience.stop();
+      setMenuValue('menu-sound', 'Off');
+      return;
+    }
+    const ok = ambience.start();
+    setMenuValue('menu-sound', ok ? 'On' : 'Off');
+  });
+  document.getElementById('menu-motion')?.addEventListener('click', () => {
+    reducedMotion = !reducedMotion;
+    stage.setReducedMotion(reducedMotion);
+    setMenuValue('menu-motion', reducedMotion ? 'Reduced' : 'Full');
+  });
+  document.getElementById('menu-quality')?.addEventListener('click', () => {
+    qualityStep = (qualityStep + 1) % QUALITY.length;
+    const item = QUALITY[qualityStep]!;
+    stage.setRenderScale(item.scale);
+    setMenuValue('menu-quality', item.label);
+  });
+  document.getElementById('menu-about')?.addEventListener('click', () => {
+    showMenuNote(config.privacy);
+  });
+  document.getElementById('menu-credits')?.addEventListener('click', () => {
+    showMenuNote(config.credits);
+  });
+  document.getElementById('menu-close')?.addEventListener('click', () => {
+    setModal(false);
+  });
 
   // 主按钮：**绑 click**（覆盖鼠标 / 触屏 / 键盘回车与空格）—— 键盘用户唯一的路径
   // 主按钮的通道由 `data-channel` 决定：
@@ -199,62 +296,62 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     const channel = cta.getAttribute('data-channel');
     cta.addEventListener('click', () => {
       if (uiModalOpen) return;
-      if (channel === 'world-inject') tap();
-      else window.dispatchEvent(new CustomEvent('site:cta'));
+      if (channel === 'world-inject') {
+        // 世界注入：一次按下（零件看到上升沿），同时派发站点因果（/hug 的 release）
+        tap();
+        window.dispatchEvent(new CustomEvent('site:cta'));
+      } else {
+        window.dispatchEvent(new CustomEvent('site:cta'));
+      }
     });
   }
 
   // Esc 菜单：模态期间世界不接收指针（④）
   window.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (event.key === 'Escape') setModal(!uiModalOpen);
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setModal(!uiModalOpen);
+    }
   });
 
   /**
-   * 把纸的几何算成 CSS 变量（与 `paper-ink` 的布局公式**必须一致**）。
+   * 把纸的几何写成 CSS 变量。
    *
-   * 为什么放在壳里：L5 是 DOM，它不知道画布里的纸在哪。而"文字只能落在纸内或 UI 层"是产品红线。
-   * 两边算同一个公式 = 一个隐式耦合，所以这里把公式抄成一行注释，并让 `paper-visual` 的
-   * 实测比例（1.415）与 `SHEET_ASPECT` 互相印证 —— 任何一边改了，另一边的门会红。
+   * 公式**只在 `paper-ink.sheetRect()` 里存在一份**，壳通过 `stage.geometry.sheet` 读结果。
+   * 从前这里手抄了 1.4142 / 0.90 / 0.82 三个数字 —— 纸一改比例，DOM 文字和画布纸面就会错位，
+   * 而所有门都测不出来。现在两边读同一个矩形。
    */
   function layoutSheet(): void {
-    if (!config.paperSheet || !document.body) return;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const aspect = 1.4142;
-    let h = vh * 0.90;
-    let w = h * aspect;
-    const maxW = vw * 0.82;
-    if (w > maxW) {
-      w = maxW;
-      h = w / aspect;
+    if (!document.body) return;
+    const rect = stage.geometry.sheet;
+    if (!config.paperSheet || !rect) {
+      document.body.dataset.sheet = 'off';
+      return;
     }
-    const x = (vw - w) / 2;
-    const y = (vh - h) / 2;
     const root = document.documentElement;
-    root.style.setProperty('--sheet-x', `${x}px`);
-    root.style.setProperty('--sheet-y', `${y}px`);
-    root.style.setProperty('--sheet-w', `${w}px`);
-    root.style.setProperty('--sheet-h', `${h}px`);
+    root.style.setProperty('--sheet-x', `${rect.x}px`);
+    root.style.setProperty('--sheet-y', `${rect.y}px`);
+    root.style.setProperty('--sheet-w', `${rect.w}px`);
+    root.style.setProperty('--sheet-h', `${rect.h}px`);
     document.body.dataset.sheet = 'on';
   }
 
   // ── 尺寸 ──
   const onResize = (): void => {
-    layoutSheet();
     stage.resize(
       window.innerWidth > 0 ? window.innerWidth : canvas.clientWidth,
       window.innerHeight > 0 ? window.innerHeight : canvas.clientHeight,
       window.devicePixelRatio > 0 ? window.devicePixelRatio : 1,
     );
+    // 先 resize（stage 会重算纸矩形），再读 geometry 写 CSS 变量
+    layoutSheet();
     pushPointer();
   };
-  layoutSheet();
+  onResize();
   window.addEventListener('resize', onResize, { passive: true });
 
   // ── 帧循环 ──
   let lastPaint = -Infinity;
-  let frameMs = 0;
-  let prevTs = -1;
 
   const currentLod = (): Lod => {
     for (let i = 0; i < stage.degraded.length; i += 1) {
@@ -268,11 +365,13 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     lastPaint = ts;
     const stats = stage.stats;
     const degraded = stage.degraded;
-    const state = degraded.length === 0 ? 'ready' : 'degraded';
+    const ready = stats.readiness >= 1;
+    const state = !ready ? 'booting' : (degraded.length === 0 ? 'ready' : 'degraded');
     const lines: string[] = [];
     lines.push(
       `state ${state}   lod ${currentLod()}   fps ${stats.fps.toFixed(0)}`
-      + `   frame ${frameMs.toFixed(1)}ms   cpu ${stats.cpuMs.toFixed(2)}ms`
+      + `   frame ${stats.frameMs.toFixed(1)}ms   cpu ${stats.cpuMs.toFixed(2)}ms`
+      + `   scale ${stats.renderScale.toFixed(2)}   ready ${stats.readiness.toFixed(2)}`
       + `   drawn ${stats.drawn}/${parts.length}   budget ${stats.budgetMs.toFixed(1)}ms`,
     );
     lines.push(`order ${orderLabel}`);
@@ -285,9 +384,6 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
   }
 
   function tick(ts: number): void {
-    const delta = prevTs >= 0 ? ts - prevTs : 1000 / 60;
-    prevTs = ts;
-    frameMs = frameMs === 0 ? delta : frameMs * 0.9 + delta * 0.1;
     // 注入的按下：frame 前置 true、frame 后立刻释放 —— 零件看到恰好一个上升沿
     if (pendingTap) stage.setPointer(nx, ny, true);
     stage.frame(ts);
@@ -322,6 +418,9 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
         frames: stats.frames,
         fps: stats.fps,
         cpuMs: stats.cpuMs,
+        frameMs: stats.frameMs,
+        readiness: stats.readiness,
+        renderScale: stats.renderScale,
         degraded,
         ctaEnabled: config.cta !== null,
         tapped,
@@ -331,6 +430,10 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     setModal,
     onFrame(fn: (t: number, dt: number) => void): void {
       frameHooks.push(fn);
+    },
+    dispose(): void {
+      ambience?.dispose();
+      stage.dispose();
     },
   };
 

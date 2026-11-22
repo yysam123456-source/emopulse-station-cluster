@@ -252,6 +252,9 @@ for (const name of Object.keys(PRESETS)) {
   check(html === second.html, `${name}: 两次构建产物不逐字节一致（构建不确定，无法复现画面）`);
 
   // 零外部请求
+  // ★ 例外：three.js 内部用 `http://www.w3.org/1999/xhtml` 作为 createElementNS 的
+  //   **XML 命名空间**，它不是网络请求。只放行这一个字面量，其余 http(s) 仍然红。
+  const htmlExternal = html.replace(/http:\/\/www\.w3\.org\/1999\/xhtml/g, 'urn:xhtml');
   const externalPatterns = [
     [/https?:\/\//i, 'http(s)://'],
     [/\bsrc\s*=/i, 'src='],
@@ -262,7 +265,7 @@ for (const name of Object.keys(PRESETS)) {
     [/\burl\s*\(/i, 'url('],
   ];
   for (const [pattern, label] of externalPatterns) {
-    check(!pattern.test(html), `${name}: 产物里出现了 ${label}（零外部请求被破坏）`);
+    check(!pattern.test(htmlExternal), `${name}: 产物里出现了 ${label}（零外部请求被破坏）`);
   }
 
   // 占位符清零
@@ -285,7 +288,8 @@ for (const name of Object.keys(PRESETS)) {
   }
 
   // GL 画布只在有 gl 通道零件时出现
-  const expectsGl = partIds.includes('voxel-world');
+  // world 与 gl 共用 #gl：任何一个 world 零件都要求画布存在。
+  const expectsGl = partIds.some((id) => id === 'voxel-world' || id === 'koi-pond' || id === 'hug-meadow' || id === 'dawn-desk');
   check(first.hasGl === expectsGl, `${name}: hasGl=${first.hasGl}，期望 ${expectsGl}`);
   check(html.includes('id="gl"') === expectsGl, `${name}: #gl 画布存在性与 hasGl 不一致`);
 
@@ -321,6 +325,9 @@ for (const name of Object.keys(PRESETS)) {
     channel: 'canvas2d',
     // 替身不需要真能力，否则仍会被装配器标成 unsupported
     requires: undefined,
+    // `space:'subject'` 只对 world 有意义；换成 canvas2d 后必须一起摘掉，
+    // 否则装配器会在 Node 里报「subject 只对 world 有意义」——那是替身造出来的假错。
+    space: undefined,
     create: () => ({
       update() {},
       draw() {},
@@ -419,8 +426,8 @@ for (const name of Object.keys(PRESETS)) {
       `${name}: 产物内 costMs 合计 ${shim.declaredCost.toFixed(2)} ≠ 构建器算出的 ${expectedCost.toFixed(2)}（opts 没进产物？）`,
     );
     if (expectsGl) {
-      const hit = snap.degraded.some((entry) => entry.id === 'voxel-world' && entry.reason === 'unsupported');
-      check(hit, `${name}: 无 WebGPU 时 voxel-world 应记 unsupported，实得 ${JSON.stringify(snap.degraded)}`);
+      const hit = snap.degraded.some((entry) => entry.reason === 'unsupported');
+      check(hit, `${name}: 无 GL 时 world/gl 零件应记 unsupported，实得 ${JSON.stringify(snap.degraded)}`);
     }
   }
 

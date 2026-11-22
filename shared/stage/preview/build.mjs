@@ -51,6 +51,13 @@ export const PART_ENTRY = Object.freeze({
   'ascii-field': 'shared/parts/ascii-field/index.ts',
   bubbles: 'shared/parts/bubbles/index.ts',
   'tide-medium': 'shared/parts/tide-medium/index.ts',
+  'koi-pond': 'shared/parts/koi-pond/index.ts',
+  dandelion: 'shared/parts/dandelion/index.ts',
+  boids: 'shared/parts/boids/index.ts',
+  sun: 'shared/parts/sun/index.ts',
+  'still-sink': 'shared/parts/still-sink/index.ts',
+  'hug-meadow': 'shared/parts/hug-meadow/index.ts',
+  'dawn-desk': 'shared/stage/preview/dawn-desk/index.ts',
 });
 
 /**
@@ -90,30 +97,26 @@ export const PRESETS = Object.freeze({
     budgetMs: 8,
     glBlend: null,
   },
-  // `/hug` 的栈：**纯 Canvas2D**（产品裁定：黄昏草原底下塞体素海洋＝两个介质）。
-  // 「L0 与 L1 不能共存」是**旧裁决，已撤回**：T18 之后装配器按层序把 GL 就地合成，
-  // L2 及以上的 2D 零件都能正常画在 L1 之上。所以 `/still` 可以同时装水底材与 voxel-world；
-  // 唯一的事实是「不透明的 L1 会挡住 L0」（遮挡，不是分层缺陷）。
-  // dandelion / boids / blow-input 还没做，先只装已有的两件；零件到位后往这里加。
+  // `/hug` 的栈：原站同构的三维蒲公英草甸（10 株 / 1335 颗 / 深橄榄绿 bokeh）。
+  // 它是一件完整的 L1 world，不装 L0；画面由 GL 自己铺满，避免旧草坡在底下透出来。
   hug: {
-    title: 'hug · 黄昏草原（纯 2D）',
+    title: 'hug · 风的来信（三维蒲公英草甸）',
     biome: 'field',
     seed: 20260614,
-    parts: [
-      'field-ground',
-      { id: 'pixel-post', opts: { grain: 0.05, scanline: 0, vignette: 0.06 } },
-    ],
-    budgetMs: 8,
+    parts: ['hug-meadow'],
+    budgetMs: 9,
     glBlend: null,
   },
-  // 唯一的 GL 站。L1 与 L0 能共存（终裁）：T18 之后就地合成，L2+ 画在 L1 之上；
-  // L0 被不透明的水体遮挡是设计（0 像素），不是缺陷。
+  // `/still` 的完整栈：水底材 + 体素世界 + 气泡 + 沉水渐变 + 后处理。
+  // preview 是**形态探针**，预算放到 14ms 以便看到 high 档；出厂 12ms 会按真实成本降 low。
   still: {
-    title: 'still · 体素海洋（L1 GL 单通道，/still 的降级档骨架）',
+    title: 'still · 体素海洋（完整栈，形态探针）',
     biome: 'tide',
     seed: 20260901,
-    parts: ['voxel-world', 'bubbles'],
-    budgetMs: 8,
+    parts: ['tide-medium', 'voxel-world', 'bubbles', 'still-sink',
+      { id: 'pixel-post', opts: { grain: 0.03, scanline: 0, vignette: 0.18 } },
+    ],
+    budgetMs: 14,
     glBlend: null,
   },
   // `tide` 底材的**并排三版探针**（骨架版，不配门）。差异轴只有一条：色阶 + 焦散形态。
@@ -144,32 +147,22 @@ export const PRESETS = Object.freeze({
     budgetMs: 8, glBlend: null,
   },
   // 判形态专用：同一套栈但预算放宽（**只用于看形态，不是出厂配置**）。
-  // 出厂 `koi` 是 9.78ms > 8ms → 三件全降 low，低档的粗格子会把"条带感"放大 4 倍，
-  // 所以判形态必须在**不降档**的画面上判（PM 明确要求先修这笔账）。
+  // 原件自带纸/水彩/胶片 finish；再叠 pixel-post 会压暗 real、压冷 ink。
   'koi-nolimit': {
-    title: 'koi · 不限预算（判形态用，非出厂）',
+    title: 'koi · 锦鲤池不限预算（判形态用，非出厂）',
     biome: 'ink', seed: 20260312,
-    parts: [
-      'paper-ink',
-      { id: 'ascii-field', opts: { variant: 'plain', ink: 'rgba(34,40,50,0.80)', blend: 'multiply' } },
-      { id: 'pixel-post', opts: { grain: 0.02, scanline: 0, vignette: 0.10 } },
-    ],
+    parts: ['paper-ink', 'koi-pond'],
     budgetMs: 100,
     glBlend: null,
   },
-  // `/koi-pond` 的栈：纸 + ASCII 水纹 + 后处理（宣纸墨点）。
-  // ascii-field 用 **plain**（按行合并，0.56ms）；**keys**（GlyphAtlas，12.5ms）留给
-  // "需要多色字符"的场景，它自己会超预算并被挂起 —— 见 ascii-field/README。
+  // `/koi` 的栈：纸（unsupported 兜底）+ 完整三条渲染路径的 three.js 锦鲤池（world 通道）。
+  // 旧版只保留了 ink 单风格；现在 real/paint/ink 都在零件内，由 `?style=` 或 Esc 菜单切换。
   koi: {
-    title: 'koi · 纸 + ASCII 水纹 + 墨点（/koi-pond 的栈）',
+    title: 'koi · 纸 + 完整锦鲤池（/koi 的栈）',
     biome: 'ink',
     seed: 20260312,
-    parts: [
-      'paper-ink',
-      { id: 'ascii-field', opts: { variant: 'plain', ink: 'rgba(34,40,50,0.80)', blend: 'multiply' } },
-      { id: 'pixel-post', opts: { grain: 0.02, scanline: 0, vignette: 0.10 } },
-    ],
-    budgetMs: 8,
+    parts: ['paper-ink', 'koi-pond'],
+    budgetMs: 12,
     glBlend: null,
   },
   // `/license` 的栈：L0 纸 + L4 后处理。**扫描线必须关、不做块量化** ——
@@ -180,10 +173,69 @@ export const PRESETS = Object.freeze({
     seed: 20261118,
     parts: [
       'paper-ink',
-      { id: 'pixel-post', opts: { grain: 0.04, scanline: 0, vignette: 0.10 } },
+      { id: 'pixel-post', opts: { grain: 0, scanline: 0, vignette: 0.10 } },
     ],
     budgetMs: 8,
     glBlend: null,
+  },
+  // `dawn-desk` 是**预览专用探针**，不是正式站：只装 room-at-dawn 的 desk 一组（room shell + sky
+  // + fixtures + exterior + plants + desk），桌面上放一张 /license 尺寸的纸。
+  // 它回答「纸是不是首屏主角 / desk-only 成本 / 40 秒晨光」三件事，不接 /license。
+  'dawn-desk': {
+    title: 'dawn-desk · 只装 desk 一组的纸面探针',
+    biome: 'room',
+    seed: 20261120,
+    parts: ['dawn-desk'],
+    budgetMs: 20,
+    glBlend: null,
+    chrome: [
+      '<div id="dawn-brand"><b>6:51</b><span>permit office / first light</span></div>',
+      '<h1 class="sr-only">License</h1>',
+      '<p class="sr-only">A permit to simply be.</p>',
+      '<div id="dawn-guide" role="status" aria-live="polite"><span id="dawn-guide-text">DRAG THE STAMP TO THE PAPER</span></div>',
+      '<div id="dawn-atmos" aria-hidden="true"></div>',
+      '<div id="dawn-grain" aria-hidden="true"></div>',
+      '<p id="dawn-note">desk only · 1410:1000 · 40s dawn · no export</p>',
+      '<section id="dawn-end" aria-hidden="true"><p>NO COPY KEPT.</p><span>You may simply be.</span><button id="dawn-again" type="button" data-cue="reset">Issue another</button></section>',
+    ].join(''),
+    chromeStyle: [
+      '#dawn-atmos{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 47% 46%, rgba(20,14,9,0) 44%, rgba(20,14,9,.10) 77%, rgba(18,12,8,.24) 100%),linear-gradient(90deg,rgba(255,214,164,.035),rgba(255,255,255,0) 26%,rgba(255,255,255,0) 72%,rgba(41,30,20,.055));box-shadow:inset 0 0 160px rgba(24,16,10,.14)}',
+      '#dawn-grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.038;mix-blend-mode:soft-light;background-image:radial-gradient(circle at 18% 26%,rgba(255,255,255,.30) 0 .55px,rgba(255,255,255,0) .95px),radial-gradient(circle at 72% 64%,rgba(0,0,0,.24) 0 .5px,rgba(0,0,0,0) .88px),radial-gradient(circle at 44% 88%,rgba(255,255,255,.18) 0 .65px,rgba(255,255,255,0) 1px);background-size:3px 3px,4px 4px,6px 6px;background-position:0 0,1.2px 2px,2px .8px}',
+      '#dawn-brand{position:fixed;left:28px;top:22px;z-index:2;color:#2b2721;',
+      'font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.05em;',
+      'text-shadow:0 1px 18px rgba(255,251,242,.92);pointer-events:none}',
+      '#dawn-brand b{display:block;font:400 28px/1 Georgia,"Times New Roman",serif;letter-spacing:.01em}',
+      '#dawn-brand span{display:block;margin-top:5px;color:rgba(43,39,33,.52);font-size:10.5px;text-transform:uppercase}',
+      '#dawn-guide{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:3;',
+      'padding:11px 17px;border:1px solid rgba(64,57,46,.18);border-radius:999px;',
+      'background:rgba(250,243,230,.82);color:rgba(44,39,32,.78);backdrop-filter:blur(7px);',
+      'font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.13em;',
+      'text-transform:uppercase;pointer-events:none;transition:opacity .25s,color .25s}',
+      '#dawn-guide[data-mode="quiet"]{opacity:.3}',
+      '#dawn-note{position:fixed;left:28px;bottom:32px;z-index:2;margin:0;',
+      'color:rgba(43,39,33,.46);font:10.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;',
+      'letter-spacing:.06em;text-transform:uppercase;pointer-events:none}',
+      '#dawn-end{position:fixed;inset:0;z-index:4;display:grid;place-content:center;text-align:center;',
+      'background:rgba(6,8,11,.78);backdrop-filter:blur(9px);opacity:0;visibility:hidden;pointer-events:none;',
+      'transition:opacity .55s ease,visibility .55s}',
+      '#dawn-end.show{opacity:1;visibility:visible;pointer-events:auto}',
+      '#dawn-end p{margin:0;color:#f4eee3;font:400 clamp(40px,5.2vw,68px)/1.1 Georgia,"Times New Roman",serif;',
+      'letter-spacing:.055em;text-transform:uppercase;text-shadow:0 2px 24px rgba(0,0,0,.4)}',
+      '#dawn-end span{display:block;margin-top:18px;color:rgba(244,238,227,.66);',
+      'font:400 14px/1.5 Georgia,"Times New Roman",serif;letter-spacing:.05em}',
+      '#dawn-again{margin:34px auto 0;min-height:46px;padding:0 22px;border:1px solid rgba(238,230,216,.4);',
+      'border-radius:999px;background:transparent;color:#f4eee3;cursor:pointer;',
+      'font:500 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.14em;',
+      'text-transform:uppercase;transition:background .2s,border-color .2s}',
+      '#dawn-again:hover{background:rgba(244,238,227,.10);border-color:rgba(244,238,227,.72)}',
+      '#dawn-again:focus-visible{outline:2px solid #f4eee3;outline-offset:3px}',
+      '.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;',
+      'clip:rect(0,0,0,0);white-space:nowrap;border:0}',
+      '@media(max-width:600px){#dawn-brand{left:16px;top:14px}#dawn-brand b{font-size:22px}',
+      '#dawn-brand span{display:none}#dawn-note{display:none}#dawn-guide{bottom:18px;font-size:9.5px;',
+      'padding:10px 14px;max-width:calc(100vw - 32px);white-space:normal;text-align:center}',
+      '#dawn-end p{font-size:36px}#dawn-end span{font-size:12px}#dawn-again{margin-top:26px}#dawn-grain{opacity:.032}}',
+    ].join(''),
   },
   // 同一份零件栈换 biome + 换 seed + 换后处理性格：用来确认「配色/观感确实由站点参数驱动」。
   ink: {
@@ -214,6 +266,8 @@ const STYLE = [
   'background:rgba(80,12,16,.92);border:1px solid rgba(255,120,120,.45);',
   'color:#ffd7d7;border-radius:4px;white-space:pre-wrap}',
   'body[data-state=failed] #dbg{display:none}',
+  'body.clean #dbg{display:none}',
+  '__PREVIEW_CHROME_STYLE__',
 ].join('');
 
 /** GL 画布片段（只有装配里真有 gl 通道零件时才出现）。 */
@@ -233,6 +287,7 @@ const TEMPLATE = [
   '<body data-state="booting">',
   '<canvas id="stage" aria-hidden="true"></canvas>',
   '__PREVIEW_GL__',
+  '__PREVIEW_CHROME__',
   '<div id="dbg" role="status">state booting</div>',
   '<div id="boot-error" hidden></div>',
   '<script>__PREVIEW_BOOT__</script>',
@@ -404,7 +459,10 @@ export async function buildPreview(options = {}) {
   // 装配器自己的校验：重复 id / 双层 L4 / 两个 gl 通道 / 混合模式白名单 / costMs 合法
   validateParts(defs);
   const order = sortParts(defs).map((def) => def.id);
-  const hasGl = defs.some((def) => (def.channel ?? 'canvas2d') === 'gl');
+  const hasGl = defs.some((def) => {
+    const channel = def.channel ?? 'canvas2d';
+    return channel === 'gl' || channel === 'world';
+  });
 
   const config = {
     title: preset.title,
@@ -458,8 +516,9 @@ export async function buildPreview(options = {}) {
   const html = TEMPLATE
     .replace('__PREVIEW_TITLE__', () => `${preset.title} · ${preset.name}`)
     .replace('__PREVIEW_META__', () => meta)
-    .replace('__PREVIEW_STYLE__', () => STYLE)
+    .replace('__PREVIEW_STYLE__', () => STYLE.replace('__PREVIEW_CHROME_STYLE__', preset.chromeStyle ?? ''))
     .replace('__PREVIEW_GL__', () => (hasGl ? GL_CANVAS : ''))
+    .replace('__PREVIEW_CHROME__', () => preset.chrome ?? '')
     .replace('__PREVIEW_BOOT__', () => script);
 
   let outPath = null;

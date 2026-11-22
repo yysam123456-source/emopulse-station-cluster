@@ -22,6 +22,7 @@
     "preview:field": "node shared/stage/preview/build.mjs --preset field",
     "preview:hug": "node shared/stage/preview/build.mjs --preset hug",
     "preview:room": "node shared/stage/preview/build.mjs --preset room",
+    "preview:dawn-desk": "node shared/stage/preview/build.mjs --preset dawn-desk",
     "preview:ink": "node shared/stage/preview/build.mjs --preset ink",
     "verify:field": "node tests/field-visual.mjs",
     "shot": "node tests/lib/browser.mjs --shot dist/preview/field.html --out dist/preview/shot-field.png",
@@ -35,6 +36,7 @@
     "build:sites": "node shared/sites/build.mjs",
     "serve": "node shared/sites/serve.mjs",
     "verify:sites": "node tests/site-build.mjs",
+    "verify:site": "node tests/site-visual.mjs",
     "verify:fingerprint": "node tests/site-fingerprint.mjs",
     "verify:dom": "node tests/site-dom.mjs",
     "verify:license": "node tests/license-ritual.mjs && node tests/license-stay.mjs"

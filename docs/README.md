@@ -4,18 +4,27 @@
 
 ## 权威顺序（从高到低）
 
+> **2026-11-20 现状**：`/koi` 已从「六个 JS + 只 ink」升级为 zz85 上游 **26 个文件逐 SHA 对齐**的完整移植；real / paint / ink 三条渲染路径、相机、触摸、池底、雨、音乐全部接回。对应决策见 `DECISIONS.md` ADR-07，工程补注见 `HANDOFF.md` 顶部，产品形态见 `PRODUCT-FORM.md` §1.4。
+
 | 序 | 文档 | 状态 | 什么时候读它 |
 |---|---|---|---|
-| 1 | [`HANDOFF.md`](./HANDOFF.md) | ⭐ **工程权威** | 接手第一份。装配模型 / 零件口径 / 验证门 / 命令 / 坑；**当前架构设计以其 §3.1「T18：L1 就地合成」为准** |
-| 2 | [`PRODUCT-FORM.md`](./PRODUCT-FORM.md) | ⭐ **产品形态权威** | 四站（hug / still / koi / license）用户看到什么、做什么、带走什么；工程约束仍以 HANDOFF 为准 |
-| 3 | [`COPY-SITES.md`](./COPY-SITES.md) | ⭐ **文案权威 / 构建输入单一来源** | `shared/sites/copy.mjs` 逐字照抄此处，`site-build` 断言逐字命中；改字必须先改本文 |
-| 4 | [`MANUAL-QA.md`](./MANUAL-QA.md) | ⭐ **手测权威** | 唯一能回答「这站能不能给人看」的可执行协议；不靠形容词 |
-| 5 | [`BIOME-ASSET-MAP.md`](./BIOME-ASSET-MAP.md) | ✅ 有效 | 决定某个 biome 站要装哪几个零件时 |
-| 6 | [`VOXEL-AS-PART.md`](./VOXEL-AS-PART.md) | ✅ 有效 | 动 `shared/parts/voxel-world/` 或想改 `shared/core/` 之前 |
-| 7 | [`ASCII-PIECE-CONTRACT.md`](./ASCII-PIECE-CONTRACT.md) | ✅ 有效 | 改 `ascii-field` 零件之前（零件已存在，不是"做之前"） |
-| 8 | [`../QUARANTINE.md`](../QUARANTINE.md) | ✅ 有效 | 隔离台账：`Q-01` 已消解，`Q-02` 待裁（见文内状态） |
-| 9 | [`evidence/voxel-proof.png`](./evidence/voxel-proof.png) · [`evidence/l2-over-l1-bubbles-on-voxel.png`](./evidence/l2-over-l1-bubbles-on-voxel.png) | 证据 | 两张实机截图：初次体素世界 / L2 气泡叠在 L1 之上 |
-| 10 | `docs/system_design.md`（已归档） | ⛔ 归档 | 当前架构设计以 `HANDOFF.md` §2 为准；旧设计见 `archive/2026-11-pre-pivot/system_design.md` |
+| 1 | [`DECISIONS.md`](./DECISIONS.md) | ⭐ **当前架构决策权威（2026-11-20 koi 完整移植）** | 先读这份：`world` 通道、单 GL 画布、`costMs` 与实测、`E_UNSUPPORTED`、`/koi` 为什么用 three、导出为什么裁主画布。**与 HANDOFF 旧段落冲突时以本文 + 代码为准。** |
+| 2 | [`HANDOFF.md`](./HANDOFF.md) | ⭐ **工程细节权威** | 接手第一份。装配模型 / 零件口径 / 验证门 / 命令 / 坑；§0/§3.1 的旧状态已由 DECISIONS 取代，读时以文内「2026-11-20 koi 完整移植补注」为准 |
+| 3 | [`PRODUCT-FORM.md`](./PRODUCT-FORM.md) | ⭐ **产品形态权威** | 四站（hug / still / koi / license）用户看到什么、做什么、带走什么；工程约束仍以 DECISIONS / HANDOFF 为准 |
+| 4 | [`COPY-SITES.md`](./COPY-SITES.md) | ⭐ **文案权威 / 构建输入单一来源** | `shared/sites/copy.mjs` 逐字照抄此处，`site-build` 断言逐字命中；改字必须先改本文 |
+| 5 | [`MANUAL-QA.md`](./MANUAL-QA.md) | ⭐ **手测权威** | 唯一能回答「这站能不能给人看」的可执行协议；不靠形容词 |
+| 6 | [`BIOME-ASSET-MAP.md`](./BIOME-ASSET-MAP.md) | ✅ 有效 | 决定某个 biome 站要装哪几个零件时 |
+| 7 | [`VOXEL-AS-PART.md`](./VOXEL-AS-PART.md) | ✅ 有效 | 动 `shared/parts/voxel-world/` 或想改 `shared/core/` 之前 |
+| 8 | [`ASCII-PIECE-CONTRACT.md`](./ASCII-PIECE-CONTRACT.md) | ✅ 有效 | 改 `ascii-field` 零件之前（零件已存在，不是"做之前"） |
+| 9 | [`../QUARANTINE.md`](../QUARANTINE.md) | ✅ 有效 | 隔离台账：`Q-01` 已消解，`Q-02` 待裁（见文内状态） |
+| 10 | [`evidence/voxel-proof.png`](./evidence/voxel-proof.png) · [`evidence/l2-over-l1-bubbles-on-voxel.png`](./evidence/l2-over-l1-bubbles-on-voxel.png) | 证据 | 两张实机截图：初次体素世界 / L2 气泡叠在 L1 之上 |
+| 11 | `docs/system_design.md`（已归档） | ⛔ 归档 | 当前架构设计以 `HANDOFF.md` §2 为准；旧设计见 `archive/2026-11-pre-pivot/system_design.md` |
+
+## 评审（输入，不是施工依据）
+
+| 文档 | 状态 | 用途 |
+|---|---|---|
+| [`REVIEW-2026-11-19.md`](./REVIEW-2026-11-19.md) | ✅ 已执行 · 评审输入 | 2026-11-19 的架构 / 产品诊断：四站实机截图（`review-2026-11-19/`）、五个结构性问题、分步调整方案、three.js 落地映射。**第 0/1/2 步已由 A1 落地；第 3 步按 ADR-11 只归位、不硬接 D0 资产；第 4 步文档已收敛。本文现在只作为诊断证据，不再作为施工清单。** 落地取舍见 [`DECISIONS.md`](./DECISIONS.md)。 |
 
 ## 已废弃但**故意留在原位**
 
