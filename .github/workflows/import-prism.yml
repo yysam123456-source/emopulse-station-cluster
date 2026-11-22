@@ -13,7 +13,7 @@ jobs:
       - name: Download PRISM artifact
         run: |
           mkdir -p shared/stage/preview/prism-pack
-          curl -L --fail --silent --show-error "https://aka.doubaocdn.com/s/H0hTqg7PKn" -o shared/stage/preview/prism-pack/index.html
+          curl -L --fail --silent --show-error "https://aka.doubaocdn.com/s/Py9FkaUU4Q" -o shared/stage/preview/prism-pack/index.html
           curl -L --fail --silent --show-error "https://aka.doubaocdn.com/s/Y3oZvrklV0" -o shared/stage/preview/prism-pack/README.md
       - name: Commit imported files
         run: |
