@@ -529,8 +529,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 @media (max-width:720px){
   .topbar{height:64px;padding:0 16px}
   .brand{gap:9px}.brand-name{font-size:15px;letter-spacing:.16em}.brand-rule{height:17px}
-  .brand-sub{font-size:8px;letter-spacing:.11em}
+  .brand-sub{display:none}
   .chrome-btn{height:31px;padding:0 10px;font-size:9px}.chrome-btn .label{display:none}
+  #muteBtn .label{display:inline;font-size:8px;letter-spacing:.02em}
   .hud{height:92px;padding:0 16px 5px;flex-wrap:wrap;align-content:center;row-gap:8px}
   .progress{min-width:92px}.progress .cap{display:none}
   .hint{order:3;flex-basis:100%;text-align:left;font-size:9px;letter-spacing:.1em;padding-left:2px}
@@ -544,6 +545,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   .ov-head{align-items:flex-start;flex-direction:column;gap:10px}
   .ov-stat{align-self:flex-start}
   .album-foot{flex-direction:column;align-items:flex-start}
+}
+@media (max-width:380px){
+  #muteBtn .label{display:none}
 }
 @media (max-height:620px) and (min-width:721px){
   .topbar{height:56px}.hud{height:72px}
