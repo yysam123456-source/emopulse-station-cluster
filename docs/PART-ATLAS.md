@@ -24,7 +24,7 @@ Portal 的 `preview-manifest.ts` 有 **6675 条**组件记录，但“记录数�
 
 解释：
 
-- `port`：可以抽象成 Stage 零件，优先做；
+- `port`：可以抽象成 Stage 零件的候选；做不做取决于有没有站或模板需要它；
 - `ui-reference`：UI/CSS 组件，只做站点壳参考；
 - `reference`：运动/动画参考，保留逻辑，不整体移植；
 - `archive`：视频/图片/embed，留来源路径；
@@ -76,7 +76,7 @@ Portal 的 `preview-manifest.ts` 有 **6675 条**组件记录，但“记录数�
 | L1 | 273 |
 | L4 | 32 |
 
-## 6. 可移植优先级（port 族）
+## 6. port 候选（按来源项目）
 
 | project | port 候选数 |
 |---|---:|
@@ -87,23 +87,29 @@ Portal 的 `preview-manifest.ts` 有 **6675 条**组件记录，但“记录数�
 | threeui | 93 |
 | ascii-sharks | 9 |
 
-优先顺序按“对 A2 模板的直接价值”排，而不是按数量排：
+这张表是候选存量，不是施工顺序。截至 2026-11-24，从这 1,529 条里落地的是 `abyss` / `nebula` / `temple`（另加 `bubbles`、`pixel-post`，后者只借了概念）；
+评审（`docs/review-2026-11-24/REVIEW-2026-11-24.md` §5.5）建议停止继续扩充 Portal 候选，
+因为现有零件里还有 4 个没有任何使用方。有站或模板需要时，再按族回来查：
 
-1. **pixelfx / shader**：直接补 L2 特效与 L4 后处理，和现有 `pixel-post` 同一层；先挑 weather 与低成本后处理。
-2. **threeui**：补 L1 单 GL 场景；与 `nebula` / `temple` 共用“单 GL”约束。
-3. **ascii-magic / ascii-rest / ascii-sharks**：补 L2 字符场；和 `ascii-field` 合并成一套字符渲染工具。
-4. **looseleaf**：L0 纸/墨底材；优先并入 `paper-ink` 的材质分支，而不是新开零件。
-5. **react-bits / animata / eldoraui / pinui / zelda**：UI 或运动参考；不占 Stage 画布层，先做站点壳。
+| 族 | port 候选 | 现状 |
+|---|---:|---|
+| pixelfx | 244 | 未逐条拆；`pixel-post` 只借了 `core/fx.js` 的概念 |
+| shaders | 209 | 未拆；2.59 MB 单 bundle |
+| threeui | 93 | 未拆 |
+| ascii | 983 | 未拆；`ascii-field` 是按 ascii-magic 的 piece 契约自建，且没有使用方 |
+| looseleaf | 0 | 不是候选：123 条全是 embed，已归 `archive` |
 
 ## 7. 与现有零件的对照
 
-| 层 | 现有零件 | 图谱里的补位 |
+16 个 Stage 零件（`shared/parts/`）按层列出；「孤儿」= 不在任何站、预设、模板里（`docs/review-2026-11-24/inventory/INVENTORY.md` §3、§5）。
+
+| 层 | 现有零件（使用方） | 图谱里的对应 |
 |---|---|---|
-| L0 | field-ground, paper-ink, tide-medium | looseleaf 纸材；pixelfx 背景类 |
-| L1 | voxel-world, koi-pond, hug-meadow | threeui 场景；Nebula / AbyssalDescent / temple 参考 |
-| L2 | boids, bubbles, dandelion, ascii-field | pixelfx weather；ascii 族；animejs 运动逻辑 |
-| L3 | sun, still-sink | 暂无强候选；保持轻量 |
-| L4 | pixel-post | shaders 后处理；pixelfx post 类 |
+| L0 | `abyss`（模板 deepsea / nebula）· `paper-ink`（/license /koi，模板 koi）· `field-ground`（仅预设 field / field-l0）· `tide-medium`（/still，仅预设） | 无强候选；looseleaf 123 条是 embed，已归档 |
+| L1 | `voxel-world`（/still）· `koi-pond`（/koi，模板 koi）· `hug-meadow`（/hug）· `nebula`（模板 nebula）· `temple`（模板 temple / gate） | threeui 93 条未拆；NebulaGalaxy / AbyssalDescent / kage 参考已落成 `nebula` / `abyss` / `temple` |
+| L2 | `bubbles`（/still，模板 deepsea）· 孤儿：`ascii-field` `boids` `dandelion` | pixelfx 244 条、ascii 983 条未拆 |
+| L3 | `still-sink`（/still，模板 deepsea）· 孤儿：`sun` | 暂无强候选 |
+| L4 | `pixel-post`（/license /still，模板 deepsea / nebula） | shaders / pixelfx 后处理类 |
 | L5 | 无正式零件 | uiverse / animata / eldoraui / zelda 做站点壳 |
 
 ## 8. 关键边界
@@ -117,12 +123,19 @@ Portal 的 `preview-manifest.ts` 有 **6675 条**组件记录，但“记录数�
 
 ## 9. 和 A2 的关系
 
-A2 报告（`docs/A2-IMPLEMENTATION-PATH-2026-11-23.md`）的结论是：
-**多模板在 Stage 构建层已经成立，缺的是模板注册、参数 schema、体积/导出、Studio，以及深海/寺庙两个新 GL 场景。**
+A2 的模板层与 Studio 已经有了，不再缺「模板注册、参数 schema、新场景」：
+`shared/product/templates.mjs` 是模板注册表，`shared/product/studio.mjs` 生成 Studio，
+深海 / 星系 / 寺庙三个场景分别落在 `abyss` / `nebula` / `temple`（现状见 `docs/A2-PARTS-AND-TEMPLATES.md`）。
 
-本图谱支持这个结论：6,675 条里真正需要补的零件集中在 5 个族；深海/寺庙/星系三个场景已经用
-`abyss` / `nebula` / `temple` 三个新零件落地，剩余工作是按模板需要继续挑 pixelfx/shaders/threeui，
-而不是逐条复制 manifest。
+缺口在产品层，不在这张图谱里（评审 `docs/review-2026-11-24/REVIEW-2026-11-24.md` §3.3 与 §5.2）：
+
+- **导出**：Studio 没有导出控件，「另存为」存下的是原模板，调好的参数全部丢失；
+- **体积预算**：构建只把 gzip 写进 manifest，没有阈值；超 1 MB 的模板照样标 `READY`；
+- **实时调参**：改一次参数就把 iframe 整个重载；
+- **画质档位**：运行时只有 `low | high` 两档，没有给用户的档位选择。
+
+所以 port 候选目前不是 A2 的待办：评审 §5.5 建议在导出 / 体积预警 / 实时调参补齐之前不给 A2 加新模板，也不扩充 Portal 候选。
+有站或模板需要某一条时，再回到 §6 按族查。
 
 ## 10. 复现
 

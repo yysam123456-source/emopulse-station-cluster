@@ -537,7 +537,7 @@ ascii-rest 那一侧不用 `CELL_W`，用 `cell` 倍数：`h = w * cell`（默�
 
 差别不是"要不要适配"，而是**写颜色的时机不同**：一个是"piece 返回后我们查表"，另一个是"piece 画的过程中往我们给的数组里写"。硬统一成 `{text, color}` 会丢信息（ascii-rest 的 piece 是在绘制时按 `paper` 明暗分支的，事后无法还原）。
 
-**必须先定**：通用零件的输出是"帧 + 键表"（那就只支持 ascii-magic 的 734 件），还是"帧 + 一个我们提供的写入缓冲区"（那就只支持 ascii-rest 的 250 件），还是两套各一个零件类型。**我倾向后者**——它们的成本结构与用法本来就不同（一个要 kit.js，一个零依赖）。
+**必须先定**：通用零件的输出是"帧 + 键表"（那就只支持 ascii-magic 的 734 件），还是"帧 + 一个我们提供的写入缓冲区"（那就只支持 ascii-rest 的 240 件），还是两套各一个零件类型。**我倾向后者**——它们的成本结构与用法本来就不同（一个要 kit.js，一个零依赖）。
 
 ### 问题 2：`t` 的所有权没人定义，跨路由一定会跳
 
@@ -565,7 +565,7 @@ ascii-rest 那一侧不用 `CELL_W`，用 `cell` 倍数：`h = w * cell`（默�
 ## 11. 没核实的地方
 
 1. **没有行号。** 所有定位靠"文件 + 函数/常量名 + 原文片段"；WebFetch 不返回行号，我没有编造。
-2. **只读了 4 个 piece**（moonlit-sea / pond-ripples / jellyfish / aquarium）。**734 + 250 件里其余 980 件没有逐件核对契约**——我只能说"抽查 4 件全部符合上述结构"，不能说"全部"。
+2. **只读了 4 个 piece**（moonlit-sea / pond-ripples / jellyfish / aquarium）。**734 + 240 件里其余 970 件没有逐件核对契约**——我只能说"抽查 4 件全部符合上述结构"，不能说"全部"。
 3. **`aquarium.js` 只读过一遍（上一轮），本轮没重读**。它同样是 `(t) => string` 且零 import，但 `meta` 里有没有 `options` 我没再确认。
 4. **`public/ascii-rest/library.js`（14,830 B）没读**，所以不确定 `mount()` 之外还有没有别的渲染路径（比如直接把 piece 包成 web component）。
 5. **`public/ascii-magic/lib/scene.js`（26,024 B）与 `lib/image.js`（7,499 B）没读**——如果 `scene.js` 提供了"多件合绘到同一 Grid"的能力，§10 的结论可能要改。
@@ -573,3 +573,7 @@ ascii-rest 那一侧不用 `CELL_W`，用 `cell` 倍数：`h = w * cell`（默�
 7. **性能数字是推算，不是实测。** 3,456 格 / 69k / 207k 次每秒是算术推导；"fillText 太慢"这个结论来自作者自己的代码注释（`GlyphAtlas` / `stampDots`），**不是我在 4 个 biome 的真机上测的**。
 8. **"ascii-rest 全是单色"只是 2/2 抽样**。`mount.js` 明确有 `env.color` 通道，说明至少有些件是彩色的——**具体多少件带 palette，我没统计**（要逐个 import 读 `meta`，成本不划算）。
 9. **`speed` 对 `t` 的缩放**只确认了 ascii-magic 有（`elapsed += dt * speed`）；ascii-rest 的 `mount()` 里我没看到 `speed` 参数，**因此两套的"倍速"能力不一致**（这条是推断，依据是 `mount.js` 的解构里没有 `speed`）。
+
+---
+
+`ascii-field` 目前不在任何站、模板、预设里（孤儿，评审 §2.2）；只在 `PART_ENTRY` 登记（`shared/stage/preview/build.mjs:51`）。

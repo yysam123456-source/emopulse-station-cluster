@@ -1,6 +1,7 @@
 # INVENTORY · 拆解进度只读盘点（2026-11-24）
 
 > 取证基线：`HEAD = origin/main = 1fce19c`（2026-11-24 10:27）；取证期间 `git status --short` 只有 `?? docs/review-2026-11-24/`，已跟踪文件零改动。
+> **本文是取证当时的快照。** 同日下午的文档整理已按本文做了回改（评审提交 b759bb7 之后的提交）：被取代的 `docs/THIRD-PARTY-REVIEW-2026-11-20.md`、`docs/THIRD-PARTY-REVIEW-2026-11-21.md`、`docs/DAWN-DESK-PREVIEW-2026-11-20.md` 已删除（可在 `git show b759bb7:<路径>` 查到）。文中引用的行号、断言数、模板数都是**那一刻**的快照，§6 矛盾清单里各文档的现文以仓库当前内容为准。
 > 方法：只读（读文件 / grep / wc / find / cmp / 只读 `import` 两张注册表）。**没有**运行 build、preview、`npm run build:*`，也**没有**运行任何 test / verify 脚本——凡标「未实跑」的数字都是静态计数，不是测试结果。
 > 证据等级：【实测】= 命令输出原文；【推断】= 由实测做算术或逻辑延伸；【不知道】= 没查到或只读无法证明。
 

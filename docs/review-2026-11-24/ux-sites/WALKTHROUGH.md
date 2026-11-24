@@ -3,6 +3,7 @@
 > 走查人：`ux-sites`（只读取证）。日期 2026-11-24。对象：`dist/`（入口页 + `/license` `/hug` `/still` `/koi`，主理人刚重建的产物，本轮**没有 build**）。
 > 方法：无头 Edge + 原生 CDP（`docs/review-2026-11-24/tools/cdp.mjs`，未改动），每次走查新开独立 profile，结束即关。
 > 本文件第 1、3、4 节是给主理人直接读的；第 2 节是逐站明细；第 5 节是证据表。原始数据全部在 `metrics.json`（各次运行的完整 JSON）。
+> **截图位置**：入库的截图在本目录（清单见 `../EVIDENCE-INDEX.md`）；未入库的截图与走查脚本已移到仓库外 `C:\Users\Lenovo\WorkBuddy\2026-11-17-13-04-03\emopulse-review-evidence-2026-11-24\`（保持相对路径，脚本在其 `_scripts\review-1124\` 下）。证据表里的文件名在这两处之一。
 
 ## 0. 口径与注意事项（先读这 6 条）
 

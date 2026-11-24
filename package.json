@@ -45,7 +45,8 @@
     "verify:site": "node tests/site-visual.mjs",
     "verify:fingerprint": "node tests/site-fingerprint.mjs",
     "verify:dom": "node tests/site-dom.mjs",
-    "verify:license": "node tests/license-ritual.mjs && node tests/license-stay.mjs"
+    "verify:license": "node tests/license-ritual.mjs && node tests/license-stay.mjs",
+    "docs:status": "node tools/docs/status.mjs"
   },
   "dependencies": {
     "three": "^0.169.0"

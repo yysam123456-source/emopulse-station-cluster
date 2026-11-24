@@ -1,167 +1,91 @@
-# A2 零件与模板产品化 · 落地说明（2026-11-23）
+# A2 零件与模板 · 现状（2026-11-24）
 
-> **2026-11-23 写实重构后，本文第 2.3 节与第 3 节的 `temple` 描述已过期。**
-> 当前寺庙已拆成 `ScenePlan + SceneModule`，并新增 `gate` 模板；以 `docs/REALISM-PARTS-CATALOG.md` 为准。
-> 本文保留作为早期 4 模板产品化的历史记录。
+> 本文回答「A2 现在有什么、和六项 Must 差在哪、下一步做什么」。数字口径都写在表里；结构性的数字今后只在 [`docs/STATUS.md`](./STATUS.md) 维护。
+> 依据：[`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §3.3、§5.2、§5.4、§5.5 与同目录 `ux-a2/WALKTHROUGH.md`（Studio + 5 模板实机走查）。
 
-本文件是 `docs/A2-IMPLEMENTATION-PATH-2026-11-23.md` 的**执行版**：报告回答“为什么这样走”，这里回答“已经落了什么、怎么跑、还差什么”。
+## 1. 模板清单（5 个，全部 `status: ready`）
 
-## 1. 本轮交付清单
+| id | 名称 | preset | 零件 | 参数个数 | 通道 | 产物原始字节 | gzip 字节 | ≤ 1 MB |
+|---|---|---|---|---:|---|---:|---:|---|
+| `deepsea` | 深海信标 | `a2-deepsea` | abyss + bubbles + still-sink + pixel-post | 4 | 2D | 29,480 | 11,578 | 是 |
+| `nebula` | 星海旋臂 | `a2-nebula` | abyss + nebula + pixel-post | 5 | GL | 520,388 | 135,269 | 是 |
+| `temple` | 晨光山门与主殿 | `a2-temple` | temple | 7 | GL | 4,992,587 | 3,473,188 | **否** |
+| `gate` | 独立山门 | `a2-gate` | temple | 4 | GL | 4,992,577 | 3,473,186 | **否** |
+| `koi` | 锦鲤池 | `koi` | paper-ink + koi-pond | 5 | GL | 591,332 | 161,248 | 是 |
 
-| 类型 | 文件 | 状态 |
+- **口径**：id / 名称 / preset / 零件 / 参数个数取自 [`shared/product/templates.mjs`](../shared/product/templates.mjs) 的 `TEMPLATES`；preset 的零件装配取自 [`shared/stage/preview/build.mjs`](../shared/stage/preview/build.mjs) 的 `PRESETS`；字节 = `wc -c dist/templates/<id>/index.html` 与 `gzip -9 -c dist/templates/<id>/index.html | wc -c`（本机复算与 [`arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §7.2 一致）。1 MB 按 gzip 字节 ≤ 1,048,576 算。
+- `temple` 与 `gate` 是同一个 `temple` 零件的两次装配（`gate` 关掉主殿、换一套山门方案），不是两个零件。
+- 25 个参数 = 8 个下拉 + 13 个滑块 + 4 个复选框。`koi` 的「种子」默认值 20260312 超出滑块上限 999999（走查 U-12）。
+- `dist/preview/a2-*.html` 与 `dist/templates/<id>/index.html` 是同一文件的重复副本。
+
+## 2. 产品层三个文件
+
+| 层 | 文件 | 做什么 | 不做什么 |
+|---|---|---|---|
+| 注册 | [`shared/product/templates.mjs`](../shared/product/templates.mjs)、[`template-spec.ts`](../shared/product/template-spec.ts) | 模板 = `id + name + preset + biome + status + parts + params`；`TemplateParam` 只有 `enum / number / boolean` 三种 | 没有颜色类型、没有画质参数 |
+| 构建 | [`shared/product/build-templates.mjs`](../shared/product/build-templates.mjs) | 每个 ready 模板跑一次 `buildPreview`，写 `dist/templates/<id>/index.html` 和 `manifest.json`（`bytes`、`gzipBytes`、`hasGl`、`order`、`external`） | 只有两道会失败的门：发现外部请求、残留 `__PREVIEW_` 占位符。gzip 只记录，**没有阈值**；没有导出功能 |
+| Studio | [`shared/product/studio.mjs`](../shared/product/studio.mjs) | 读 manifest，生成 `dist/studio/index.html`：每个模板一张卡 = 实时预览 iframe + 参数控件 + 「打开独立页」「重置参数」 | 参数只写进网址 query，改一次就把 iframe 整个重载；不重写产物，所以调好的参数存不下来 |
+
+```bash
+npm run build:templates        # node shared/product/build-templates.mjs
+npm run build:studio           # node shared/product/studio.mjs
+# 然后直接双击 dist/studio/index.html（file:// 可开，不需要服务器）
+```
+
+## 3. Studio 与六项 Must
+
+判定取自 `ux-a2/WALKTHROUGH.md` §5：**1 达成 / 3 部分 / 2 未达成**。
+
+| Must | 判定 | 实测现状（走查证据） |
 |---|---|---|
-| 新零件 | `shared/parts/abyss/index.ts` | L0 Canvas 深海光柱/焦散/微粒/涟漪 |
-| 新零件 | `shared/parts/nebula/index.ts` | L1 GL 四旋臂星系粒子，可参数化 |
-| 新零件 | `shared/parts/temple/index.ts` | L1 GL 夜寺鸟居/石灯/主殿/月轮 |
-| 参数工厂 | `shared/parts/koi-pond/index.ts` | 新增 `KoiOptions` / `makePart(opts)` |
-| 模板注册 | `shared/product/templates.mjs` | 4 个模板、参数 schema |
-| 类型契约 | `shared/product/template-spec.ts` | `TemplateSpec` / `TemplateParam` |
-| 构建门 | `shared/product/build-templates.mjs` | 构建、gzip、零外部请求、manifest |
-| Studio | `shared/product/studio.mjs` | 参数控件 + iframe + 独立页链接 |
-| 零件图谱 | `tools/parts/atlas.mjs` | 6,675 条 manifest → CSV/MD |
-| 图谱结果 | `docs/PART-ATLAS.csv` / `docs/PART-ATLAS.md` | 6,675 行 + 统计/边界 |
+| 场景模板 ≥ 3 套 | 达成 | 5 套全部 `ready`、0 console 错误、`file://` 直开 5/5。附注：`deepsea` 是 Canvas2D 画的光柱与颗粒，不是粒子（GLSL 着色器 0 个） |
+| 全程序化生成 | 部分 | deepsea / nebula / koi 产物里 `data:image` 0 个；temple / gate 各内嵌 12 张 base64 位图（9 JPEG + 3 PNG） |
+| 体积预算检查器 | **未达成** | Studio 每卡只有一行构建期静态文字；超 1 MB 无预警，temple / gate 仍是绿色 `READY`；没有 Toy / 独立站门槛切换 |
+| lil-gui 风格参数面板 | 部分 | 25 个控件都能用；颜色选择器 0 个；画质下拉不存在；面板不在模板产物里，产物内只有只读调试条 |
+| 单 HTML 导出 | **未达成** | Studio 没有导出控件。「另存为」存下的文件与 `dist/templates/<id>/index.html` 逐字节相同，**参数全部丢失** |
+| < 1 MB、零外部资源 | 部分 | 零外部资源：达成（走查全部页面只有本机与 `data:` 两类请求）。≤ 1 MB：3 / 5 达成 |
 
-## 2. 三个新零件
+Studio 另外的严重问题（全文 28 条见 `ux-a2/WALKTHROUGH.md` §6）：
 
-### 2.1 `abyss`（L0 Canvas）
+| 编号 | 现象 |
+|---|---|
+| U-04 | 调参不是实时：拖动 1.2 秒的滑块让 iframe 重载 18 次，拖动被卡成 8–15 秒 |
+| U-05 | 没有画质档位：运行时 Lod 契约只有 `low / high`，全程显示 `high` |
+| U-07 | 工程调试条（`state / lod / fps / frame / cpu / drawn / budget …`）直接出现在 5 个模板页和每个预览里；手机端盖住预览约 6 成 |
+| U-09 | temple / gate / koi 加载期间长时间暗屏（temple 桌面端约 5–12 秒） |
+| U-10 | Studio 一打开 5 个场景同时运行，首开 11.1 MB；首屏只看得到 2 / 5 张卡 |
 
-- 来源：Portal `AbyssalDescent.tsx` 是 5 张 JPG 序列；直接搬会换尺寸就糊，也不可叠加。
-- 做法：程序化深海底材——深水渐变、暗角、颗粒、顶部斜射光柱（blur 软化）、焦散线、悬浮微粒、指针涟漪。
-- 参数：`palette`（`abyss|tide|ink`）、`density`、`rays`、`caustics`、`vignette`。
-- 约束：`canvas2d` / `L0` / `source-over`；不占 GL，因此适合做“无 GL 兜底”模板。
+## 4. 体积与「全程序化」
 
-### 2.2 `nebula`（L1 GL）
+| 项 | 事实 | 口径 |
+|---|---|---|
+| 位图数量 | temple / gate 各 12 个 `data:image` | `grep -o 'data:image/[a-z]*' dist/templates/temple/index.html \| sort \| uniq -c` |
+| 位图占比 | 占原始字节 87.79%、占 gzip 95.3% | `ux-a2/WALKTHROUGH.md` §5（`metrics.json` 的 `assets` 节） |
+| 去掉位图后 | temple 的代码部分 gzip 161,477 B | 同上 |
+| 位图来源 | `shared/realism/assets.ts` 文件头自述「由 AI 生成并压缩到 1024 JPEG 的写实表面贴图。生成来源：seedream 5.5」 | 不是程序化，也不是上游项目资产（`inventory/INVENTORY.md` §4.6） |
+| 对比 | 同样内联 three.js 的 nebula gzip 135 KB、koi 161 KB | 见 §1 |
 
-- 来源：Portal `src/components/showcases/NebulaGalaxyShowcase.tsx`（35,200 GPU 粒子、四旋臂、三套 palette）。
-- 做法：保留“位置生成 + 粒子着色器 + 指针脉冲”骨架，宿主换成 Stage 的 `update/draw`；粒子数约 28k 起，按 density 缩放。
-- 参数：`palette`（`violet|abyss|ember|aurora`）、`density`、`scale`、`speed`、`pulse`、`coreGlow`。
-- 约束：`gl` / `L1` / 单 GL；与 `temple` 不能同场。
+结论：≤ 1 MB 这条线卡在位图贴图上，不在 three.js 上。位图不解决，`temple` / `gate` 的 gzip 就回不到 1,048,576 B 以内。
 
-### 2.3 `temple`（L1 GL）
+## 5. 后续路线
 
-- 来源：Portal `public/showcases/temple-of-echoes`（Kage 场景）与 `fable-030 Rose Window` 的 temple/culture reference；原件依赖外部 GLB/贴图，不适合直接做零件。
-- 做法：无贴图基本体重画——鸟居、石灯（发光灯箱 + 点光）、主殿、石板路、松树剪影、月轮、尘埃；透明背景，L0 的纸/墨仍能从天空边缘透出。
-- 参数：`palette`（`night|dawn|ink`）、`fog`、`lanterns`、`orbit`、`moon`。
-- 约束：`gl` / `L1` / 单 GL；与 `nebula` 不能同场。
+**计划（评审 §5.2「A2」条，P1，下一个迭代）**
 
-### 2.4 `koi` 参数化
+1. 导出时内嵌参数。
+2. 体积 > 1 MB 红色预警。
+3. 调参不重载 iframe。
+4. 画质三档。
+5. 去掉默认调试条。
 
-- 新增 `KoiOptions`：`style/mode/cam/floor/rain/music/seed`。
-- 新增 `makePart(opts)`；不传 opts 时完全保留 `/koi` 的 URL query 行为。
-- 模板注册用 `makePart({ style:'ink', cam:'top' })` 这类固定参数；Studio 仍可用 query 现场覆盖。
+**待裁决（评审 §5.4 第 2 条，用户尚未拍板）**：A2 与四站是同仓还是分仓。评审建议**同仓、分线、分入口**，理由是保住「同一套零件」；PM 建议分仓，代价是运行时两份。在拍板之前，本文和其它文档都不把任何一边写成已定。
 
-## 3. 三层产品化
+**评审建议停止做的事（§5.5）**：在导出 / 体积预警 / 实时调参补齐之前，停止给 A2 加新模板；停止继续扩充 Portal 候选、拆第三方 3D 项目（孤儿零件还没有使用方）。
 
-### 第一层：模板注册（`shared/product/templates.mjs`）
+## 6. 相关文档
 
-一个模板 = `id + name + preset + biome + status + parts + params`。`preset` 必须能在 `build.mjs` 的 `PRESETS` 里解析，构建门会真实跑一次 `buildPreview`。
-
-已注册 4 个：
-
-| id | preset | 层组合 | 体积 / gzip | GL |
-|---|---|---|---:|---|
-| `deepsea` | `a2-deepsea` | abyss + bubbles + still-sink + pixel-post | 27.6 KB / 11.1 KB | 否 |
-| `nebula` | `a2-nebula` | abyss + nebula + pixel-post | 504.4 KB / 131.8 KB | 是 |
-| `temple` | `a2-temple` | abyss + temple + pixel-post | 528.0 KB / 138.2 KB | 是 |
-| `koi` | `koi` | paper-ink + koi-pond | 576.1 KB / 158.1 KB | 是 |
-
-### 第二层：构建/体积/导出（`shared/product/build-templates.mjs`）
-
-每个 ready 模板输出：
-
-- `dist/templates/<id>/index.html`：单 HTML、零外部请求；
-- `dist/templates/manifest.json`：`bytes`、`gzipBytes`、`hasGl`、`order`、`external`、`placeholder`、`buildMs`；
-- 失败即 `process.exitCode=1`，不会把失败模板写进 ready 清单。
-
-命令行：
-
-```powershell
-node shared/product/build-templates.mjs --list
-node shared/product/build-templates.mjs
-node shared/product/build-templates.mjs --only nebula
-node shared/product/build-templates.mjs --out dist/templates
-```
-
-### 第三层：Studio（`shared/product/studio.mjs`）
-
-读 `dist/templates/manifest.json`，生成 `dist/studio/index.html`：
-
-- 每个模板一张卡：名称、preset、parts、体积、GL 标记；
-- 参数控件（enum / number / boolean）直接写 query，iframe 即时刷新；
-- “打开独立页”指向 `dist/templates/<id>/index.html`；
-- 全部内联 CSS/JS，无服务器、无外部字体。
-
-```powershell
-node shared/product/build-templates.mjs
-node shared/product/studio.mjs
-# 打开 dist/studio/index.html
-```
-
-## 4. 零件图谱：6,675 条怎么读
-
-`docs/PART-ATLAS.csv` 一行一条 manifest 记录，列为：
-
-`id, project, kind, status, family, role, suggested_layer, action, registry_entry, media_label, note`
-
-统计：
-
-| action | 数量 | 含义 |
-|---|---:|---|
-| `port` | 1,529 | 可抽象成 Stage 零件，优先做 |
-| `ui-reference` | 4,151 | UI/CSS，做站点壳参考，不进画布 |
-| `archive` | 539 | 视频/图片/embed，留来源路径 |
-| `reference` | 427 | 运动/动画参考，保留逻辑不整体移植 |
-| `skip` | 29 | manifest 已标 unsupported |
-
-`port` 的族分布：ascii 983、pixelfx 244、shader 209、three 93、effect 10（其余为未归族/媒体边界）。这说明“做全”不是 6,675 条逐条复制，而是按**效果族**补：
-
-1. `pixelfx`：先挑 weather；尺寸锁 320×180，进 Stage 要加内部 RT 适配。
-2. `shaders`：先挑 1–2 个后处理重写；2.59 MB 单 bundle 不能按组件 tree-shake。
-3. `threeui`：补 L1 单 GL 场景；与 nebula/temple 共用单 GL 约束。
-4. `ascii`：与 `ascii-field` 合并成一套字符渲染工具。
-5. `uiverse/animata/eldoraui/pinui/zelda`：只做 L5 站点壳，不进画布。
-
-## 5. 验证与门
-
-```powershell
-npx tsc --noEmit                 # 通过
-node tests/preview-build.mjs     # 783/783 通过
-node tools/parts/atlas.mjs       # 6,675 行
-node shared/product/build-templates.mjs
-node shared/product/studio.mjs
-```
-
-构建门检查：
-
-- `bytes` 与 HTML 实际长度一致；
-- 无 `http(s)://`、`src=`、`href=`、`<link>`、`<img>`、`@import`、`url(`；
-- 无 `__PREVIEW_*__` 占位符；
-- `hasGl` 与模板是否真装 GL 零件一致；
-- `order` 来自 Stage 装配器，不是注册表顺序。
-
-## 6. 已知边界（不要用“做全”绕过）
-
-- **单 GL**：一份 composition 只能有一个 `gl`/`world` 零件；`nebula` 与 `temple` 必须按模板选一个。
-- **单 L4**：`pixel-post` 已占 L4；`shaders` 后处理要进模板，必须先决定“替换 pixel-post”，不能并联。
-- **媒体不占层**：268 条 media-video、148 条 media-image 只归档，不包成画布零件。
-- **UI 不进画布**：uiverse 3,802 条是 UI/CSS；把它们塞进 L2 只会让装配器变重，不会让画面更好。
-- **`abyss` 的离屏底图**：Node 假 DOM 没有 `document` 时退回纯色底；真实浏览器才走离屏缓存。
-- **`nebula`/`temple` 的 Node 冒烟**：假 canvas 禁止 `addEventListener`，零件按 `E_UNSUPPORTED` 让装配器跳过；真实浏览器正常。
-- **截图验收**：本轮不再并发开浏览器；视觉截图只在单实例、用完即关的条件下补。
-
-## 7. 下一步建议（按收益排序）
-
-1. **pixelfx weather 零件**：`snow/rain/fog/god-rays/aurora` 五个里先做 `rain` + `fog`，验证 320×180 内部 RT 适配与 L2 叠加。
-2. **shaders 后处理替换实验**：挑一个轻量后处理（不是整包 2.59 MB），与 `pixel-post` 做 A/B；通过体积门后再进模板。
-3. **threeui 单 GL 场景**：优先能复用 `nebula` 相机/粒子骨架的条目，不引入新渲染器。
-4. **ascii 合并**：把 `ascii-magic/rest/sharks` 的字符映射抽成 `ascii-field` 的 `charset/ramp` 参数，而不是新开三个零件。
-5. **L5 站点壳**：从 uiverse/animata 挑 3–5 个控件做模板页头/参数面板，不放进 Stage。
-
-## 8. 清理约定
-
-本轮产生的临时调试脚本只在 `_scratch/`（已 gitignore），交付物不引用。浏览器验收遵守：
-
-- 同一时间最多一个 Edge 实例；
-- 用完关闭该实例的进程；
-- 任务结束清理测试 profile（`%TEMP%\edge-*`）与 `_scratch/cdp-*.mjs`；
-- 不清理用户正常浏览器、不清理仓库 `node_modules`、不清理 `dist` 交付物。
+| 文档 | 用途 |
+|---|---|
+| [`docs/PART-ATLAS.md`](./PART-ATLAS.md) | Portal 6,675 条 manifest 记录的筛选表（`tools/parts/atlas.mjs` 生成） |
+| [`docs/A2-IMPLEMENTATION-PATH-2026-11-23.md`](./A2-IMPLEMENTATION-PATH-2026-11-23.md) | 实现路径与 Portal 融合评估（11-23 计划稿，文件头有状态块） |
+| [`docs/A2-FEASIBILITY-REVIEW.md`](./A2-FEASIBILITY-REVIEW.md) | 立项可行性评审（11-23，文件头有回看块） |
+| [`docs/STATUS.md`](./STATUS.md) | 结构性数字的唯一维护处 |

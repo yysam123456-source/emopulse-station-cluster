@@ -1,10 +1,22 @@
 # MANUAL-QA — 四站手测协议
 
-> 自动化现已覆盖 6+ 门：`paper-visual` 10 · `field-visual` 6 · `tide-visual` 2 · `site-fingerprint` 7 · `site-dom` 80 · `license-ritual` 34 · `license-stay` 17 · `preview-build` 738 · `input` 23 · `clock` 5 · `site-build` 117。**本文仍负责它们测不到的"这站能不能给人看"**——判据要可执行、可复现、可对照截图，不靠形容词。
+> 自动化覆盖（2026-11-24 实测口径：Windows 11 + 无头 Edge + 无 playwright，见 [`review-2026-11-24/arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §1）：`preview-build` 811 · `site-build` 119 · `clock` 5 项里 2 项红。`paper-visual` / `field-visual` / `tide-visual` / `site-fingerprint` / `site-dom` / `license-ritual` / `license-stay` / `input` 都依赖 `tests/lib/browser.mjs`，本机不可跑，断言数未经实测。**本文仍负责它们测不到的"这站能不能给人看"**——判据要可执行、可复现、可对照截图，不靠形容词。
 >
 > **总时长：四站 ≤ 40 分钟**（实测预算：前置 2 分钟 + 每站 3 分钟 + 记录 6 分钟 ≈ 20 分钟，留一倍余量）。
 >
 > **判据只有两种形态**：`是/否`，或一个**可量阈值**。**任何"看起来/感觉/差不多"都不合格**，包括"看起来不错"。
+
+### 2026-11-24 实测对照
+
+[`review-2026-11-24/ux-sites/WALKTHROUGH.md`](./review-2026-11-24/ux-sites/WALKTHROUGH.md) §3/§4 实机走查：**四站没有一站全绿**——`/license` 卡 G1/G7，`/hug` 卡 G7/G8，`/still` 卡 G7/G8，`/koi` 卡 G1/G5/G7。与实现冲突的条目：
+
+- **G5**：`/koi` 菜单实测 12 项（多 `Look` / `Touch` / `Camera` / `Water` / `Weather` / `Music`）；`PRODUCT-FORM §1.4` 允许，本文没同步。
+- **H12**：`?from=hug` 实际显示 `Someone sent you a little warmth.`，与 `COPY-SITES` 一致，与本文的 `Someone sent you this link.` 不一致（UX-23）。
+- **K8**：本文要求 60 s 后出 `Keep this frame` / `Copy the seed link`；`COPY-SITES` 写 `/koi` 不设带走入口，实测两者都没有（G8）。
+- **S2**：`/still` 中心有沉木、海藻、珊瑚、鱼群，不是「零实体」；整帧 L\* P50 47–50，设计口径 26（UX-13）。
+- **§11b**：`/hug` 实测 L\* P50 29.4 / 色相 103°，基线 43.1 / 35° 是旧方案（UX-35）。
+
+逐条判定见评审 §3.2 与 WALKTHROUGH §4；裁决后回改正文。
 
 ---
 

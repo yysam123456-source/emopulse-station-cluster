@@ -1,5 +1,18 @@
 # A2（Sub1 Studio）架构可行性评审
 
+> **2026-11-24 回看**（正文是 11-23 的原稿，未改；现状见 [`docs/A2-PARTS-AND-TEMPLATES.md`](./A2-PARTS-AND-TEMPLATES.md)，判定见 [`ux-a2/WALKTHROUGH.md`](./review-2026-11-24/ux-a2/WALKTHROUGH.md) §5）
+>
+> | 本文当时的判断 | 一天后的实测 |
+> |---|---|
+> | §4 差异 1「架构是站点装配运行时，A2 是模板 + 参数化导出产品」 | **印证**。Studio 只落地了「调参数」和桌面预览；选模板、体积实时反馈、移动端模拟、导出四步仍缺 |
+> | §4 差异 4「没有产品级体积门」 | **印证，并出了反例**。构建现在会算 gzip，但没有阈值：temple / gate gzip 3.47 MB 照样 `READY` |
+> | §4 差异 6「调试条 ≠ 产品控件」 | **印证**。调试条现在直接出现在 5 个模板页和每个 Studio 预览里 |
+> | Must 1「寺庙模板没有」 | **已做出来**：`shared/product/templates.mjs` 注册 5 个模板（deepsea / nebula / temple / gate / koi），`abyss` / `nebula` / `temple` 三个零件落地 |
+> | Must 4「参数面板全部不存在」 | **部分做出来**：Studio 有 25 个控件（8 下拉 / 13 滑块 / 4 复选）；没有颜色选择器、没有画质下拉 |
+> | Must 3 体积预算检查器、Must 5 单 HTML 导出 | **仍未达成**。Must 2 全程序化、Must 4 参数面板、<1 MB 为「部分」；六项合计 1 达成 / 3 部分 / 2 未达成 |
+> | §3 体积实测「全部 < 1 MB」 | **不再成立**：temple / gate gzip 3,473,188 / 3,473,186 B，原因是内嵌 12 张位图贴图（占 gzip 95.3%） |
+> | §5 人日估计（M0 4–6、全量 14–22） | 模板与 Studio 当晚落地，未达成的仍是本文标「新建」的体积检查器与用户侧导出。估计不再作排期依据，后续以评审 §5.2 的 A2 条目为准 |
+
 > 评审日期：2026-11-23 ｜ 性质：**立项决策用的只读评审**，不是施工设计
 > 输入：`C:/Users/Lenovo/WorkBuddy/2026-10-27-14-44-45/docs/ai-radar-product-designs-2026-11-23.md` §0 / A2 全章 / §5.2 / §5.3 / §六
 > 被评审底座：`C:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster`
@@ -76,7 +89,7 @@
 | 项 | 内容 |
 |---|---|
 | 现成 | 二档 LOD：`shared/stage/contract.ts:87` `type Lod = 'low' \| 'high'`；运行时按预算降档且**不直接不画** `shared/stage/stage.ts:398-494`，`degraded[]` 对外可见（`:346,93`）；自动 governor 按 fps 调 `renderScale`（`DECISIONS.md` ADR-05）；10/13 个零件实现 `setLod`（grep 结果见第 4 节证据）。 |
-| 缺 | 第三档（极致/均衡/省电）；移动端自动选档策略（现仅有 coarse pointer/deviceMemory 探测在旧 `shared/core/quality.js`，未接 stage）。 |
+| 缺 | 第三档（极致/均衡/省电）；移动端自动选档策略（现仅有 coarse pointer/deviceMemory 探测在旧 `shared/core/src/quality.js`，未接 stage）。 |
 | 类型 | 「改」 |
 | 人日 | **1–2** |
 

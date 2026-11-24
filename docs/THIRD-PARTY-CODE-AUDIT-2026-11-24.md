@@ -1,7 +1,7 @@
 # 四个第三方项目：完整源码审计与拆分结论（2026-11-24）
 
 > 本轮口径：先把四个项目的**完整源码**拿到手，再逐项目判断“能不能拆成场景 / 能不能拆成零件”。
-> 不再用 2026-11-20 的“子集评估”代替完整代码审计；那份报告保留为历史记录。
+> 不再用 2026-11-20 的“子集评估”代替完整代码审计；那份报告已删除（`git show b759bb7:docs/THIRD-PARTY-REVIEW-2026-11-20.md`）。
 > 逐文件清单见 `docs/THIRD-PARTY-FILE-INVENTORY-2026-11-24.csv`（207 行，含路径 / 字节 / 模块组）。
 > 源码归档在 `_third_party/2026-11-24/`（`.gitignore` 已忽略，不随产品包分发）。
 
@@ -79,7 +79,7 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
 
 - 入口：`_scratch/room-feature-smoke.ts`；bundle 后由 `_scratch/probe-page.mjs` 在 headless Edge / D3D11 里执行。
 - 全量 9 件：`ok:true`，build `10,479 ms`，`colliders:10`，`animated:0`，`bake:true`；法线材质诊断渲染 `251 calls / 1,780,144 tris`。
-- 子集 `only=desk,fixtures,exterior,plants`：`ok:true`，build `3,607 ms`，5 件，合计 **837,362 tris**；诊断渲染 `184 calls / 1,167,086 tris`。
+- 子集 `only=desk,fixtures,exterior,plants`：`ok:true`，build `3,607 ms`，**6 件**（`room-shell`、`sky` + 4 个 part；`only=` 只过滤 part），合计 **837,362 tris**；诊断渲染 `184 calls / 1,167,086 tris`。
 - 更小的 `desk + room-shell + sky + plants`：**439,718 tris**，接近旧 `dawn-desk` 的 38–50 万面预算。
 - 诊断截图：
   - 全量 9 件：`docs/preview/third-party/room-at-dawn-features.png`
@@ -97,7 +97,7 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
 | plants | 19 | 65,762 |
 | clutter | 26 | 87,104 |
 | decor | 49 | 132,542 |
-| **合计** | **195** | **1,476,972** |
+| **合计** | **355** | **1,476,972** |
 
 - 结论：**9 件都能独立 build，顺序正确，共享 M 正常；但全量 148 万面，必须按站裁剪，不能整间房塞进首屏。**
 
@@ -145,7 +145,7 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
 - **WebGPU 版本也不兼容**：上游 `package.json` 是 `three@0.186.0`，产品仓是 `three@^0.169.0`。本轮实际把 `rain.ts + height-map.ts` 接成 `WorldFeature` 时，`instancedArray`、`time` 等 TSL 导出的类型在 0.169 下不存在，`tsc` 直接报错；因此适配文件没有保留在编译面，避免用 `@ts-nocheck` 把不兼容藏起来。要真拆，先统一到 0.186 或做 API 适配。
 - **宿主必须是 WebGPU**：`createRain` / `createHeightMap` / `createPostPipeline` 都要 `WebGPURenderer`，与当前四站的 WebGL2 管线不是同一套。
 - **不能进现有四站**：一场只允许一个 GL/world 件，`/hug`、`/still`、`/koi`、`/license` 都已占用；要做只能是未来 `rain-window` 新站。
-- 本轮没有把 rain 模块复制进 `shared/parts-library`：不是不会拆，而是**没有许可证 + three 版本不匹配 + 没有 WebGPU 新站**三个前提同时缺失。
+- **本轮的库内状态**：`shared/parts-library/rain-webgpu/` 已有 4 个上游原件（`engine.ts` / `rain.ts` / `height-map.ts` / `post.ts`，11-17 首个提交 `30847cb` 入库，与归档逐字节一致）加 v1 壳 `index.ts`（恒抛 `E_PART_NOT_MOUNTED`）；本轮没有新增文件。不继续拆不是不会拆，而是**没有许可证 + three 版本不匹配 + 没有 WebGPU 新站**三个前提同时缺失。
 
 ## 4. `crimson-loong`：18 个全局脚本，9 个视觉件，拆得出来但不能直接 import
 
@@ -153,7 +153,7 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
 
 - 归档：`_third_party/2026-11-24/crimson-loong`，44 文件 / 11.95 MB。
 - `src`：18 个 `.js` / 1.23 MB；`vendor/three` 0.72 MB；`index.html` 2.0 MB（已内联 three + 全部脚本）。
-- 构建方式 `tools/build.py`：把 `src/*.js` 按文件名排序**拼成一个 classic script**，再内联 three。不是 ESM，没有 import/export。
+- 构建方式 上游 `tools/build.py`：把 `src/*.js` 按文件名排序**拼成一个 classic script**，再内联 three。不是 ESM，没有 import/export。
 - 每个模块用 IIFE 返回一个命名空间：`Sky`、`Rock`、`Arch`、`Flora`、`Dragon`、`Wake`、`Water`、`FX`、`Air`、`Post`、`Film`、`Daylight`、`Score`、`Tex` 等；共享全局 `G`、`SUN`、`SUN_COL`、`Q`、`lerp` 等。
 - 因此“模块边界存在，但模块加载边界不存在”：不能 `import { Dragon } from './60_dragon.js'`，只能按顺序执行或包一层沙箱。
 
@@ -185,7 +185,7 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
   2. 按 `00→05→10→15→20→30→35→40→58→60→66→68→70→72→80→85→88→90` 顺序执行；
   3. 把 `G` 变成宿主注入的 context，而不是全局单例；
   4. 再把 `Dragon/Wake/Water/FX/Air` 映射成 `WorldFeature`。
-- 这是“可拆”，但不是“今天就能装”。本轮只做到**边界确认**，没有把 18 个脚本硬塞进 `shared/parts` 冒充 ESM。
+- 这是“可拆”，但不是“今天就能装”。库内已有 3 个上游原件（`00_util.js` / `15_tex.js` / `60_dragon.js`，11-17 入库，与归档逐字节一致）加 v1 壳；本轮**只做到边界确认**，没有新增文件，也没有把其余 15 个脚本塞进 `shared/parts` 冒充 ESM。
 
 ## 5. `saltline-fable-5.2`：完整源码证实 0 个可维护子件
 
@@ -200,7 +200,7 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
 | 项目 | 拆场景？ | 拆零件？ | 进现有四站？ | 做新站？ | 许可证 |
 |---|---|---|---|---|---|
 | `room-at-dawn` | 已完成：9 个 feature | **已落地并通过装配冒烟** | 否，无 world 槽位 | 可做 `room-dawn` L1 world | MIT，可干净合并 |
-| `rainy-night-webgpu` | 可拆 10 视觉 feature | 结构最干净，但未搬进库 | 否，WebGPU + 无槽位 | 可做 `rain-window` | 代码无 LICENSE，城模 CC-BY-4.0 |
+| `rainy-night-webgpu` | 可拆 10 视觉 feature | 结构最干净；库内已有 4 个原件，未拆 feature | 否，WebGPU + 无槽位 | 可做 `rain-window` | 代码无 LICENSE，城模 CC-BY-4.0 |
 | `crimson-loong` | 可拆 9 视觉 feature | 全局脚本，需包装工程 | 否，无槽位 | 可做 `loong-lake` | 代码无 LICENSE |
 | `saltline-fable-5.2` | 否 | 否（0） | 否 | 否 | 无 LICENSE |
 
@@ -221,12 +221,20 @@ Stage 的硬约束没有变：一场只允许一个 L4 后处理（`E_MULTI_POST
 
 - `npx tsc --noEmit` 通过（含新增 `shared/parts/world-feature.ts`、`room-at-dawn/features.ts`）。
 - room feature 装配冒烟：`_scratch/room-feature-smoke.html`，headless Edge / D3D11，`ok:true`，9 件 / 1,476,972 tris / 10,479 ms。
-- 子集冒烟：`only=desk,fixtures,exterior,plants`，5 件 / 837,362 tris / 3,607 ms。
+- 子集冒烟：`only=desk,fixtures,exterior,plants`，6 件 / 837,362 tris / 3,607 ms。
 - 诊断截图：`docs/preview/third-party/room-at-dawn-features.png`（全量 9 件）与 `...-desk.png`（desk 子集）；法线材质，证明装配，不是 GI/成品光照。
 - **未做**：room 的 GI/成品光照截图（缺 world host/pipeline，不用黑屏冒充成品）；rain/crimson 的运行时模板（许可证/版本/宿主未定）；saltline 任何移植。
 
 ## 8. 与旧报告的关系
 
-- `docs/THIRD-PARTY-REVIEW-2026-11-20.md` 是**子集评估**，结论“room 唯一值得试装、rain/crimson 只能未来站、saltline 不做”仍然成立。
-- 本文件把“值得试装”推进到“9 件已拆 + 装配冒烟通过”，并把 rain/crimson 的模块边界从概念表推进到**完整源码逐文件清单**。
-- 本文件不修改旧报告的结论，只补完整证据和代码落点。
+- `docs/THIRD-PARTY-REVIEW-2026-11-20.md`、`docs/THIRD-PARTY-REVIEW-2026-11-21.md`、`docs/DAWN-DESK-PREVIEW-2026-11-20.md` 已删除，原文见 `git show b759bb7:<路径>`。
+- 11-20 报告是**子集评估**：它写 room「8–10 个 feature」（把 `pipeline` 也算进去）、`createRain.ts` 517 行等文件名与行数，与归档对不上——归档里是 `rain/rain.ts` 467 行、`rain/height-map.ts` 172 行、`atmosphere/post.ts` 292 行。它「room 唯一值得试装、rain/crimson 只能未来站、saltline 不做」的结论仍成立。
+- 本文件把「值得试装」推进到「9 件已拆 + 装配冒烟通过」，并把 rain/crimson 的模块边界从概念表推进到**完整源码逐文件清单**。
+
+## 后续（2026-11-24 评审）
+
+- **停止继续拆解第三方 3D**：`rain` / `crimson` / `micro-scenes` / `sylva` / `grand-atelier` 拆解数保持 0。
+- **库内原件与 v1 壳随 v1 归档**：`shared/parts-library` 里的原件子集与恒抛 `E_PART_NOT_MOUNTED` 的 v1 壳，随 `shared/contract`、`shared/build`、`parts-library/registry` 进 `archive/v1/`（评审 P2）；先处理 `verify:reuse` 对 `ARCHITECTURE-REUSE.md` 的运行时解析。
+- **room-at-dawn 的 9 个 `WorldFeature` 不再新增装配投入**：`WorldFeatureHost` 目前零 importer，等有站或模板真正要用再接；要接就进一个预设并跑 bench。
+
+评审出处：[`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §5.3 / §5.5。

@@ -80,9 +80,17 @@
 内部场景的 `SceneModule` 经验已抽成 `shared/parts/world-feature.ts`，并先落到 `room-at-dawn`：
 
 - 9 个 `WorldFeature`：`room-shell`、`sky`、`exterior`、`fixtures`、`bed`、`desk`、`plants`、`clutter`、`decor`；
+- 契约：`shared/parts/world-feature.ts`（`WorldFeature`、`WorldFeatureHost`；不是 PartV2，不进零件注册表）；
 - 适配文件：`shared/parts-library/room-at-dawn/features.ts`；
-- 装配冒烟：全量 9 件 / 1,476,972 tris / 10,479 ms，子集 5 件 / 837,362 tris / 3,607 ms；
+- 装配冒烟（入口 `_scratch/room-feature-smoke.ts`，不入库）：全量 9 件 build 10,479 ms；子集 `only=desk,fixtures,exterior,plants` build 3,607 ms、837,362 tris（`room-shell`、`sky` 恒装，所以子集实际是 6 件）；
 - 诊断截图：`docs/preview/third-party/room-at-dawn-features.png`（9 件全量）、`docs/preview/third-party/room-at-dawn-features-desk.png`（desk 子集），法线材质，不是成品光照；
 - 逐文件审计：`docs/THIRD-PARTY-CODE-AUDIT-2026-11-24.md`；
-- `rainy-night-webgpu` / `crimson-loong` 只完成边界与许可审计，未搬进可分发库；`saltline` 不做。
+- `rainy-night-webgpu` / `crimson-loong`：拆解数为 0，没有 `WorldFeature`，也没有 PartV2。库里各有上游原件的一个子集作对照——`shared/parts-library/rain-webgpu/` 4 个 `.ts`（上游 25 个模块）、`shared/parts-library/crimson-loong/` 3 个 `.js`（上游 18 个脚本），加一个 v1 壳；这些文件在 2026-11-17 的首个提交 `30847cb` 就已入库。审计里列的 10 / 9 个视觉 feature 只是边界划分，代码里不存在；
+- `saltline` 不做（单文件状态机，没有模块边界）。
+
+## 9. 后续（2026-11-24 评审）
+
+- 已落地：9 个 `WorldFeature` + `WorldFeatureHost` 契约；但已跟踪代码里没有任何装配入口，唯一调用方在 `_scratch/`。
+- 评审建议（P2）：出现使用方（站或模板）之前，不再给 9 个 `WorldFeature` 新增装配投入；要接就先进一个 preset 并跑 bench。
+- 待裁决：是否为 `room-at-dawn` 立新站、是否为 `rainy-night-webgpu` 立 WebGPU 新站（前提：许可证、three 版本、`WebGPURenderer`）、是否允许无 LICENSE 源码进可分发仓库。见 `docs/THIRD-PARTY-CODE-AUDIT-2026-11-24.md` §6.2。
 

@@ -1,9 +1,9 @@
-# 写实零件库与模板装配（2026-11-23）
+# 写实零件库与模板装配（2026-11-24）
 
 > 这份文件回答一件事：**寺庙场景现在由哪些零件组成、每个零件能不能被别的场景复用**。
-> 旧的 `shared/parts/temple/index.ts` 是“一个 GL 零件里画一整个场景”的黑盒实现；本轮已把它拆成 `ScenePlan + SceneModule + MaterialLab`，模板只负责选方案、开零件、调参数。
+> `shared/parts/temple/index.ts` 不是“一个 GL 零件里画一整个场景”的黑盒：场景由 `ScenePlan + SceneModule + MaterialLab` 装配，模板只负责选方案、开零件、调参数。
 >
-> 其他模板（deepsea / nebula / koi）的内部模块见 [`INTERNAL-SCENE-PARTS.md`](./INTERNAL-SCENE-PARTS.md)。
+> 其他模板（deepsea / nebula / koi）的内部模块见 [`INTERNAL-SCENE-PARTS.md`](./INTERNAL-SCENE-PARTS.md)，零件总数与使用方见 [`STATUS.md`](./STATUS.md)。
 
 ## 1. 分层
 
@@ -53,27 +53,37 @@ ScenePlan（构图 / 光照 / 雾 / 后处理 / 地形）
 
 ## 4. 其他模板的零件化现状
 
-| 模板 | 现有 Stage 零件 | 内部是否已拆到能力级 | 说明 |
-|---|---|---|---|
-| `deepsea` | `abyss` / `bubbles` / `still-sink` / `pixel-post` | 否（仍是各零件内部整段实现） | 已是多零件装配，但零件内部没有 SceneModule 化 |
-| `nebula` | `abyss` / `nebula` / `pixel-post` | 否 | 同上 |
-| `koi` | `paper-ink` / `koi-pond` | 否 | `koi-pond` 仍是单文件整场景 |
-| `temple` | `temple` | **是**（7 个 SceneModule + MaterialLab） | 本轮完成 |
+五个模板的内部都已拆到模块级，但各用各的模块类型（下表「装配方式」列），没有共用同一套接口；逐层职责见 [`INTERNAL-SCENE-PARTS.md`](./INTERNAL-SCENE-PARTS.md) §2–§4。
 
-结论：本轮把“写实室外场景”这条链拆到了能力级，并新增 `gate` 方案验证复用；`deepsea / nebula / koi` 仍停在“多 Stage 零件装配”，下一步应按同一套 `SceneModule` 规则继续拆，而不是继续在单文件里调参。
+| 模板 | 现有 Stage 零件 | 装配方式（装配数组所在文件） | 内部模块，按装配顺序 | 还没拆的部分 |
+|---|---|---|---|---|
+| `deepsea` | `abyss` / `bubbles` / `still-sink` / `pixel-post` | `abyss` 内 `AbyssScene` + 5 个 `AbyssLayer`（`shared/parts/abyss/scene.ts`） | background → rays → caustics → motes → ripples | `bubbles` / `still-sink` / `pixel-post` 是独立的 Stage 零件，内部没有再分模块 |
+| `nebula` | `abyss` / `nebula` / `pixel-post` | `nebula` 内 `NebulaScene` + 4 个 `NebulaModule`（`shared/parts/nebula/scene.ts`），共享一组 uniforms | starfield → halo → arms → core | 同上 |
+| `koi` | `paper-ink` / `koi-pond` | `koi-pond` 内三个类（`shared/parts/koi-pond/modules/`） | FishSchool / SurfaceEcology / CameraRig | water / caustics / paint / ink / grade 仍按上游整体 pass 调用，没有拆成 pass 模块 |
+| `temple` | `temple` | `ScenePlan` + `SceneModule` + `MaterialLab`（`shared/realism/scene.ts`） | atmosphere / ridge / ground / pine-grove / shrine-hall / torii / stone-lanterns（顺序取自 `shared/realism/plans.ts` 的 `TEMPLE_DAWN`） | 无 |
+| `gate` | `temple` | 同上，`TORII_GATE` 方案 | atmosphere / ridge / ground / pine-grove ×3 / torii / stone-lanterns | 无 |
+
+装配入口：五个模板分别对应 `a2-deepsea` / `a2-nebula` / `koi` / `a2-temple` / `a2-gate` 五个 preset（`shared/stage/preview/build.mjs` 的 `PRESETS`），模板注册表在 `shared/product/templates.mjs`。
+
+还没拆、也没有排期的：`koi` 的渲染链（拆之前要先定 RT 所有权和 pass 顺序，见 [`INTERNAL-SCENE-PARTS.md`](./INTERNAL-SCENE-PARTS.md) §7）。
 
 ## 5. 写实资产
 
-- 屋顶：`ROOF_JPG` 真实板瓦照片，世界坐标 UV，横向按宽度、纵向按坡高，瓦垄竖直。
-- 地面：`GRASS_JPG` 正俯拍苔庭/短草地表，重复 20×20；不再用“绿圆片”苔藓球。
-- 天空：`SKY2_JPG` 2:1 晨空全景，暖金到冷蓝过渡，作为天空球 + IBL。
-- 植被：`PINE_CUT_PNG` / `GRASS_CUT_PNG` / `SHRUB_CUT_PNG` 真透明 PNG，alphaTest + normal-up 卡片。
-- 材质：杉木/朱漆/灰泥/花岗岩/碎石/松树皮均为照片贴图 + 程序化 bump；板瓦 roughness 0.78、metalness 0、clearcoat 0。
+全部贴图是 `shared/realism/assets.ts` 里的 base64 内联常量，共 15 张（12 张 JPEG + 3 张 PNG；口径：文件内 `export const` 的个数）。该文件头注释写明：由 AI 生成（seedream 5.5）并压缩的写实表面贴图。本文只转述这条注释，不断言图片的实际来源。
+
+| 用途 | 常量 | 尺寸（解码图片头读出） | 怎么用（`shared/realism/materials.ts`） |
+|---|---|---|---|
+| 屋顶板瓦 | `ROOF_JPG` | 1024×1024 | 世界坐标 UV，瓦垄沿坡面竖直（`shared/realism/roof.ts`）；板瓦材质 roughness 0.78、metalness 0、clearcoat 0 |
+| 苔庭地表 | `GRASS_JPG` | 1024×1024 | 重复 20×20，同时作 bumpMap |
+| 天空 | `SKY2_JPG` | 1536×768（2:1） | 等距柱状贴图，作为天空球，并复用为场景环境光（`shared/realism/modules/atmosphere.ts`、`shared/realism/scene.ts`） |
+| 植被卡片 | `PINE_CUT_PNG` / `GRASS_CUT_PNG` / `SHRUB_CUT_PNG` | 512×512 | 带 alpha 的 PNG，`alphaTest` 0.42 / 0.4 / 0.4，法线朝上 |
+| 其他表面 | `CEDAR_JPG` `RED_JPG` `PLASTER_JPG` `STONE_JPG` `GRAVEL_JPG` `MOSS_JPG` | 1024×1024 | 杉木 / 朱漆 / 灰泥 / 花岗岩 / 碎石 / 苔 |
+| 有常量、没有使用方 | `ROOF2_JPG` `SKY_JPG` `PINE_JPG` | 1024×1024 / 1536×768 / 1024×1024 | `shared/realism/materials.ts` 只 import、不引用；它们不在 temple / gate 产物里 |
 
 ## 6. 实时预览与摄影模式
 
-- **实时预览**：`dist/preview/a2-temple.html`、`a2-gate.html`。WebGL 光栅 + GPU 阴影 + 景深 + SSAO + ACES/胶片分级。这是模板真正运行的东西。
-- **摄影模式**：`_scratch/pt/`。同一套 `buildScene()` + `ScenePlan`，改用 `three-gpu-pathtracer` 做路径追踪；用于检查全局光照、接触阴影和材质在物理光照下的表现。
+- **运行入口**：`dist/templates/temple/index.html`、`dist/templates/gate/index.html`（`npm run build:templates`）。`dist/preview/a2-temple.html`、`a2-gate.html`（`npm run preview:a2-temple`）与它们逐字节相同。后处理链是景深（含屏幕空间遮蔽）→ bloom → ACES 色调映射 + 暗角 + 颗粒（`shared/parts/temple/index.ts`）。
+- **摄影模式**：`_scratch/pt/`（不入库）。同一套 `buildScene()` + `ScenePlan`，改用 `three-gpu-pathtracer` 做路径追踪；用于检查全局光照、接触阴影和材质在物理光照下的表现。
 - **照片级验收帧**：`dist/templates/temple/preview-photo.jpg`。它由实时装配帧做神经精修输出，保留原构图与物体位置，用于对外展示；**不是实时 WebGL 的帧**，不能替代模板运行验证。
 
 ## 7. 已验证 / 未达成
@@ -82,10 +92,12 @@ ScenePlan（构图 / 光照 / 雾 / 后处理 / 地形）
 - 同一 `temple` 零件可装配出 dawn / snow / dusk / gate 四种方案。
 - `gate` 模板证明“关掉主殿”后仍是完整场景，不再需要新写一个寺庙。
 - GPU 截图下方向光阴影正常（SwiftShader 下阴影缺失是环境限制，不是代码问题）。
-- 全量 `tsc --noEmit` 通过；`dist/templates` 5 个模板 + `manifest.json` + Studio 已重建。
+- `tsc --noEmit` 0 error（2026-11-24 实跑，见 [`STATUS.md`](./STATUS.md)）；`dist/templates` 5 个模板 + `manifest.json` + Studio 已重建。
 
-未达成：
+未达成（2026-11-24 实测，取证见 [`review-2026-11-24/ux-a2/WALKTHROUGH.md`](./review-2026-11-24/ux-a2/WALKTHROUGH.md) U-02、U-08、U-09）：
 - 实时 WebGL 画面仍是“高精度游戏资产”级，不是照片级；屋顶、松针、草地细节在近景仍能看出卡片/重复纹理。
 - 路径追踪摄影模式仍有采样噪声，96 samples / 0.65 renderScale 下需要后续接 OIDN 或提高采样。
-- `deepsea / nebula / koi` 内部尚未拆到 SceneModule 级。
-- 模板单文件约 4.87 MB（gzip 3.37 MB），体积仍偏大；下一步应做纹理分级（512/1024）和按方案按需打包。
+- 体积超标：`temple` 单文件 4,992,587 B、gzip 3,473,188 B，`gate` 4,992,577 B / 3,473,186 B（口径：`gzip -9 -c dist/templates/temple/index.html | wc -c`），是 A2 入口 ≤ 1 MB 线的 3.4 倍。Studio 只显示这个数字，不预警（U-03）。
+- “全程序化”只对 deepsea / nebula / koi 成立：temple / gate 产物内含 12 张 base64 位图，占原始字节 87.79%、gzip 的 95.3%。
+- 加载期暗屏：主线程解析内联脚本期间无法出图，桌面约 5–12 s 才见完整画面（U-09）。
+- 体积怎么降（纹理分级 512/1024、按方案按需打包、位图外置）尚未裁决；评审把它列在 A2 的 P1（体积 > 1 MB 红色预警），见 [`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §5.2。

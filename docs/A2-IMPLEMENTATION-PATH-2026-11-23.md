@@ -2,11 +2,34 @@
 
 > 基于 `emopulse_station_cluster` 与 `frontend-design-portal` 的决策稿  
 > 日期：2026-11-23  
-> 状态：待拍板 / 可作为 A2 立项与施工依据  
+> 状态：2026-11-23 决策稿（当时的计划、工期与验收设计）；现状见下方「2026-11-24 状态」  
 > 范围：A2 产品实现路径、现有资产复用、Portal 融合方式、工期与验收门；不包含具体代码实现。
 
 > **2026-11-23 追问复核修正**
 > 上一稿第 4 节只抽读了 8–10 个 Showcase，未做全量；经补扫，Portal Showcases 实际为 **103 个**（27 个本地 + 76 个 Fable 远程），组件为 19 个项目/5,000+。本稿新增 **§17**，修正第 4 节的数量判断。另：复核 `Stage` 装配代码后，**多模板装配可以直接复用 `Stage`**，不需要另造 A2 Runtime；§7 的“独立 A2 Core”应收敛为“Stage + Template 适配层”，详见 §17.3。全量清单见 `docs/A2-SHOWCASE-INVENTORY.csv`。
+
+> **2026-11-24 状态**
+> 本文是计划稿，正文只改了 §0、§15、§19，另修了 §16.1 一处 ADR 编号（旧稿误写 ADR-04）；其余章节保留当时的判断，读的时候以本块为准。六项 Must 现状（判定取自 [`docs/review-2026-11-24/ux-a2/WALKTHROUGH.md`](./review-2026-11-24/ux-a2/WALKTHROUGH.md) §5）：
+>
+> | Must | 现状 | 判定 |
+> |---|---|---|
+> | 场景模板 ≥ 3 套 | 5 套 `ready`，`file://` 直开 5/5 | 达成 |
+> | 全程序化生成 | 3 / 5；`temple` / `gate` 内嵌 12 张位图，占 gzip 95.3% | 部分 |
+> | 体积预算检查器 | 构建只记录 gzip，没有阈值；3.47 MB 照样 `READY` | 未达成 |
+> | lil-gui 风格参数面板 | Studio 有 25 个控件；无颜色选择器、无画质下拉；调参靠整页重载 iframe | 部分 |
+> | 单 HTML 导出 | Studio 没有导出；「另存为」会丢参数 | 未达成 |
+> | < 1 MB、零外部资源 | 零外部资源成立；gzip 达标 3 / 5 | 部分 |
+>
+> | 本文各章 | 现状（2026-11-24） |
+> |---|---|
+> | §7、§17.3 `Stage + TemplateSpec` | **已落地**：`shared/product/templates.mjs`、`template-spec.ts`、`build-templates.mjs`、`studio.mjs` |
+> | §8 三套模板、§17.5 M0-a / M0-b | **已落地**：`abyss` / `nebula` / `temple` 三个零件，`koi-pond` 的 `KoiOptions` / `makePart(opts)`，4 个 `a2-*` preset |
+> | §9.1 用户流程、§9.4 参数 schema | **部分**：只有「调参数」和桌面预览；schema 只有 `enum / number / boolean` |
+> | §7.4 体积门、§7.5 导出流水线、§9.3 导出格式、§9.5 体积检查器 | **未动**：构建只把 gzip 写进 manifest，没有任何阈值；没有导出控件 |
+> | §8.4 第四套、§10 继续从 Portal 挑零件 | **评审建议停止**：在导出 / 体积预警 / 实时调参补齐前不加模板，不再扩充 Portal 候选 |
+> | §11 工期、§12.2 真机性能、§13 Kill Criteria、§14 拍板 | **未裁决**：§14.2 的 6 件事未见裁决记录；A2 与四站同仓还是分仓仍待用户拍板 |
+>
+> 后续以 [`docs/review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §5.2 的 A2 条目（P1）为准；同仓 / 分仓见 §5.4 第 2 条，评审建议「同仓、分线、分入口」，用户尚未拍板。现状说明见 [`docs/A2-PARTS-AND-TEMPLATES.md`](./A2-PARTS-AND-TEMPLATES.md)。
 
 ---
 
@@ -17,6 +40,7 @@
 
 **结论 2：设计稿写的 M0“深海粒子项目存量改造”，在本仓库不成立。**  
 本仓库没有“深海粒子项目”：`still` 是 WebGPU 体素水下世界，`bubbles` 是 2D 气泡，Portal 的 `AbyssalDescent` 是图片序列，三者都不是“3D 深海粒子”。本仓库唯一能承接 M0 的现成 3D 模板是 **koi**。所以 M0 要么改为 **koi 模板化**，要么先把原深海粒子项目的路径交出来。
+**2026-11-24 现状**：原项目始终没有交出来，深海改为新做——`abyss`（L0 Canvas2D 光柱）配 `nebula`（L1 GL 粒子星系）。`deepsea` 模板是 Canvas2D 画的，不是粒子；`nebula` 才是 GL 粒子。
 
 **结论 3：Portal 不是 A2 的模板库，也不是 A2 的运行时。**  
 `frontend-design-portal` 是一个 5,000+ 组件、19 个项目、**103 个整页 demo（27 个本地 + 76 个 Fable 远程）**的“前端设计目录 + 预览/代码浏览 + SEO 站”。它可以做 A2 的**展示层、流量入口、设计参考和素材矿**，但不能直接提供 A2 需要的三套可售卖 3D 模板、参数 schema、体积检查器和导出器。
@@ -25,15 +49,15 @@
 A2 渲染层直接用现有 `Stage`（单 GL + L0–L5 合成），上面加 `TemplateSpec`（模板元数据 + composition 工厂 + 参数 schema）、构建/体积/导出层、A2 Studio（参数化生成器）、Portal（展示/SEO/导流）；四者同域、分构建、弱耦合。**不新造 A2 渲染运行时。** Portal 的 React 代码不进入 A2 导出物；A2 的 Three.js 运行时也不进入 Portal 的组件目录。融合点在**产品层和数据层**，不在运行时。
 
 **结论 5：首版应当做“A2 Lite”，不是“A2 Full”。**  
-A2 Lite = koi 单模板 + 最小 Studio + 单 HTML 导出 + 体积门 + Portal 展示页，约 **10–15 人日**；复核 Stage 装配后，可下压到 **9–14 人日**，但按 10–15 保守排。验证通过后再做深海、寺庙、付费。A2 Full（3 模板 + Portal + 付费 + 真实移动端）约 **30–45 人日**；设计稿的 14–22 人日只覆盖“代码主体”，不含真实移动端性能、产品化、Portal、支付和权利清理。
+A2 Lite = 模板 + 最小 Studio + 单 HTML 导出 + 体积门 + Portal 展示页。**2026-11-24 现状**：模板（5 个，不止 koi）与最小 Studio 在 11-23 当晚落地；单 HTML 导出、体积门、Portal 展示页没有做，所以 Lite 的五件里成了两件。本文 11-23 给的人日估计（Lite 10–15、Full 30–45）与实测不符，不再作依据；后续以评审 §5.2 的 A2 条目为准，评审 §5.5 建议在导出 / 体积预警 / 实时调参补齐前不再加模板。
 
 **结论 6：最大风险不是“做不出来”，而是“做成了但卖不了”。**  
-- 体积：koi 已过门，深海/寺庙是新场景，不是存量改造。  
+- 体积（2026-11-24 实测，`gzip -9 -c | wc -c`）：`deepsea` 11,578 B、`nebula` 135,269 B、`koi` 161,248 B，在 1 MB（1,048,576 B）线内；**`temple` / `gate` 3,473,188 / 3,473,186 B，约为线的 3.3 倍**，卡在内嵌的 12 张位图贴图上（占 gzip 95.3%），而构建对超限没有任何预警。  
 - 性能：移动端 60fps 未真机验证，`costMs` 存在申报值与实测值的口径矛盾。  
 - 权利：Portal 根目录没有 LICENSE；`Kage` 带 © 声明，`Sylva` 明确不再分发，`Fable` 无 LICENSE。把这些 demo 直接当付费模板卖，是产品级风险。  
 - 商业：A2 的目标客户是 B 站 Toy 创作者/独立开发者，Portal 的受众是“找前端组件的人”，两者有交集但不重合；Portal 能导流，不能代替 A2 的销售闭环。
 
-**一句话决策：先做 koi，不要先做深海；先把 `Stage` + `TemplateSpec` + 最小 Studio 做出来，再把 Portal 当展示层；先证明“有人愿意导出/付费”，再谈三套模板全量。**
+**一句话决策（2026-11-24 改）：“先做 koi”这一步已经过去——5 个模板和最小 Studio 当晚一起做出来了，下一步是导出、体积预警、实时调参；在它们补齐之前不加新模板；先证明“有人愿意导出”，再谈付费和三套以上的模板。**
 
 ---
 
@@ -49,12 +73,12 @@ A2 Lite = koi 单模板 + 最小 Studio + 单 HTML 导出 + 体积门 + Portal �
 | 本仓库代码 | `shared/stage/contract.ts`、`shared/stage/preview/build.mjs`、`package.json`、各站点/零件目录 | 运行时、零件、构建、单 HTML 断言 |
 | 本仓库产物 | `dist/koi`、`dist/still`、`dist/hug`、`dist/license`、`dist/preview/*` | 体积实测（本轮复测 + 既有评审） |
 | Portal 仓库 | `https://github.com/yysam123456-source/frontend-design-portal` 的 `package.json`、`index.html`、`src/types.ts`、`src/data/projects.ts`、`src/components/ShowcasesPage.tsx`、`src/components/showcases/*`、`public/kage.html`、`public/showcases/starfall.html` | 技术栈、数据模型、showcase 能力、可复用资产、权利状态 |
-| Portal 文档 | `docs/SEO_TIER2_DESIGN.md`、`public/llms.txt`、`index.html` 文案 | 定位、构建、SEO、组件数量口径 |
+| Portal 文档 | `docs/SEO_TIER2_DESIGN.md`（Portal 仓）、`public/llms.txt`、`index.html` 文案 | 定位、构建、SEO、组件数量口径 |
 
 ### 1.2 没有验证/不能当成事实的部分
 
 - **Portal 未在本机 clone 成功，未跑 `npm install` / `npm run build`。** Portal 的文件、依赖、构建脚本来自 GitHub 仓库读取；其“dist 6,064 文件、5,000+ 组件”等数字来自仓库文档/HTML，未在本轮重建验证。
-- **Portal 的组件数量存在口径漂移。** `docs/SEO_TIER2_DESIGN.md` 写 5,075 组件/9 项目；`index.html` 写 6,425 组件/5,451 预览；`src/data/projects.ts` 当前是 19 个项目。不要把任何一个数字写成硬契约。
+- **Portal 的组件数量存在口径漂移。** `docs/SEO_TIER2_DESIGN.md`（Portal 仓） 写 5,075 组件/9 项目；`index.html` 写 6,425 组件/5,451 预览；`src/data/projects.ts` 当前是 19 个项目。不要把任何一个数字写成硬契约。
 - **没有真机测移动端 60fps。** 本稿只做“验收标准设计”，不声称 koi 已在 iPhone/Android 上达标。
 - **没有对 A2 新模板做体积实测。** koi 的 165–168KB 是现有站点/预览产物，不是 A2 模板产物；新模板必须重新测。
 - **本文不是法律意见。** 权利部分只做工程风险识别，最终商用授权需法务/权利方确认。
@@ -221,7 +245,7 @@ A2 Lite = koi 单模板 + 最小 Studio + 单 HTML 导出 + 体积门 + Portal �
 | 页面 | 首页/官方展示、组件目录、组件详情、Showcases（**103 个整页 demo：27 本地 + 76 Fable 远程**）、代码抽屉、Sandpack 预览 |
 | 构建 | `vite build` + `generate-previews` + `augment-heavy-demos` + `build:worker`；Cloudflare Pages/Worker 部署 |
 | 预览 | 组件用 iframe/Sandpack/React 预览；整页 demo 用 `IframeShowcase`，`allow="autoplay; fullscreen; webgpu"` |
-| SEO | `docs/SEO_TIER2_DESIGN.md` 描述纯 CSR + SSG 的第二层 SEO；有 `robots.txt`、`llms.txt`、`_headers`、`_redirects` |
+| SEO | `docs/SEO_TIER2_DESIGN.md`（Portal 仓） 描述纯 CSR + SSG 的第二层 SEO；有 `robots.txt`、`llms.txt`、`_headers`、`_redirects` |
 | 商业 | 未发现登录、支付、订单、订阅模块；未发现“模板”SKU、参数 schema 或导出器 |
 
 【事实】Portal 的 103 个 Showcases（27 本地 + 76 Fable 远程）里有大量整页 demo，但**质量/资产形态/权利差异极大**：
@@ -775,7 +799,7 @@ dist/a2/<template>/index.html + manifest.json
 
 **Phase P0：权利与资产台账（1–2 天）**
 
-- 建 `docs/A2-ASSET-LEDGER.md`（或表）：每个资产来源、作者、许可证、是否可商用、是否可修改、是否可再分发。
+- 建 `docs/A2-ASSET-LEDGER.md`（或表；**未建**）：每个资产来源、作者、许可证、是否可商用、是否可修改、是否可再分发。
 - 明确 Portal 的定位：如果 Portal 是你自有/有授权，可以用它的 UI/Showcases；如果只是公开参考，只能“看”，不能“抄”。
 - 明确 Kage/Sylva/Fable 为**不可直接商用**；Kage 只做美术参考，Sylva/Fable 不做代码/资产复用。
 
@@ -895,7 +919,7 @@ P0 决策/权利
 **Day 2**
 - 从 `shared/parts/koi-pond` 抽 `a2/templates/koi/scene.ts`；
 - 建 `build-template.mjs` + `check-budget.mjs` + `check-zero-network.mjs`；
-- 产出 `dist/a2/koi-spike.html`；
+- 产出 `dist/a2/koi-spike.html`（**未产出**）；
 - 截图对比 `/koi` 三风格。
 
 **Day 3**
@@ -1027,16 +1051,14 @@ P0 决策/权利
 ## 15. 一页式路线图（给决策会用）
 
 ```
-2026-11 第 4 周    P0 决策/权利/契约              1–2 人日
-2026-12 第 1 周    M0 koi 模板 + 构建/导出/体积    5–7 人日
-2026-12 第 2 周    S0 Studio MVP + P1 Portal 展示  4–6 人日
-2026-12 第 3 周    真机性能门 + A2 Lite 发布        3–5 人日
-2027-01 第 1–2 周   M1 深海模板                    6–9 人日
-2027-01 第 3–4 周   M2 寺庙模板                    8–11 人日
-2027-02            P2 付费/授权/白标 + H0 hardening 6–10 人日
+已落地（2026-11-23 晚）  5 个模板 · 构建层 · 最小 Studio（shared/product/）
+已落地（2026-11-24）     实机走查：六项 Must 1 达成 / 3 部分 / 2 未达成
+待排期（评审 §5.2，P1） 导出内嵌参数 · 体积 > 1 MB 红色预警 · 调参不重载 iframe · 画质三档 · 去掉默认调试条
+待裁决（评审 §5.4）     A2 与四站同仓还是分仓
+未排期                  真机性能门 · Portal 展示页 · 付费 / 授权
 ```
 
-> 这是“1 人全职 + 少量协作”的粗排；2 人可把深海/寺庙并行，但 `TemplateSpec` 契约必须先冻结。
+> 2026-11-24 改：11-23 的周排期（2026-11 第 4 周 → 2027-02）是按人日估的，与实测不符，已删；剩余各项目前没有工期估计。「待排期」五项的完成判定见 [`docs/review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §5.2；同仓 / 分仓的评审建议是「同仓、分线、分入口」，用户尚未拍板。
 
 ---
 
@@ -1045,7 +1067,7 @@ P0 决策/权利
 ### 16.1 本仓库
 
 - `docs/HANDOFF.md`：装配模型、六层、零件口径、四站状态。
-- `docs/DECISIONS.md`：ADR-04/08/09/10/11；koi 栈、`costMs` 口径、grand-atelier D0。
+- `docs/DECISIONS.md`：ADR-05/07/08/09/10/11；koi 栈、`costMs` 口径、grand-atelier D0。
 - `docs/PRODUCT-FORM.md`：四站产品形态与红线。
 - `docs/A2-FEASIBILITY-REVIEW.md`：A2 既有可行性评审；本稿在其上补 Portal 与实现路径。
 - `package.json`：`three@^0.169.0`、`esbuild`、`tsx`、`typescript`；无 Vite/lil-gui。
@@ -1071,7 +1093,7 @@ P0 决策/权利
 - `public/showcases/starfall.html`：程序化村落；外链 `unpkg.com/three@0.185.0`。
 - `public/kage.html`：244,467 B；© 2026 Kage；外链 `three.min.js`、字体、webp。
 - `src/grand-atelier`：组件/库集合较完整（19 组件 + lib），可作本地缺失模块参考；本仓库 `grand-atelier` 缺 4 模块；未构建验证。
-- `docs/SEO_TIER2_DESIGN.md`：5,075 组件/9 项目（与 `index.html`/数据漂移）。
+- `docs/SEO_TIER2_DESIGN.md`（Portal 仓）：5,075 组件/9 项目（与 `index.html`/数据漂移）。
 - `public/_headers`、`_redirects`、`llms.txt`：部署/SEO/路由。
 - 说明：Portal 未在本机 clone/构建；以上为源码/文档读取，非运行实测。
 
@@ -1359,17 +1381,31 @@ a2/
 
 **A2 不是“再建一个运行时”，而是“把现有 Stage 升级成模板装配线”：koi 是第一条可交付产线，hug/still 是多模板的证明，深海/寺庙是下一条产线；Portal 的 103 个 Showcase 是橱窗和参考库，不是可直接搬运的模板仓。**
 
-## 19. 落地进度（2026-11-23 晚）
+## 19. 落地进度（2026-11-24）
 
-本轮已从“报告”推进到“可构建实体”，详见 `docs/A2-PARTS-AND-TEMPLATES.md`：
+下面只列已经落地、且有代码或实测证据的项。没有落地的（导出、体积阈值、实时调参、画质档位）不在这里，见文件头「2026-11-24 状态」。
 
-- **新增 3 个 Stage 零件**：`shared/parts/abyss/index.ts`（L0 Canvas 深海光柱）、`shared/parts/nebula/index.ts`（L1 GL 四旋臂星系）、`shared/parts/temple/index.ts`（L1 GL 夜寺鸟居）。
-- **koi 参数化**：`shared/parts/koi-pond/index.ts` 新增 `KoiOptions` / `makePart(opts)`，保留 `/koi` 原有 query 行为。
-- **新增 3 个 preset**：`a2-deepsea`、`a2-nebula`、`a2-temple`；`PRESETS` 从 14 个增至 17 个。
-- **三层产品化落地**：`shared/product/templates.mjs`（注册表）→ `shared/product/build-templates.mjs`（构建/体积/零外部门）→ `shared/product/studio.mjs`（Studio 生成器）。
-- **4 个可构建模板**：`deepsea` 27.6 KB / gzip 11.1 KB；`nebula` 504.4 KB / gzip 131.8 KB；`temple` 528.0 KB / gzip 138.2 KB；`koi` 576.1 KB / gzip 158.1 KB。
-- **全量零件图谱**：`docs/PART-ATLAS.csv` 6,675 行 + `docs/PART-ATLAS.md`；`port` 1,529 条，`ui-reference` 4,151 条，`archive` 539 条，`reference` 427 条，`skip` 29 条。
-- **验证**：`npx tsc --noEmit` 通过；`node tests/preview-build.mjs` 783/783 通过。
+| 项 | 落地物 | 证据 |
+|---|---|---|
+| 模板注册与类型契约 | [`shared/product/templates.mjs`](../shared/product/templates.mjs) 的 `TEMPLATES`：5 个模板、25 个参数；[`template-spec.ts`](../shared/product/template-spec.ts) | `node -e "import('./shared/product/templates.mjs').then(m => console.log(m.TEMPLATES.length))"` → 5 |
+| 构建层 | [`shared/product/build-templates.mjs`](../shared/product/build-templates.mjs) → `dist/templates/<id>/index.html` + `manifest.json` | 会失败的门只有两道：外部请求、`__PREVIEW_` 占位符 |
+| Studio | [`shared/product/studio.mjs`](../shared/product/studio.mjs) → `dist/studio/index.html` | 实机：25 个控件可用，`file://` 直开，0 console 错误（走查 §2） |
+| 新零件 | `shared/parts/abyss`（L0 Canvas2D，5 层）、`shared/parts/nebula`（L1 GL，4 模块）、`shared/parts/temple`（L1 GL，7 模块，在 `shared/realism/`） | `inventory/INVENTORY.md` §3、§4.6 |
+| koi 参数工厂 | `shared/parts/koi-pond/index.ts` 的 `KoiOptions` / `makePart(opts)` | `index.ts:40`、`:863` |
+| preset | `a2-deepsea`、`a2-nebula`、`a2-temple`、`a2-gate`，`PRESETS` 共 18 个 | `shared/stage/preview/build.mjs:258-306`；`inventory/INVENTORY.md` §4.7 |
+| 零件图谱 | [`docs/PART-ATLAS.md`](./PART-ATLAS.md) 与 `docs/PART-ATLAS.csv`，6,675 行 | `node tools/parts/atlas.mjs` |
 
-**结论更新**：深海/寺庙不再是“下一条产线”的空白，已有可构建零件与模板；剩余补零件工作应按图谱的 `pixelfx → shaders → threeui → ascii` 顺序挑，而不是按 6,675 条逐条复制。
+模板产物（`dist/templates/<id>/index.html`，`wc -c` 与 `gzip -9 -c | wc -c`，与 [`arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §7.2 一致）：
+
+| id | 原始字节 | gzip 字节 |
+|---|---:|---:|
+| `deepsea` | 29,480 | 11,578 |
+| `nebula` | 520,388 | 135,269 |
+| `temple` | 4,992,587 | 3,473,188 |
+| `gate` | 4,992,577 | 3,473,186 |
+| `koi` | 591,332 | 161,248 |
+
+验证（2026-11-24 实跑，[`REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §4.1）：`npx tsc --noEmit` 0 error；`verify:preview` 811/811（18 个 preset 逐个断言单文件、零外部请求）。`verify:preview` 不检查体积，也不打开浏览器。
+
+**结论更新（2026-11-24）**：深海、寺庙、星系三个场景和 Studio 已经是可构建、可打开的实体；六项 Must 里仍未达成的是体积预算检查器和单 HTML 导出。下一步不再是「从图谱里继续挑零件」（评审 §5.5 已建议停止），而是评审 §5.2 的五项：导出内嵌参数、体积 > 1 MB 红色预警、调参不重载 iframe、画质三档、去掉默认调试条。
 

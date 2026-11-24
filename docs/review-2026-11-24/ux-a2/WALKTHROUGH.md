@@ -4,6 +4,7 @@
 > 取证人：ux-a2 ｜ 驱动：`docs/review-2026-11-24/tools/cdp.mjs`（无头 Edge + 原生 CDP）
 > 视角：一个想做 3D 网页的真实使用者——「看到了什么、能不能用、能导出什么、手机上什么样、体积多大」。
 > 本轮未改任何已跟踪文件、未跑任何 build / verify 命令；脚本与导出物只在 `_scratch/review-1124/ux-a2/`。
+> **截图位置**：入库的截图在本目录（清单见 `../EVIDENCE-INDEX.md`）；未入库的截图与走查脚本已移到仓库外 `C:\Users\Lenovo\WorkBuddy\2026-11-17-13-04-03\emopulse-review-evidence-2026-11-24\`（保持相对路径，脚本与导出物在其 `_scripts\review-1124\` 下）。证据表里的文件名在这两处之一。
 
 ## 0. 取证口径（先读这个）
 

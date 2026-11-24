@@ -1,32 +1,23 @@
-# L3 零件总库（Parts Library）
+# L3 零件库（v1）
 
-> 本库只增不改。原件按仓库原样复制，站点侧 `sites/<id>/parts/` 只写薄包装
-> `createPart(opts) => { update(t), dispose() }`，不改原件、不改 `shared/core/`。
-> 因单 HTML + 零外部资源约束，站点产物使用按原件视觉/联动参数移植的 Canvas 2D 实现；
-> 原件保留在本库供后续换零件、调参数、回归对照，绝不谎称已直接内联。
+> **这是 v1 契约（`createPart(opts)`）的零件库**，不是 `shared/parts/` 的 PartV2 体系。
+> 新体系只用到两处：`koi/`（`koi-pond` 导入 7 个上游 JS）与 `dandelion/`（`shared/parts/dandelion` 导入 `core/meadow.ts`）；其余目录只做「原件整件入库对照」，没有新体系装配入口。
+> 评审建议：本库随 v1 归档（P2，见 `docs/review-2026-11-24/REVIEW-2026-11-24.md` §5.3）。
+> 纪律：原件目录只增不改；`verify:reuse` 按各目录 `part.manifest.ts` 声明的字节数比对磁盘，`EXCERPT.md` / `BLOG.md` / `part.manifest.ts` 与上游源码一个字节都不许动。
 
-## 索引表（11 类零件）
+## 目录（10 个零件）
 
-| 目录 | 来源 URL | 源文件 | 装到哪站 | 处置说明 |
-| --- | --- | --- | --- | --- |
-| `grand-atelier/` | https://github.com/Anionex/grand-atelier | `lib/piano-action.ts`、`piano-model.ts`、`piano-materials.ts` | /license | **真实复制原件**（击弦机 key→hammer→damper 联动）；站点 glue 改为 按钮→印章→出证 |
-| `crimson-loong/` | https://github.com/ChetasLua/crimson-loong | `src/60_dragon.js`、`15_tex.js`、`00_util.js` | /license | **真实复制原件**（事件表/纹理）；站点取 verifying→stamping→approved 时间轴顺序 |
-| `room-at-dawn/` | https://github.com/Leonxlnx/room-at-dawn | `src/main.js` | /license、/praise | **真实复制原件**（程序化噪声+烘焙）；站点移植为 Canvas 纸纹（公文/热敏） |
-| `sylva/` | https://github.com/MengTo/sylva | `index.html`、`sylva-assets/liquid-metal-explore.html` | /praise | **真实复制原件**（指针 NDC + 平面射线）；站点移植为指针拨开纸层 |
-| `koi/` | https://github.com/zz85/random-sketches @ gh-pages | `vibes/koi/{main,koi,pond,ink,paint,glsl,surface,smoke,audio,cdp}.js` + `index.html` + 文档，共 13 文件 | koi-pond / koi-ink / koi-watercolor | **真实复制原件**（整页三着色器）；站点产物为单 HTML 零外链 Canvas 2D 三风格移植版 |
-| `micro-scenes/` | https://github.com/XinyuWang250428/gpt6-Astra_3.js | 六个 HTML（雨夜便利店/木漏时光/海风之屿/晨雾稻田/雨后紫藤温室/故宫雪晶球） | /still P2 | **真实复制原件**（6 变体），本批次未装站 |
-| `rain-webgpu/` | https://github.com/Jing0715-fer/rainy-night-webgpu-nextjs | `engine.ts`、`rain/rain.ts`、`rain/height-map.ts`、`atmosphere/post.ts` | /still P2 | **真实复制原件**（createHeightMap / createRain / createRipples / createPostPipeline），本批次未装站 |
-| `dandelion/` | 未定位到公开原件（GitHub 检索 DandelionMeadow / BlowInput 无结果） | 无 | /hug | **因无法获取原件，按文档 §1 描述实现等效代码**：三状态 ready→drifting→away、错峰释放 aRelease / DETACH_SECONDS=1.6，见 `sites/hug/parts/index.ts` |
-| `paper-plane/` | 未定位到文档所指"照片折纸飞机"原件 | 无 | /license、/hug | **因无法获取原件，按文档 §1 描述实现等效代码**：fold() 双材质 + flightPosition(t) 弧线与切线转向，见两站 `parts/index.ts` |
-| `blow-input/` | 未定位到公开原件 | 无 | /hug | **按描述实现**：默认不主动授权、按钮兜底、用户显式点击后才 getUserMedia + AnalyserNode 检测音量阈值 |
-| `verdant-forest/` | 未定位到公开原件 | 无 | /still P2（预留） | 本批次未实现站点，扩展位已留 |
+| 目录 | 是什么 | 新体系使用 |
+|---|---|---|
+| `ascii-kit/` | Portal ascii-magic 的 `lib/kit.js`（220 行，D4 逐字节复制） | 否（`ascii-field` 自建，不 import） |
+| `blow-input/` | 公众号文章吹气检测算法 `core/detector.ts`（276 行，D3 移植） | 否（只有 v1 `sites/hug/parts/blow-input.ts` import） |
+| `crimson-loong/` | 上游 18 个脚本中的 3 个对照文件（D1） | 否 |
+| `dandelion/` | 公众号文章蒲公英算法 `core/meadow.ts`（551 行，D3 移植） | **是**：`shared/parts/dandelion` |
+| `grand-atelier/` | 击弦机 3 个原件 TS（D1） | 否 |
+| `koi/` | zz85/random-sketches 上游 26 项 + `index.ts` + manifest（共 28 文件） | **是**：`shared/parts/koi-pond` import 7 个 JS |
+| `micro-scenes/` | gpt6-Astra_3.js 的 6 个自包含 HTML（D0） | 否 |
+| `rain-webgpu/` | rainy-night-webgpu 25 个模块中的 4 个（D0） | 否 |
+| `room-at-dawn/` | 上游 `upstream/` 24 文件 + 9 个 WorldFeature 适配（共 29 文件） | 否（唯一装配入口在 gitignore 的 `_scratch/`） |
+| `sylva/` | 2 个整页 HTML（D0；许可 L4 阻断） | 否（v1 `/praise` 冻结） |
 
-## 接入约定（写死，避免各站发明新机制）
-
-1. 零件原件放入对应目录，保持来源内容不变；来源 URL 记录于本表；
-2. `site.config.ts.parts[]` 的语义是**声明本站装了什么**（供门 2 / 死引用 / 许可普查读取），
-   **不承诺可挂载**。零件入站目前必须改站点 glue 的硬编码槽位——通用挂载路径
-   （`store.partFactories` + `registerPartFactory`）在产线上**从未生效**（Q-01，已裁定删除）；
-3. `site.config.ts.parts` 中 `enabled: true` 只表示「本站启用该功能」，**不代表该 ref 会被装载**；
-   零件内部状态机不改动，由 glue 对齐外层 FSM；
-4. 自研仅限：情绪文案、Canvas 凭证导出、短 URL+埋点、零件粘合 glue；其余全部复制或按描述等效实现。
+另：`part-errors.ts`、`legacy-provenance.ts` 是 v1 共用代码，`registry/` 是其注册中心（见 `registry/README.md`）。

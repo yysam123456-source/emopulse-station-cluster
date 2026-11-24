@@ -1,6 +1,6 @@
 // 站内「停留」层：慢变量（光线角度）+ 拖光。**不产生任何结果。**
 // 光角由 `sunAngleAt(t)` 决定，屏幕与导出卡 import 同一个函数（导出传 `sunAngleAt(t_press)`）。
-// 拖光"看得出"的像素证据与踩过的坑见 `docs/HANDOFF.md` §任务 4。
+// 拖光"看得出"的像素证据与踩过的坑见 `docs/HANDOFF.md` §4.1。
 export const STAY: { drift: boolean; dragLight: boolean; restamp: boolean; fold: boolean } = {
   drift: true, dragLight: true, restamp: true, fold: true,
 };

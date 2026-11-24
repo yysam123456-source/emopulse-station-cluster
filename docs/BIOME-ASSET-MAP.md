@@ -10,11 +10,11 @@
 
 ## 一句话总判断
 
-四个 biome 里，**room 只要 2 件、field/tide 各 3 件、ink 2–3 件**就能"看起来像"；真正卡住工作量的不是零件数量，而是 **L0 底材（施工前四 biome 全缺；现 `paper-ink` / `field-ground` / `tide-medium` 均已实现）** 和 **ASCII 的网格分辨率锁死**——ASCII 那 984 件能上色、能透明叠加、能进我们的画布，但永远只能是一个 `cols×rows` 的字符栅格，不能当"高清纹理"用。
+四个 biome 里，**room 只要 2 件、field/tide 各 3 件、ink 2–3 件**就能"看起来像"；真正卡住工作量的不是零件数量，而是 **L0 底材（施工前四 biome 全缺；现 `paper-ink` / `field-ground` / `tide-medium` 均已实现）** 和 **ASCII 的网格分辨率锁死**——ASCII 那 983 件（CSV 复算：ascii-magic 734 + ascii-rest 240 + ascii-sharks 9）能上色、能透明叠加、能进我们的画布，但永远只能是一个 `cols×rows` 的字符栅格，不能当"高清纹理"用。
 
 ---
 
-## 结论 2（先答）：ASCII 984 件到底能不能用
+## 结论 2（先答）：ASCII 983 件到底能不能用
 
 **能，而且比预期好：它们不是预渲染文本，是活的 JS 模拟 + 一张字符栅格 + 一张按字符索引的调色表。颜色、字号、字符集都可改，画布默认透明可叠加。但分辨率锁死在 `meta.cols × meta.rows`。**
 
@@ -43,7 +43,7 @@ export default function create() {
 }
 ```
 
-**ascii-rest（250 件）**
+**ascii-rest（240 件）**
 
 ```js
 // public/ascii-rest/pieces/pond-ripples.js（6,021 B，原文节选）
@@ -65,7 +65,7 @@ export default function pondRipples() {
 
 ### 怎么用最省（两套差别很大）
 
-| | ascii-magic（734） | ascii-rest（250） |
+| | ascii-magic（734） | ascii-rest（240） |
 |---|---|---|
 | 单件依赖 | 依赖 `public/ascii-magic/lib/kit.js`（**10,772 B**，提供 `Grid/palette/gradient/KEYS/fbm/noise2/rng/clamp`） | **零依赖**，单文件自包含（抽查的 pond-ripples / aquarium 均无 import） |
 | 取用方式 | `import mod from './pieces/x.js'` → `mod.default()` → `draw(t)` | `import mod from './pieces/x.js'` → `mod.default()` → `draw(t)` → **直接拿字符串** |
@@ -122,7 +122,7 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 
 | 零件 id | biome | 层 | portal 源路径 | 字节 | 形态 | 进 canvas2d | 复合风险 |
 |---|---|---|---|---|---|---|---|
-| `boids` | field | L2 | `src/generated/vendor/animata/background/boids-ecosystem.tsx` | 7,672 | canvas | 能 | **零 dt**，速度是"每帧像素"（`MAX_SPEED=1.8`），隐含 60fps；`background + 'dd'` 只对 6 位 hex 成立（`rgba()` 会拼出非法色）；自带全屏 canvas，需改成可嵌套尺寸 |
+| `boids` | field | L2 | **自写**（`shared/parts/boids/README.md:3`）；`animata/background/boids-ecosystem.tsx` 只是同题材候选，未搬运 | —（自写，无上游字节） | canvas | 能 | 零件自带 `dt` 并夹在 `MAX_DT`；结论 4 第 6、7 条是 animata 候选文件的坑，不适用于本件 |
 | `bubbles` | tide | L2 | `src/components/showcases/AbyssalDescent.tsx` | 22,000（整文件；抽取值约 2,000，估算） | canvas | 能 | 归一化 0..1 坐标绑在**它自己的容器**上；高光是**两个叠加圆**不是渐变；整个文件还含别的展示逻辑，要剥 |
 | `koi-pond-ripples` | ink | L2 | `public/ascii-magic/pieces/koi-pond-ripples.js` | 7,151 | 字符栅格 | 能 | 网格锁 92×34；依赖 `lib/kit.js`（10,772） |
 | `moonlit-sea` | tide | L2 | `public/ascii-magic/pieces/moonlit-sea.js` | 3,000 | 字符栅格 | 能 | 96×36；带 palette，可整片换色 |
@@ -151,7 +151,7 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 
 ## 结论 1：每个 biome 最少需要哪几件
 
-「现有」= 已完成或已在做；**当前实况：`shared/parts/` 7 个正式零件，`shared/parts-library/` 63 个文件**。以下表格里的"现有/自写"是施工前口径，**✅ 行才是现状**；「提取」= 从 portal 直接拿；「自写」= 仓库里没有，必须写。
+「现有」= 已完成或已在做；**当前实况：`shared/parts/` 16 个正式零件，`shared/parts-library/` 102 个文件**。以下表格里的"现有/自写"是施工前口径，**✅ 行才是现状**；「提取」= 从 portal 直接拿；「自写」= 仓库里没有，必须写。
 
 ### tide `/still` — 3 件
 
@@ -165,17 +165,17 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 
 ✅ **现状：三个 L0/L1/L4 零件均已装配，L3 不装；新增工作量为 0。** 施工前原文：新增工作量 = 1 个底材。若还想加"有东西在游"，加 `aquarium` 或 `jellyfish` 会把画面语言拉到"ASCII 水族箱"，**二选一，不要叠**。
 
-### field `/hug` — 3 件
+### field `/hug` — 施工前 3 件 / 现状 1 件
 
 | 层 | 零件 | 状态 |
 |---|---|---|
-| L0 底材 | 暖色纸/草底 + 斜射光 | ✅ **`field-ground` 已完成**（施工前估算：自写约 40 行） |
-| L1 世界 | —— | **省略** |
-| L2 生态 | `boids` | **现有** |
-| L3 交互 | `blow-input` | **现有**（本地） |
-| L4 后处理 | `pixel-post` | **现有** |
+| L0 底材 | 暖色纸/草底 + 斜射光 | ✅ **`field-ground` 已实现**（施工前估算：自写约 40 行）；**当前只挂在 preset `field` / `field-l0`，`/hug` 不装** |
+| L1 世界 | `hug-meadow` | ✅ **已装配**（原站草甸整件移植，`shared/sites/build.mjs:110`） |
+| L2 生态 | `boids` | **不装**：`/hug` 现有零件栈只有 `hug-meadow` 一件 |
+| L3 交互 | `blow-input` | **不装**：v2 没有 `blow-input` 零件，`/hug` 的放飞由 `hug-meadow` 的 `cue('release')` 承担 |
+| L4 后处理 | `pixel-post` | **不装**（`hug-meadow` 自带全屏片元背景与大气，不再叠后处理） |
 
-✅ **现状：L0 `field-ground` 已完成，新增工作量为 0**（`boids` / `dandelion` / `blow-input` / `pixel-post` 均已装配）。施工前原文：新增工作量 = 1 个底材。`boids` 在这层是"飞虫/鸟群"，不是"鸟群演示"，必须把 `count=120` 往下调、把光标斥力调小（参数见 §B）。**不要**再叠 `wind-grass`——两套自走实体抢同一层注意力，画面会脏。
+✅ **现状：`/hug` 的零件栈只有一件 `hug-meadow`**（`shared/sites/build.mjs:110` `parts: ['hug-meadow']`，预算 9ms）。施工前的 `field-ground + boids + dandelion + sun + pixel-post` 平面草坡栈已被用户否定并整体摘掉；`boids` / `dandelion` / `sun` 现为孤儿，`field-ground` 只在 preset 里。施工前原文（保留）：新增工作量 = 1 个底材；`boids` 要调 `count=120`、调小光标斥力，**不要**再叠 `wind-grass`。
 
 ### room `/license` — 2 件
 
@@ -189,26 +189,26 @@ ink 那 8 个文件（实测字节）：`types.ts` 2,148 / `paint.ts` 2,191 / `r
 
 ✅ **现状：非 0**——`paper-ink` + `pixel-post` 两件零件之外，站内还有仪式 / 停留代码（`stay.ts` 37 + `fold.ts` 20 = 57 行；该上限已于 2026-11-19 撤销，见 PRODUCT-FORM §0）。施工前原文：新增工作量 = **0**，这是四个 biome 里最省的。晨光本身用 canvas 线性渐变 + `fbm` 镂空光斑就够，未引 `god-rays`。
 
-### ink `/koi-pond` — 2–3 件
+### ink `/koi-pond` — 施工前 2–3 件 / 现状 2 件
 
 | 层 | 零件 | 状态 |
 |---|---|---|
 | L0 底材 | `paper-ink`（纸 + 描边） | **现有** |
-| L1 世界 | —— | 省略 |
-| L2 生态 | ✅ **`ascii-field` 已实现**（76×28 字符栅格，δ∈{2,3,4} 轮转，斜向流动；`koi-pond-ripples` 92×34 提取方案未采用） |
+| L1 世界 | `koi-pond` | ✅ **已装配**（zz85 完整移植，`shared/sites/build.mjs:141-144`） |
+| L2 生态 | `ascii-field` | **不装**：`ascii-field` 不在任何站、模板、预设里（孤儿）；鱼群在 `koi-pond` 内部（`FishSchool`） |
 | L3 交互 | 指针 → 墨在水中扩散 | ✅ **站内已实现，约 60 行**（施工前估算 30 行；一个位移场 + 迭代模糊） |
-| L4 后处理 | `pixel-post` | ✅ **已实现（宣纸 grain，无抖动）**——`dither` 从未执行、已删 |
+| L4 后处理 | `pixel-post` | **不装**：原件 `grade` / `paint` / `ink` 已完成最终成片，再叠暗角会压暗 real、压冷 ink |
 
-✅ **现状：整站 ASCII 墨，无风格二选一问题**（矢量墨方案未采用）。施工前原文：若不用 ASCII 鱼，ink 只要 2 件；`koi-pond-ripples` 的 92×34 栅格叠在 SVG 描边上会风格打架——要么整站 ASCII 墨、要么整站矢量墨。
+✅ **现状：`/koi` 的零件栈是 `paper-ink + koi-pond`，预算 12ms**（`shared/sites/build.mjs:141-144`），**不叠 `pixel-post`**。`ascii-field`（76×28 / 92×34 两型）已实现但没有任何站装配，见 `docs/ASCII-PIECE-CONTRACT.md` 文末。施工前原文（保留）：若不用 ASCII 鱼，ink 只要 2 件；`koi-pond-ripples` 的 92×34 栅格叠在 SVG 描边上会风格打架——要么整站 ASCII 墨、要么整站矢量墨。
 
 ### 汇总
 
 | biome | L0 | L1 | L2 | L3 | L4 | 需自写 |
 |---|---|---|---|---|---|---|
 | tide | `tide-medium` ✅ | `voxel-world` ✅（按能力） | `bubbles` ✅ | **不装** | `pixel-post` ✅ | 0（均已实现） |
-| field | `field-ground` ✅ | — | `boids` ✅ + `dandelion` ✅ | `blow-input` ✅ | `pixel-post` ✅ | 0 |
+| field | `field-ground` ✅（仅 preset） | `hug-meadow` ✅（`/hug` 唯一零件） | `boids` 未装 + `dandelion` 未装 | `blow-input` 未装 | `pixel-post` 未装 | 0 |
 | room | `paper-ink` ✅ | — | — | 仪式在站内 DOM ✅ | `pixel-post` ✅ | 0（零件），站内 ≤165 行 |
-| ink | `paper-ink` ✅（满幅、无边界、无台面） | — | `ascii-field` ✅（76×28，δ 轮转） | 墨扩散（站内 ~60 行）✅ | `pixel-post` ✅（无抖动） | 0 |
+| ink | `paper-ink` ✅（满幅、无边界、无台面） | `koi-pond` ✅ | `ascii-field` 未装（孤儿） | 墨扩散（站内 ~60 行）✅ | `pixel-post` 未装 | 0 |
 
 ---
 
@@ -275,8 +275,8 @@ shader = await createShader(canvas, {
 | 3 | `src/generated/vendor/threeui/landscape/LandscapeScene.tsx` | 同上，`<iframe src="/landscape.html?variant=...">` | 同上 |
 | 4 | `ascii-rest` 的 `meta.ground` | `mount.js`：`if (ground) ctx.fillStyle = ground; fillRect(0,0,w,h)` → **整块不透明铺底，毁掉下层** | 拷贝 piece 后把 `ground` 删掉，或在我们自己渲染时忽略它 |
 | 5 | `ascii-magic` 的 `play()` | 会 `pre.style.display = "none"` 并在 `<pre>` **后面 append 一个新 canvas**，尺寸由 `fontSize × cols` 推出 | 别用 `play()`；直接用 `mod.default()` 拿 `g.frame()`，自己画。要用它的画布就 `drawImage(它的canvas, ...)` |
-| 6 | `boids` 的 `ctx.fillStyle = background + 'dd'` | 87% 透明抹除靠**字符串拼接**。`background` 是 6 位 hex 才成立，传 `rgba()` / `hsl()` 会拼出非法色，浏览器静默忽略 → 拖尾变成不消失 | 要么强制 6 位 hex，要么改成 `ctx.globalAlpha = 0.87; fillRect(...)` |
-| 7 | `boids` 的 `MAX_SPEED = 1.8` | 单位是**像素/帧**，全段无 dt。120Hz 屏上速度翻倍，切标签页回来会瞬移 | 3 处改 `dtScale = clamp(dt,0,0.05)*60`：位置积分、朝向积分、（**不要**改 trail 的 `'dd'`） |
+| 6 | animata 候选 `boids` 的 `ctx.fillStyle = background + 'dd'` | 87% 透明抹除靠**字符串拼接**。`background` 是 6 位 hex 才成立，传 `rgba()` / `hsl()` 会拼出非法色，浏览器静默忽略 → 拖尾变成不消失 | 要么强制 6 位 hex，要么改成 `ctx.globalAlpha = 0.87; fillRect(...)` |
+| 7 | animata 候选 `boids` 的 `MAX_SPEED = 1.8` | 单位是**像素/帧**，全段无 dt。120Hz 屏上速度翻倍，切标签页回来会瞬移 | 3 处改 `dtScale = clamp(dt,0,0.05)*60`：位置积分、朝向积分、（**不要**改 trail 的 `'dd'`） |
 | 8 | pixelfx 的 `W = 320, H = 180` | 硬编码在 `fx/transitions/_lib.js` 模块顶部，不是参数 | 想换尺寸只能改常量，且所有 `fx/*` 的构图假设都基于它 |
 | 9 | pixelfx 没有"后处理文件" | 247 个 fx 文件里**没有** grain / vignette / scanline / noise | 用 `field(fn,gmin,gmax)` + `pixels(p)` 自己写，别去文件树里找 |
 | 10 | `ink` 的 `toSvg()` | 输出是 **SVG 字符串**，进 canvas 只能 `new Image()` + `blob:` URL（异步，逐帧不可行）或 `Path2D`（要自己解析 `parts[].d`） | 静态底材走 Image 一次性贴；动态走 Path2D；别指望逐帧重生成 |
@@ -294,7 +294,7 @@ shader = await createShader(canvas, {
 1. **`public/shaders/runtime/shaders.js`（2,594,656 B）我只读到大小，没读内容。** 200 个组件的清单来自 `public/shaders/covers/` 的 200 个封面文件名（逐项计数），**不是**源码里的导出表——两者应当一一对应，但我没有验证。
 2. **组件"是否吃下层画面"是推断。** 依据是 `playground.html` 把 `Aurora + CursorRipples + FilmGrain` 叠在一个 canvas 上；单组件源码（uniform 里有没有 `u_back` / `u_texture` 之类的输入）我没看。
 3. **`public/ascii-magic/lib/kit.js`（10,772 B）没读。** `palette()` 的返回结构（数组？看起来可被字符索引的对象？）是我从 `moonlit-sea.js` 的 `palette[key]` 用法和 `player.js` 的 `palette[key]` 反推的，不是读定义得来的。
-4. **ascii-rest 250 件的配色情况只抽查了 2 件**（`pond-ripples`、`aquarium`），两件都没有 `meta.palette`。**不能推广成"250 件全单色"**——`mount.js` 里明确有 `color` 通道，说明至少有些件是带 palette 的。
+4. **ascii-rest 240 件的配色情况只抽查了 2 件**（`pond-ripples`、`aquarium`），两件都没有 `meta.palette`。**不能推广成"240 件全单色"**——`mount.js` 里明确有 `color` 通道，说明至少有些件是带 palette 的。
 5. **`public/ascii-rest/library.js`（14,830 B）、`mount.js` 以外的 `ascii-art.js`（3,450 B）、`banner.js`（33,904 B）没读。** 因此 `public/ascii-rest/fonts/ascii-rest-mono.woff2`（2,956 B）到底被谁引用、是不是必需，我不确定。
 6. **`public/ascii-magic/lib/scene.js`（26,024 B）与 `lib/image.js`（7,499 B）没读。** 若 `scene.js` 里有"整场布景"能力，可能会改变 L0 的结论。
 7. **`public/blocx` 下 6 个目录只核对了 `orbit-globe` 这一路**（caremetric-footer / contact-form / orbit-hero / partylabs-hero / smart-pricing / storybook-hero）。其余 5 个我只知道目录名，**没确认里面是不是 3D**。

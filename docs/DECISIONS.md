@@ -16,7 +16,7 @@
 **为什么**：
 - 2026-11-19 的实机证据是：仓库有 4,473 行 three 代码，但四个 `dist/*/index.html` 里 `THREE|WebGLRenderer` 出现次数都是 **0**。也就是说，「three.js 项目」只存在于源码，用户看到的是 Canvas2D 拼贴。
 - 但「每站都 3D」不是产品目标。`/license` 的价值是**纸的触感**和盖章仪式；把纸做成 3D 房间会牺牲文字清晰度、导出精度和首屏速度。
-- 三个世界零件里，`koi` 必须真 3D（鱼体 shader/水墨扩散/浮游植物），`still` 必须真 3D（体素海），`hug` 不必（平面剪影+风场更像纸上的动画）。
+- 三个世界零件里，`koi` 必须真 3D（鱼体 shader/水墨扩散/浮游植物），`still` 必须真 3D（体素海），`hug` 不必（平面剪影+风场更像纸上的动画）。**此判断已被 ADR-12 推翻**：`/hug` 改为 three 草甸；本条仍然成立的部分是 `/license` 不升级为 3D。
 
 **什么条件下推翻**：如果 `/license` 要做「拖光在纸上产生真实阴影」且 Canvas2D 的假阴影被用户认为假，再把纸升级为 `world` 零件；导出仍必须从同一张合成画布裁切，禁止另画一张。
 
@@ -149,7 +149,7 @@
 
 ## ADR-11 · v1 的 `room-at-dawn` / `grand-atelier` 保持 D0，不强行接入
 
-**决定**：`shared/parts-library/room-at-dawn`（7.3KB 单文件，原件只入库对照）与 `grand-atelier`（缺 4 个未入库模块，`index.ts` 恒抛 `E_PART_NOT_MOUNTED`）**不**升级为正式零件；`/license` 仍用 `paper-ink`。
+**决定**：`shared/parts-library/room-at-dawn`（v1 壳 `index.ts` 恒抛 `E_PART_NOT_MOUNTED`；上游 24 个 `src` 文件已入库，2026-11-24 从中拆出 9 个 `WorldFeature`，目前没有任何站或模板使用）与 `grand-atelier`（3 个原件 `.ts` 已入库；`piano-model.ts` 依赖 4 个未入库模块，v1 壳 `index.ts` 不 import 原件，只返回击弦时序占位）**不**升级为正式零件；`/license` 仍用 `paper-ink`。
 
 **为什么**：
 - 两个资产都不是「可直接接」的完整实现：一个 D0 未用，一个缺模块且只有击弦时序占位。
@@ -160,7 +160,7 @@
 
 ---
 
-## ADR-04 · `/hug` 推翻“纯 Canvas2D”裁决，完整移植原站草甸
+## ADR-12 · `/hug` 推翻“纯 Canvas2D”裁决，完整移植原站草甸
 
 **决定**：`/hug` 只装一件 `hug-meadow`（L1 / `world` / WebGL2）。它按原站 `DandelionStage` chunk 还原 10 株、1,335 颗种子、44 段/颗的 `InstancedBufferGeometry` + `LineSegments`、背景/雾/逆光/bokeh 与放飞时序；旧的 `field-ground` / `dandelion` / `boids` / `sun` / `pixel-post` 从站点栈移除。
 
@@ -171,34 +171,61 @@
 
 **什么条件下推翻**：若目标设备大面积无 WebGL2，且不满足于构建层的草甸色渐变兜底，再补一件不透明的 L0 静态草甸；不要退回旧五件套。
 
-## 当前零件栈（代码事实）
+## 当前零件栈
 
-| 站 | 栈 | budget | CTA | 备注 |
+四站的零件栈、预算与 CTA 只在 [`STATUS.md`](./STATUS.md) 维护，本文不再复制这张表。核对命令：`sed -n 30,146p shared/sites/build.mjs`，看 `STATIONS` 里每站的 `parts` / `budgetMs` / `cta`。
+
+## 当前验证门（2026-11-24 实测）
+
+口径：Windows 11、无 playwright、无头 Edge；评审基线 HEAD `1fce19c`；按 npm script / 命令计 19 条，复合脚本取其中最差的结果。逐命令输出见 [`review-2026-11-24/arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §1。
+
+| 结果 | 数量 | 命令 | 备注 |
+|---|---|---|---|
+| 绿 | 7 | `typecheck` · `verify:stage` · `verify:core` · `verify:nexus` · `verify:nexus:full` · `verify:sites` · `verify:preview` | `verify:stage` = stage-smoke 44/44 + mutation 6/6 + parts-composition 22/22；`verify:sites` 119/119；`verify:preview` 811/811 |
+| 红 | 2 | `verify:reuse` · `verify:clock` | 原因见下 |
+| 本机不可跑 | 10 | `verify:dom` · `verify:fingerprint` · `verify:license` · `verify:input` · `verify:field` · `verify:paper` · `bench:parts` · `bench:gl` · `bench:blend` · `shot` | 全部依赖 `tests/lib/browser.mjs`，它只认 macOS 的 playwright 缓存路径；其中包括全部成品视觉门和 3 条 bench |
+
+两条红的原因：
+
+- **`verify:reuse` —— 行尾，不是声明写错。** 本机工作区有 99 个已跟踪文件是 CRLF / 混合行尾（`git ls-files --eol`：`w/crlf` 85 个、`w/mixed` 14 个），manifest 里声明的字节数等于 git blob，磁盘字节 = blob + 文件内 CR 个数，于是「声明 ≠ 磁盘」。同一份代码在 LF 副本里两个红脚本都是绿的（50 项、90 项断言）。
+- **`verify:clock` —— 与行尾无关。** `shared/parts/dandelion/index.ts:291` 与 `:337` 调 `performance.now()`，与同文件 `:14` 的注释相反，LF 副本同样 `FAIL 2/5`。
+
+跑之前要知道的四件事（同见评审 §4.1）：
+
+1. `npm run verify:stage` 会原地改写 `shared/stage/stage.ts` 6 次（`tests/stage-mutation.mjs:60,71,82`）；有人并发施工时不要在真实工作区跑。
+2. `verify:field` 拿不到浏览器时打印 SKIP 并以 0 退出（`tests/field-visual.mjs:177`），在这台机器上是假绿，所以上表记为「不可跑」。
+3. `verify:site` 不在这 19 条里；它同样依赖 `tests/lib/browser.mjs`，并且会往 `dist/qa/` 写文件。
+4. 没有 CI、没有 lint，所有门靠手动跑。
+
+## 待裁决（2026-11-24 评审提出）
+
+下列三件事用户尚未拍板，**都还不是决策**。「建议」取自 [`REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §5.4；「拍板前不执行」是护栏。拍板后把结论写成新的 ADR，并删掉本节对应那一行。
+
+| # | 问题 | 选项 | 建议 | 拍板前不执行 |
 |---|---|---|---|---|
-| `/license` | `paper-ink` + `pixel-post` | 8ms | `Stamp it`（ui） | `grain:0`，静止纸不闪颗粒 |
-| `/hug` | `hug-meadow` | 9ms | `Let it go`（world-inject） | 全四站唯一世界注入；three.js 单件铺满 |
-| `/still` | `tide-medium` + `voxel-world` + `bubbles` + `still-sink` + `pixel-post` | 12ms | `Sit`（ui） | 申报 13.52 > 12，诚实降 low |
-| `/koi` | `paper-ink` + `koi-pond` + `pixel-post` | 9ms | 无 | `paperSheet:false`，整屏纸 |
+| 1 | `/still`、`/koi` 是否先从入口撤下 | ① 先撤；② 不撤，修好之前照常列出 | 撤。顺序：`/license` 先做透 → `/hug` 补链接 → `/koi` 移出四站、保留为 A2 模板 → `/still` 修好引擎再回归 | 不改入口页的站清单；不删两站的源码、预设与模板。评审 §5.1 第 7 条里「`/still`、`/koi` 标预览或下架」这半句一并挂起 |
+| 2 | A2 与四站：同仓还是分仓 | ① 同仓、分线、分入口；② 分仓（运行时两份） | 同仓、分线、分入口，保住「同一套零件」。PM 建议分仓，代价是运行时两份 | 不搬 `shared/product/`；不改模板构建对 `shared/stage/`、`shared/parts/` 的 import 路径 |
+| 3 | `/koi`「不设带走入口」与成立判据③（离开时手上有一件东西）冲突，以谁为准 | ① 以「不设带走入口」为准，承认它是场景不是站；② 以判据③为准，给它带走物 | 以判据③为准：要么给它带走物，要么承认它是场景不是站 | 不给 `/koi` 加按钮、导出或剪贴板；不改 `COPY-SITES.md` 的 `/koi` 行；不把 `/koi` 从四站口径里除名 |
 
-## 当前验证门（2026-11-19 通过）
+## 2026-11-24 评审输入
 
-- `typecheck`：通过
-- `verify:sites`：124/124
-- `verify:dom`：83/83（/hug 多一个 Wind 控件）
-- `verify:stage`：44/44 + mutation 6/6 + field 22/22
-- `verify:preview`：617/617
-- `verify:fingerprint`：7/7
-- `verify:license`：34/34 + 17/17
-- `verify:nexus:full`：199 + 12 + 36 + 43 + 17 + 58
-- `verify:reuse`：100%（89/89 黄金值）+ mutation 9/9
-- `verify:site`：41/41（真实 Chromium，1280×800@dpr1；含 CTA 可按性 + 导出 IHDR + CTA 帧差）
+评审 §4.2 把实测到的问题归并成 6 个根因。**它们尚未成为决策**：下表只记录评审的归因，对应的调整在评审 §5.1（P0，10 条）；其中会碰到本文 ADR-06（就绪与降级）、ADR-05（申报预算）、ADR-12（零件自触发）的几项，等调整落地后再决定是改写还是新写 ADR。
+
+| # | 根因 | 一句话 |
+|---|---|---|
+| R1 | 异步零件的生命周期不在壳的管辖内 | `/still` 黑屏 17.8 s，无 WebGPU 时没有提示 |
+| R2 | 画布像素尺寸有两个责任人 | 画面只画在左上角，桌面 resize 后同样坏 |
+| R3 | 状态有两个真相源 | 遮罩还在时 `snapshot().state` 已报 degraded；卡死时句柄仍报 ready |
+| R4 | 预算建立在申报值上，降档一刀切 | `/still` 三件零件同时降 low；`kb` 没有任何代码在读 |
+| R5 | 输入没有「模态 / 因果」层 | 菜单开着噪音也放飞；点草地不带链接；手机无菜单入口；捏合缩放 |
+| R6 | 重活排在首帧之前且同步阻塞 | `/koi` 4.3 s 全黑；`/still` 25 s 长任务 |
 
 ## 仍开放（不是「已完成」）
 
-1. `/still` 在 headless WebGPU 下约 39–55fps，`renderScale ~0.72`、`degraded low`。真机独显可能 60；如果目标机器是核显，需要减实体/换低档，不是继续压 `costMs`。
-2. `/koi` 单文件约 605KB（three 全量）。可做命名导入 tree-shaking，但不要为体积退回 ASCII。
+1. `/still` 在本机（无头 Edge、Intel Iris Xe 核显）是 `degraded low`、`renderScale 0.55`：空闲机 32 fps，走查期间就绪后首测 3.2–4.5 fps（[`ux-sites/WALKTHROUGH.md`](./review-2026-11-24/ux-sites/WALKTHROUGH.md) §1、评审 §3.1）。真机独显可能 60；如果目标机器是核显，需要减实体/换低档，不是继续压 `costMs`。
+2. `/koi` 单文件 607,501 B（`verify:sites` 输出，2026-11-24；three 全量）。可做命名导入 tree-shaking，但不要为体积退回 ASCII。
 3. `/hug` 放飞后的种子云密度/透明度是审美判断，需人工看 `after/hug-release.png` 再定，不是测试能判。
-4. `/hug` 的 Wind 已接（`shared/sites/mic.ts` → `stage.setAudio` → `dandelion` 的风强），但只有**真实设备/权限**能验；`blow-input` 的原始算法没有进产物，当前只读响度，不触发释放。麦克风仍是可选项（点 Wind 才申请），不是首屏权限。
+4. `/hug` 的 Wind 已接（`shared/sites/mic.ts` → `stage.setAudio()` → `hug-meadow` 读 `frame.audio.level`，`shared/parts/hug-meadow/index.ts:475-478`），响度超过 0.12 就触发放飞；但只有**真实设备/权限**能验，而且 2026-11-24 实测到环境噪音就会把蒲公英全部放飞（走查 UX-07，评审 §5.1 第 4 条）。`blow-input` 的原始算法没有进产物。麦克风仍是可选项（点 Wind 才申请），不是首屏权限。
 5. `/license` 屏幕 vs 导出只做了尺寸/体积门，没有逐像素比对；文字重排是百分比逼近，不是同一字体渲染路径。
 6. `voxel-world` 的异步设备丢失现在会通过 `PartEnv.onError` 落进 `degraded`（2026-11-19 A1 修复），但**还没有用户可读的恢复路径**：世界没了，页面只剩 tide 底材和「Quality Low」。下一步要么给一句「水静下来了」的诚实文案，要么重建设备；不要靠测试顺序掩盖。`site-visual` 把 `still` 放最前跑，仍是为了避免前三个页面的 GL 上下文把它拖成 flaky。
 7. `site-visual` 的「CTA 帧差」对 `/hug` 是 1.5 阈值、`/still` 是 8；这两个阈值是经验值，换机器/换 LOD 可能误报。
