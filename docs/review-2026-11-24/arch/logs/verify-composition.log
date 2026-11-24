@@ -1,0 +1,7 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-composition.mjs
+# start: 2026-11-24 11:03:18
+[verify-composition] ✅ PASS：36 项断言（层序 / chain 管线 / 逆序 dispose / liveListeners→0 / 四类冲突）
+# exit: 0
+# elapsed: 905ms

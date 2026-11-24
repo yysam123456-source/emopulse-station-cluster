@@ -1,0 +1,29 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/preview-build.mjs
+# start: 2026-11-24 11:10:51
+预览通路：
+
+  preset  单文件字节  脚本字节  零件            Node 假 canvas 每帧指令
+  empty       18105     16767  (none)          drawImage=0 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  field       26670     25318  field-ground,pixel-post drawImage=4 fillRect=14 stroke=232 clearRect=2 getImageData=0 putImageData=2
+  field-l0     23702     22343  field-ground    drawImage=2 fillRect=10 stroke=232 clearRect=0 getImageData=0 putImageData=0
+  hug        524094    522690  hug-meadow      drawImage=0 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  still      133404    131948  tide-medium,voxel-world,bubbles,still-sink,pixel-post drawImage=4 fillRect=8 stroke=0 clearRect=2 getImageData=0 putImageData=2
+  tide-a      22346     20974  tide-medium     drawImage=2 fillRect=2 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  tide-b      22328     20962  tide-medium     drawImage=114 fillRect=3 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  tide-c      22364     20986  tide-medium     drawImage=2 fillRect=3 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  bubbles-probe     23657     22274  tide-medium,bubbles drawImage=2 fillRect=3 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  koi-nolimit    591397    589957  paper-ink,koi-pond drawImage=3 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=1
+  koi        591332    589922  paper-ink,koi-pond drawImage=3 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=1
+  room        26837     25468  paper-ink,pixel-post drawImage=5 fillRect=10 stroke=0 clearRect=1 getImageData=0 putImageData=1
+  dawn-desk   1778955   1773370  dawn-desk       drawImage=0 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  ink         26880     25499  paper-ink,pixel-post drawImage=5 fillRect=4 stroke=0 clearRect=2 getImageData=0 putImageData=3
+  a2-deepsea     29480     28080  abyss,bubbles,still-sink,pixel-post drawImage=2 fillRect=18 stroke=18 clearRect=4 getImageData=0 putImageData=2
+  a2-nebula    520388    518955  abyss,nebula,pixel-post drawImage=2 fillRect=16 stroke=18 clearRect=4 getImageData=0 putImageData=2
+  a2-temple   4992587   4991172  temple          drawImage=0 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=0
+  a2-gate   4992577   4991165  temple          drawImage=0 fillRect=0 stroke=0 clearRect=0 getImageData=0 putImageData=0
+
+preview-build: PASS 811/811
+# exit: 0
+# elapsed: 40387ms

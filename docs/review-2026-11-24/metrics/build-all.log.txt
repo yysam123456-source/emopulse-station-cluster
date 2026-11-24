@@ -1,0 +1,245 @@
+### build:sites
+
+> emopulse-station-cluster@1.0.0 build:sites
+> node shared/sites/build.mjs
+
+[sites] license    48973 B  → dist\license\index.html  parts: paper-ink,pixel-post
+[sites] hug       539528 B  → dist\hug\index.html  parts: hug-meadow
+[sites] still     146288 B  → dist\still\index.html  parts: tide-medium,voxel-world,bubbles,still-sink,pixel-post
+[sites] koi       607501 B  → dist\koi\index.html  parts: paper-ink,koi-pond
+[sites] 索引页 9418 B → dist/index.html
+
+real	0m1.954s
+user	0m0.213s
+sys	0m0.182s
+### preview:empty
+[preview] preset=empty  parts=(none)  gl=false
+[preview] 脚本 16767 B → 单文件 18105 B（盘上 18105 B）
+[preview] 输出 dist\preview\empty.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.307s
+user	0m0.031s
+sys	0m0.015s
+### preview:field
+[preview] preset=field  parts=field-ground,pixel-post  gl=false
+[preview] 脚本 25318 B → 单文件 26670 B（盘上 26670 B）
+[preview] 输出 dist\preview\field.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.331s
+user	0m0.031s
+sys	0m0.016s
+### preview:field-l0
+[preview] preset=field-l0  parts=field-ground  gl=false
+[preview] 脚本 22343 B → 单文件 23702 B（盘上 23702 B）
+[preview] 输出 dist\preview\field-l0.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.320s
+user	0m0.030s
+sys	0m0.015s
+### preview:hug
+[preview] preset=hug  parts=hug-meadow  gl=true
+[preview] 脚本 522690 B → 单文件 524094 B（盘上 524094 B）
+[preview] 输出 dist\preview\hug.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.630s
+user	0m0.047s
+sys	0m0.015s
+### preview:still
+[preview] preset=still  parts=tide-medium,voxel-world,bubbles,still-sink,pixel-post  gl=true
+[preview] 脚本 131948 B → 单文件 133404 B（盘上 133404 B）
+[preview] 输出 dist\preview\still.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.362s
+user	0m0.015s
+sys	0m0.030s
+### preview:tide-a
+[preview] preset=tide-a  parts=tide-medium  gl=false
+[preview] 脚本 20974 B → 单文件 22346 B（盘上 22346 B）
+[preview] 输出 dist\preview\tide-a.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.310s
+user	0m0.030s
+sys	0m0.046s
+### preview:tide-b
+[preview] preset=tide-b  parts=tide-medium  gl=false
+[preview] 脚本 20962 B → 单文件 22328 B（盘上 22328 B）
+[preview] 输出 dist\preview\tide-b.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.313s
+user	0m0.031s
+sys	0m0.015s
+### preview:tide-c
+[preview] preset=tide-c  parts=tide-medium  gl=false
+[preview] 脚本 20986 B → 单文件 22364 B（盘上 22364 B）
+[preview] 输出 dist\preview\tide-c.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.328s
+user	0m0.000s
+sys	0m0.047s
+### preview:bubbles-probe
+[preview] preset=bubbles-probe  parts=tide-medium,bubbles  gl=false
+[preview] 脚本 22274 B → 单文件 23657 B（盘上 23657 B）
+[preview] 输出 dist\preview\bubbles-probe.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.316s
+user	0m0.031s
+sys	0m0.015s
+### preview:koi-nolimit
+[preview] preset=koi-nolimit  parts=paper-ink,koi-pond  gl=true
+[preview] 脚本 589957 B → 单文件 591397 B（盘上 591397 B）
+[preview] 输出 dist\preview\koi-nolimit.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.644s
+user	0m0.000s
+sys	0m0.030s
+### preview:koi
+[preview] preset=koi  parts=paper-ink,koi-pond  gl=true
+[preview] 脚本 589922 B → 单文件 591332 B（盘上 591332 B）
+[preview] 输出 dist\preview\koi.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.637s
+user	0m0.015s
+sys	0m0.016s
+### preview:room
+[preview] preset=room  parts=paper-ink,pixel-post  gl=false
+[preview] 脚本 25468 B → 单文件 26837 B（盘上 26837 B）
+[preview] 输出 dist\preview\room.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.306s
+user	0m0.016s
+sys	0m0.031s
+### preview:dawn-desk
+[preview] preset=dawn-desk  parts=dawn-desk  gl=true
+[preview] 脚本 1773370 B → 单文件 1778955 B（盘上 1778955 B）
+[preview] 输出 dist\preview\dawn-desk.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.881s
+user	0m0.015s
+sys	0m0.031s
+### preview:ink
+[preview] preset=ink  parts=paper-ink,pixel-post  gl=false
+[preview] 脚本 25499 B → 单文件 26880 B（盘上 26880 B）
+[preview] 输出 dist\preview\ink.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.310s
+user	0m0.031s
+sys	0m0.031s
+### preview:a2-deepsea
+[preview] preset=a2-deepsea  parts=abyss,bubbles,still-sink,pixel-post  gl=false
+[preview] 脚本 28080 B → 单文件 29480 B（盘上 29480 B）
+[preview] 输出 dist\preview\a2-deepsea.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.328s
+user	0m0.000s
+sys	0m0.061s
+### preview:a2-nebula
+[preview] preset=a2-nebula  parts=abyss,nebula,pixel-post  gl=true
+[preview] 脚本 518955 B → 单文件 520388 B（盘上 520388 B）
+[preview] 输出 dist\preview\a2-nebula.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m0.593s
+user	0m0.015s
+sys	0m0.030s
+### preview:a2-temple
+[preview] preset=a2-temple  parts=temple  gl=true
+[preview] 脚本 4991172 B → 单文件 4992587 B（盘上 4992587 B）
+[preview] 输出 dist\preview\a2-temple.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m1.055s
+user	0m0.015s
+sys	0m0.016s
+### preview:a2-gate
+[preview] preset=a2-gate  parts=temple  gl=true
+[preview] 脚本 4991165 B → 单文件 4992577 B（盘上 4992577 B）
+[preview] 输出 dist\preview\a2-gate.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+
+real	0m1.185s
+user	0m0.015s
+sys	0m0.015s
+### build:templates
+
+> emopulse-station-cluster@1.0.0 build:templates
+> node shared/product/build-templates.mjs
+
+[templates] deepsea  28.8 KB  gzip 11.4 KB  gl=false  order=abyss -> bubbles -> still-sink -> pixel-post
+[templates] nebula  508.2 KB  gzip 132.9 KB  gl=true  order=abyss -> nebula -> pixel-post
+[templates] temple  4875.6 KB  gzip 3375.5 KB  gl=true  order=temple
+[templates] gate  4875.6 KB  gzip 3375.5 KB  gl=true  order=temple
+[templates] koi  577.5 KB  gzip 158.4 KB  gl=true  order=paper-ink -> koi-pond
+[templates] manifest dist\templates\manifest.json
+[templates] done 5 template(s)
+
+real	0m3.622s
+user	0m0.153s
+sys	0m0.229s
+### build:studio
+
+> emopulse-station-cluster@1.0.0 build:studio
+> node shared/product/studio.mjs
+
+[studio] dist\studio\index.html (11.4 KB, 5 templates)
+
+real	0m0.990s
+user	0m0.167s
+sys	0m0.199s
+### dist sizes
+4992587 dist/templates/temple/index.html
+4992587 dist/preview/a2-temple.html
+4992577 dist/templates/gate/index.html
+4992577 dist/preview/a2-gate.html
+1778955 dist/preview/dawn-desk.html
+1283253 dist/templates/temple/preview-dawn.png
+1283253 dist/preview/a2-temple.png
+1207323 dist/templates/gate/preview-gate.png
+1207323 dist/preview/a2-gate.png
+1113711 dist/preview/a2-nebula.png
+1046994 dist/preview/a2-deepsea.png
+806134 dist/preview/a2-koi.png
+804001 dist/templates/temple/preview-night.png
+607501 dist/koi/index.html
+591397 dist/preview/koi-nolimit.html
+591332 dist/templates/koi/index.html
+591332 dist/preview/koi.html
+591332 dist/preview/a2-koi.html
+539528 dist/hug/index.html
+524094 dist/preview/hug.html
+520388 dist/templates/nebula/index.html
+520388 dist/preview/a2-nebula.html
+192986 dist/templates/temple/preview-photo.jpg
+146288 dist/still/index.html
+133404 dist/preview/still.html
+107773 dist/still.html
+48973 dist/license/index.html
+29480 dist/templates/deepsea/index.html
+29480 dist/preview/a2-deepsea.html
+26880 dist/preview/ink.html
+26837 dist/preview/room.html
+26670 dist/preview/field.html
+23702 dist/preview/field-l0.html
+23657 dist/preview/bubbles-probe.html
+22364 dist/preview/tide-c.html
+22346 dist/preview/tide-a.html
+22328 dist/preview/tide-b.html
+18105 dist/preview/empty.html
+12419 dist/studio/index.html
+9418 dist/index.html
+8467 dist/templates/manifest.json
+### DONE

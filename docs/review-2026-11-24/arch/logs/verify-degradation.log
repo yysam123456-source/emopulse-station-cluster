@@ -1,0 +1,8 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-degradation.mjs
+# start: 2026-11-24 11:03:19
+[verify-degradation] ✅ PASS：43 项断言（正常 / 无 Canvas2D / 冲突 / 同步抛错 / 异步拒绝），未捕获异常恒为 0
+[verify-degradation] 已知限制：真实浏览器 unhandledrejection 事件由无头 node 无法自然产生，本测试以「直接触发已注册监听器」等效验证其行为；WebGPU 渲染本身未验证。
+# exit: 0
+# elapsed: 948ms

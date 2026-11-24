@@ -1,0 +1,32 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF; v1 dist/*.html 已在副本内由 build all 生成) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: npx tsx tests/contracts.test.ts
+# start: 2026-11-24 11:37:20
+
+[state-machine]
+  PASS  初始状态与元数据正确
+  PASS  正常转移 idle->sitting->leaving->sitting
+  PASS  非法事件不改变状态且不抛错
+  PASS  onExit 先于 action，action 先于 onEnter，且各触发一次
+  PASS  reset 回到 initial 且不触发回调
+  PASS  构造期校验：initial 不在 states / 转移含未登记状态均抛错
+
+[short-url]
+  PASS  encode->decode 往返一致（简单对象）
+  PASS  encode->decode 往返一致（中文 / emoji / 特殊字符）
+  PASS  decode 支持 ?from= 前缀与裸 token 两种形态
+  PASS  decode 畸形输入容错，绝不抛错
+  PASS  ?from= 缺失时降级：其他查询参数不误当 token
+  PASS  encode 过滤非标量并截断键数/值长
+  PASS  withFrom 生成带 ?from= 的链接（decode 契约只吃 query 部分）
+
+[analytics]
+  PASS  scrubPayload 丢弃 PII 键（大小写不敏感）与非标量，截断长字符串
+  PASS  bucketDuration 分桶边界正确
+  PASS  队列 push 与上限截断 slice(-maxQueue)
+  PASS  localStorage 完全不可用（undefined）时不崩溃
+  PASS  localStorage 抛异常（隐私模式）时静默降级
+  PASS  enabled=false 不写队列；start/stopTimer 计时与未启动返回 0
+
+[结果] PASS=19 FAIL=0
+# exit: 0
+# elapsed: 2400ms

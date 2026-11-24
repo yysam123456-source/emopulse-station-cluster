@@ -1,0 +1,15 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/part-clock.mjs
+# start: 2026-11-24 11:03:22
+零件时钟门：扫了 42 个 .ts（shared/parts + parts-library/*/core）
+  禁用 API：performance.now() · Date.now() · requestAnimationFrame · setTimeout(
+  扫描器自检：命中 4/4（须 4）· 真实违规 2 处
+  豁免（不参与画面）：shared/parts/voxel-world/index.ts × performance.now() × 1
+  豁免（不参与画面）：shared/parts/voxel-world/index.ts × Date.now() × 1
+
+part-clock: FAIL 2/5
+  - shared/parts/dandelion/index.ts:291 使用了 performance.now() —— 零件不许持有自己的时钟（时间只从 frame.t / frame.dt 取）
+  - shared/parts/dandelion/index.ts:337 使用了 performance.now() —— 零件不许持有自己的时钟（时间只从 frame.t / frame.dt 取）
+# exit: 1
+# elapsed: 1097ms

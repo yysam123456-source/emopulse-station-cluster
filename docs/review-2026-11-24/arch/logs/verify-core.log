@@ -1,0 +1,8 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node shared/build/verify-core.mjs
+# start: 2026-11-24 11:01:45
+[verify-core] 防伪 pin 校验通过：BASELINE.sha256 未被改写
+[verify-core] ✅ Frozen Core 校验通过：11 个文件逐字节一致
+# exit: 0
+# elapsed: 523ms

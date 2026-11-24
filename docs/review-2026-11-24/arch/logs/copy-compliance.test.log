@@ -1,0 +1,24 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF; v1 dist/*.html 已在副本内由 build all 生成) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: node tests/compliance.test.mjs
+# start: 2026-11-24 11:37:20
+
+[hug] 121330 chars
+
+[index] 9410 chars
+
+[koi-ink] 107823 chars
+
+[koi-pond] 107819 chars
+
+[koi-watercolor] 107854 chars
+
+[license] 115322 chars
+
+[praise] 111944 chars
+  INFO  praise: purchase 出现 2 次，均为否定式免责声明
+
+[still] 107713 chars
+
+站点数=8  合规检查 PASS=168 FAIL=0
+# exit: 0
+# elapsed: 298ms

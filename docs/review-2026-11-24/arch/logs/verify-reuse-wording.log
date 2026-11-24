@@ -1,0 +1,25 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-reuse-wording.mjs
+# start: 2026-11-24 11:03:10
+[verify-reuse-wording] 措辞黑名单 + 降级三问 + L3 四要素
+  零件 11 件（manifest 10 + 缺口占位 1）
+
+  id                depth  许可  结果
+  ascii-kit         D4    L3    ✓
+  blow-input        D3    L3    ✓
+  crimson-loong     D1    L3    ✓
+  dandelion         D3    L3    ✓
+  grand-atelier     D1    L1    ✓
+  koi               D1    L3    ✓
+  micro-scenes      D0    L3    ✓
+  rain-webgpu       D0    L3    ✓
+  room-at-dawn      D0    L1    ✓
+  sylva             D0    L4    ✓
+  paper-plane       D1    L3    ✓
+
+[verify-reuse-wording] 许可分级：L1=2 L3=8 L4=1（本次纳入 11 件）
+
+[verify-reuse-wording] ✅ PASS：12 项断言（措辞黑名单 / 降级三问 / L3 四要素 / L3 计数）
+# exit: 0
+# elapsed: 1061ms

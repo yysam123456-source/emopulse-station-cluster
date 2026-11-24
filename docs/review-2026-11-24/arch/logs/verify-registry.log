@@ -1,0 +1,10 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-registry.mjs
+# start: 2026-11-24 11:03:16
+[verify-registry] LEGACY_SITES 内容哈希 = 3db4bc5ddabb2e92085018728858a0c4dece0b4ed6f0f7a827cc6a8ec2f9c176
+[verify-registry] sites/ 扫描到 0 条新站 manifest（T01 预期 0，8 个产品站属 T02~T05）
+[verify-registry] 零件声明 10 条；entry 薄包装待建（T02+）：[none]
+[verify-registry] ✅ PASS：199 项断言全通过（LEGACY_SITES 7 条字段逐字一致、fixtures 2 正向 + 4 负向、零件声明 10 条与磁盘目录一一对应）
+# exit: 0
+# elapsed: 1038ms

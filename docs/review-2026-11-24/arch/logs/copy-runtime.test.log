@@ -1,0 +1,20 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF; v1 dist/*.html 已在副本内由 build all 生成) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: npx tsx tests/runtime.test.ts
+# start: 2026-11-24 11:37:22
+
+[events]
+  PASS  stateEvent / isStateEvent / eventLabel
+
+[runtime 生命周期]
+  PASS  createContext 注入 store 且为空对象
+  PASS  boot: APP_INIT → init → mount → APP_READY 顺序正确
+  PASS  start/pause 幂等，且驱动 app 与状态事件
+  PASS  dispatch 同时驱动状态机与 app.onEvent
+  PASS  teardown: pause → dispose → APP_DISPOSE → flush，且幂等
+
+[插件注册表]
+  PASS  registerConfig/registerApp/loadConfig 按 ID 注册与读取
+
+[结果] PASS=7 FAIL=0
+# exit: 0
+# elapsed: 1970ms

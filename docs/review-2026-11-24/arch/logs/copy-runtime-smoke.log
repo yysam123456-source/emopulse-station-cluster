@@ -1,0 +1,33 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF; v1 dist/*.html 已在副本内由 build all 生成) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: node tests/runtime-smoke.mjs
+# start: 2026-11-24 11:38:19
+=== 启动无头 Edge（尝试启用软件 WebGPU）===
+Edge: Edg/158.0.4370.33
+WebGPU 探测： {"gpu":true,"adapter":false} => adapterAvailable = false
+
+[still] PASS - glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  before: {"cls":"l e","gpu":true,"canvas":true,"actPresent":true,"actText":"Sit","status":null,"sitTimer":"想待多久，就待多久。","qlen":2,"errText":"No WebGPU adapter found."}
+  after : {"cls":"l e","actText":"Sit","status":null,"sitTimer":"00:00","qlen":1,"backHidden":null}
+
+[license] PASS - glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  before: {"cls":"l e","gpu":true,"canvas":true,"actPresent":true,"actText":"Stamp it","status":"一张允许你只做自己的许可证。没有其他条件。","sitTimer":null,"qlen":2,"errText":"No WebGPU adapter found."}
+  after : {"cls":"l e","actText":"Stamp it","status":"盖章中","sitTimer":null,"qlen":0,"backHidden":null}
+
+[praise] PASS - glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  before: {"cls":"l e","gpu":true,"canvas":true,"actPresent":true,"actText":"Print one","status":"一张只为你打印的好事小票。","sitTimer":null,"qlen":1,"errText":"No WebGPU adapter found."}
+  after : {"cls":"l e","actText":"Print one","status":"靠近一点，把纸层拨开。","sitTimer":null,"qlen":0,"backHidden":null}
+
+[hug] PASS - glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  before: {"cls":"l","gpu":true,"canvas":true,"actPresent":true,"actText":"Let it go","status":"一点暖意正在聚拢。","sitTimer":null,"qlen":0,"errText":"Gathering warmth…"}
+  after : {"cls":"l e","actText":"Let it go","status":"I hope today treats you gently.","sitTimer":null,"qlen":2,"backHidden":false,"shareStatus":"/hug?from=eyJzaXRlIjoiaHVnIiwidiI6MX0","qlenAfterShare":3}
+
+=== CDP 运行时异常数: 0 ===
+
+=== 汇总 ===
+  still: glue=PASS | core渲染=未测（环境无 WebGPU adapter，l e 为正确降级） glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  license: glue=PASS | core渲染=未测（环境无 WebGPU adapter，l e 为正确降级） glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  praise: glue=PASS | core渲染=未测（环境无 WebGPU adapter，l e 为正确降级） glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+  hug: glue=PASS | core渲染=PASS（body 未进入错误态） glue 主交互触发可见状态/埋点变化；core 渲染态见 coreRender 字段
+PASS=4 FAIL=0 未测=0
+# exit: 0
+# elapsed: 47905ms

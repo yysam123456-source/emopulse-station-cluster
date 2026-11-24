@@ -1,0 +1,26 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF; v1 dist/*.html 已在副本内由 build all 生成) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: node tests/theme-injection.test.mjs
+# start: 2026-11-24 11:37:24
+
+[A] inject-theme 纯函数单元（含负向路径）
+  PASS  正向：5 锚点精确注入且 TANH/NEAR 原值不动
+  PASS  负向：WCOL 锚点重复（制造 2 次匹配）→ 构建失败
+  PASS  负向：EXPO 锚点缺失 → 构建失败
+  PASS  负向：theme.vec3 字段长度非 3 → 抛错
+  PASS  负向：theme 浮点非有限数（NaN/Infinity）→ 抛错
+  PASS  负向：js 空串 / 缺 theme → 抛错
+  PASS  负向：TANH 被外部改成非 0.6 → 注入后二次校验失败
+
+[B] 7 站产物配色注入逐一比对
+  PASS  still: WCOL=[0.36,0.34,0.31] PCOL=[0.82,0.76,0.66] SUNC=[1.35,1.18,0.98] EXPO=0.58 RAYS=0.42
+  PASS  license: WCOL=[0.72,0.66,0.56] PCOL=[0.95,0.88,0.74] SUNC=[1.45,1.25,1.05] EXPO=0.66 RAYS=0.48
+  PASS  praise: WCOL=[0.74,0.78,0.8] PCOL=[0.96,0.97,0.95] SUNC=[1.25,1.3,1.35] EXPO=0.72 RAYS=0.38
+  PASS  hug: WCOL=[0.78,0.52,0.38] PCOL=[0.98,0.82,0.66] SUNC=[1.6,1.25,0.95] EXPO=0.62 RAYS=0.58
+  PASS  koi-pond: WCOL=[0.22,0.52,0.48] PCOL=[0.72,0.88,0.8] SUNC=[1.3,1.45,1.3] EXPO=0.6 RAYS=0.5
+  PASS  koi-ink: WCOL=[0.3,0.3,0.32] PCOL=[0.88,0.88,0.86] SUNC=[1.2,1.2,1.25] EXPO=0.55 RAYS=0.35
+  PASS  koi-watercolor: WCOL=[0.62,0.55,0.72] PCOL=[0.94,0.86,0.92] SUNC=[1.35,1.25,1.45] EXPO=0.68 RAYS=0.45
+  PASS  站点差异化：still / praise / hug 的 WCOL 注入值互不相同
+
+[结果] PASS=15 FAIL=0
+# exit: 0
+# elapsed: 523ms

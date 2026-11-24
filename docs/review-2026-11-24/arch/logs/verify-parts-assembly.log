@@ -1,0 +1,37 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-parts-assembly.mjs
+# start: 2026-11-24 11:03:03
+[gi] envmap chunk patch did not apply — three.js version mismatch?
+[verify-parts-assembly] 零件声明 10 件，逐件断言：
+  FAIL ascii-kit       depth=D4 completeness=complete tiers=T1+registered+T2+dispose×2
+         原因：ascii-kit/lib/kit.js bytes 声明 10772 ≠ 磁盘 10992（REUSE-1 GWT-3）
+  OK   blow-input      depth=D3 completeness=absent   tiers=T1+registered+T2+dispose×2
+  OK   crimson-loong   depth=D1 completeness=complete tiers=T1+registered+T2+dispose×2
+  OK   dandelion       depth=D3 completeness=absent   tiers=T1+registered+T2+dispose×2
+  OK   grand-atelier   depth=D1 completeness=partial  tiers=T1+registered+T2+dispose×2
+  OK   koi             depth=D1 completeness=complete tiers=T1+registered+T2+dispose×2
+  FAIL micro-scenes    depth=D0 completeness=complete tiers=T1+registered+T0
+         原因：micro-scenes/雨夜便利店.html bytes 声明 1377922 ≠ 磁盘 1377925（REUSE-1 GWT-3）；micro-scenes/木漏时光.html bytes 声明 1431637 ≠ 磁盘 1431645（REUSE-1 GWT-3）；micro-scenes/海风之屿.html bytes 声明 1372230 ≠ 磁盘 1372235（REUSE-1 GWT-3）；micro-scenes/晨雾稻田水车村.html bytes 声明 1414634 ≠ 磁盘 1414877（REUSE-1 GWT-3）；micro-scenes/雨后紫藤溪谷温室.html bytes 声明 1413792 ≠ 磁盘 1414202（REUSE-1 GWT-3）；micro-scenes/北京故宫雪景水晶球.html bytes 声明 1495923 ≠ 磁盘 1495936（REUSE-1 GWT-3）
+  OK   rain-webgpu     depth=D0 completeness=partial  tiers=T1+registered+T0
+[gi] envmap chunk patch did not apply — three.js version mismatch?
+  OK   room-at-dawn    depth=D0 completeness=partial  tiers=T1+registered+T0
+  OK   sylva           depth=D0 completeness=complete tiers=T1+registered+T0
+[verify-parts-assembly] 装配器幂等：
+  首次 installed=10 reused=0 notMounted=[micro-scenes, rain-webgpu, room-at-dawn, sylva]
+  二次 installed=0 reused=10（幂等）
+[verify-parts-assembly] legacy 溯源冻结快照：
+  7 条站点映射 · 零件引用 13 条 · 哈希 364687ecbabbf898…
+  许可证分级：L1=2 L2=0 L3=8 L4=1（合计 11）· blocked=[sylva]
+  legacy-provenance 未被 sites/** 引用（扫描 49 个 .ts 文件，命中 0）
+[verify-parts-assembly] 汇总：Tier-1 8/10 件 · 可构造 5 件 [blow-input, crimson-loong, dandelion, grand-atelier, koi] · D0 4 件 [micro-scenes, rain-webgpu, room-at-dawn, sylva]
+[verify-parts-assembly] ❌ 7 项失败：
+  - ascii-kit: ascii-kit/lib/kit.js bytes 声明 10772 ≠ 磁盘 10992（REUSE-1 GWT-3）
+  - micro-scenes: micro-scenes/雨夜便利店.html bytes 声明 1377922 ≠ 磁盘 1377925（REUSE-1 GWT-3）
+  - micro-scenes: micro-scenes/木漏时光.html bytes 声明 1431637 ≠ 磁盘 1431645（REUSE-1 GWT-3）
+  - micro-scenes: micro-scenes/海风之屿.html bytes 声明 1372230 ≠ 磁盘 1372235（REUSE-1 GWT-3）
+  - micro-scenes: micro-scenes/晨雾稻田水车村.html bytes 声明 1414634 ≠ 磁盘 1414877（REUSE-1 GWT-3）
+  - micro-scenes: micro-scenes/雨后紫藤溪谷温室.html bytes 声明 1413792 ≠ 磁盘 1414202（REUSE-1 GWT-3）
+  - micro-scenes: micro-scenes/北京故宫雪景水晶球.html bytes 声明 1495923 ≠ 磁盘 1495936（REUSE-1 GWT-3）
+# exit: 1
+# elapsed: 2877ms

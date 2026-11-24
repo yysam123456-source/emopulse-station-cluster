@@ -1,0 +1,7323 @@
+{
+ "generatedAt": "2026-11-24T05:49:53.220Z",
+ "environment": {
+  "machine": "Windows 11 Home China, 无头 Edge (cdp.mjs)",
+  "node": "v22.22.2",
+  "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "webgl2": true,
+  "webgpu": true,
+  "note": "无头 + Iris Xe 的 fps 只能当同机相对值；同机同时有其他 agent 在跑浏览器与验证门，早期几轮桌面 fps 明显偏低，收尾复测（final.json）为较闲时数据。"
+ },
+ "sizes": {
+  "dist/studio/index.html": {
+   "file": "dist/studio/index.html",
+   "raw": 12419,
+   "gzip9": 4520,
+   "gzipZlib": 4590
+  },
+  "dist/templates/deepsea/index.html": {
+   "file": "dist/templates/deepsea/index.html",
+   "raw": 29480,
+   "gzip9": 11578,
+   "gzipZlib": 11684
+  },
+  "dist/templates/nebula/index.html": {
+   "file": "dist/templates/nebula/index.html",
+   "raw": 520388,
+   "gzip9": 135269,
+   "gzipZlib": 136102
+  },
+  "dist/templates/temple/index.html": {
+   "file": "dist/templates/temple/index.html",
+   "raw": 4992587,
+   "gzip9": 3473188,
+   "gzipZlib": 3456486
+  },
+  "dist/templates/gate/index.html": {
+   "file": "dist/templates/gate/index.html",
+   "raw": 4992577,
+   "gzip9": 3473186,
+   "gzipZlib": 3456483
+  },
+  "dist/templates/koi/index.html": {
+   "file": "dist/templates/koi/index.html",
+   "raw": 591332,
+   "gzip9": 161248,
+   "gzipZlib": 162204
+  },
+  "dist/preview/a2-deepsea.html": {
+   "file": "dist/preview/a2-deepsea.html",
+   "raw": 29480,
+   "gzip9": 11583,
+   "gzipZlib": 11684
+  },
+  "dist/preview/a2-gate.html": {
+   "file": "dist/preview/a2-gate.html",
+   "raw": 4992577,
+   "gzip9": 3473188,
+   "gzipZlib": 3456483
+  },
+  "dist/preview/a2-koi.html": {
+   "file": "dist/preview/a2-koi.html",
+   "raw": 591332,
+   "gzip9": 161249,
+   "gzipZlib": 162204
+  },
+  "dist/preview/a2-nebula.html": {
+   "file": "dist/preview/a2-nebula.html",
+   "raw": 520388,
+   "gzip9": 135273,
+   "gzipZlib": 136102
+  },
+  "dist/preview/a2-temple.html": {
+   "file": "dist/preview/a2-temple.html",
+   "raw": 4992587,
+   "gzip9": 3473192,
+   "gzipZlib": 3456486
+  },
+  "dist/preview/bubbles-probe.html": {
+   "file": "dist/preview/bubbles-probe.html",
+   "raw": 23657,
+   "gzip9": 9400,
+   "gzipZlib": 9504
+  },
+  "dist/preview/dawn-desk.html": {
+   "file": "dist/preview/dawn-desk.html",
+   "raw": 1778955,
+   "gzip9": 937787,
+   "gzipZlib": 931850
+  },
+  "dist/preview/empty.html": {
+   "file": "dist/preview/empty.html",
+   "raw": 18105,
+   "gzip9": 7286,
+   "gzipZlib": 7356
+  },
+  "dist/preview/field-l0.html": {
+   "file": "dist/preview/field-l0.html",
+   "raw": 23702,
+   "gzip9": 9592,
+   "gzipZlib": 9727
+  },
+  "dist/preview/field.html": {
+   "file": "dist/preview/field.html",
+   "raw": 26670,
+   "gzip9": 10614,
+   "gzipZlib": 10762
+  },
+  "dist/preview/hug.html": {
+   "file": "dist/preview/hug.html",
+   "raw": 524094,
+   "gzip9": 135178,
+   "gzipZlib": 136071
+  },
+  "dist/preview/ink.html": {
+   "file": "dist/preview/ink.html",
+   "raw": 26880,
+   "gzip9": 10502,
+   "gzipZlib": 10638
+  },
+  "dist/preview/koi-nolimit.html": {
+   "file": "dist/preview/koi-nolimit.html",
+   "raw": 591397,
+   "gzip9": 161344,
+   "gzipZlib": 162282
+  },
+  "dist/preview/koi.html": {
+   "file": "dist/preview/koi.html",
+   "raw": 591332,
+   "gzip9": 161246,
+   "gzipZlib": 162204
+  },
+  "dist/preview/room.html": {
+   "file": "dist/preview/room.html",
+   "raw": 26837,
+   "gzip9": 10462,
+   "gzipZlib": 10593
+  },
+  "dist/preview/still.html": {
+   "file": "dist/preview/still.html",
+   "raw": 133404,
+   "gzip9": 51121,
+   "gzipZlib": 51767
+  },
+  "dist/preview/tide-a.html": {
+   "file": "dist/preview/tide-a.html",
+   "raw": 22346,
+   "gzip9": 8985,
+   "gzipZlib": 9091
+  },
+  "dist/preview/tide-b.html": {
+   "file": "dist/preview/tide-b.html",
+   "raw": 22328,
+   "gzip9": 8970,
+   "gzipZlib": 9075
+  },
+  "dist/preview/tide-c.html": {
+   "file": "dist/preview/tide-c.html",
+   "raw": 22364,
+   "gzip9": 9014,
+   "gzipZlib": 9120
+  }
+ },
+ "studio": {
+  "first": {
+   "nav": {
+    "url": "http://127.0.0.1:8094/studio/",
+    "loadMs": 30065,
+    "readyMs": null,
+    "snapshot": null,
+    "ready": false,
+    "wallMs": 44094
+   },
+   "env": {
+    "viewport": [
+     1280,
+     720
+    ],
+    "dpr": 1,
+    "docHeight": 2306,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 0,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 502,
+    "domContentLoaded": 502,
+    "loadEventEnd": 35630,
+    "paint": {
+     "first-paint": 568,
+     "first-contentful-paint": 568
+    }
+   },
+   "fpsIdleTop": {
+    "frames": 32,
+    "ms": 2093,
+    "fps": 15.3
+   },
+   "framesTop": [
+    {
+     "title": "深海信标 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "abyss",
+       "bubbles",
+       "still-sink",
+       "pixel-post"
+      ],
+      "drawn": 4,
+      "frames": 147,
+      "fps": 13.710541959061114,
+      "cpuMs": 1.8999999910593033,
+      "frameMs": 82.28028743154746,
+      "degraded": []
+     }
+    },
+    {
+     "title": "星海旋臂 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "abyss",
+       "nebula",
+       "pixel-post"
+      ],
+      "drawn": 3,
+      "frames": 148,
+      "fps": 13.708828738328872,
+      "cpuMs": 1.6000000089406967,
+      "frameMs": 82.28730628898693,
+      "degraded": []
+     }
+    },
+    {
+     "title": "晨光山门与主殿 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "temple"
+      ],
+      "drawn": 1,
+      "frames": 90,
+      "fps": 13.702523845900698,
+      "cpuMs": 5.4000000059604645,
+      "frameMs": 82.15671752670441,
+      "degraded": []
+     }
+    },
+    {
+     "title": "独立山门 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "temple"
+      ],
+      "drawn": 1,
+      "frames": 92,
+      "fps": 13.704999951456568,
+      "cpuMs": 3.3999999910593033,
+      "frameMs": 82.27638108314325,
+      "degraded": []
+     }
+    },
+    {
+     "title": "锦鲤池 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "paper-ink",
+       "koi-pond"
+      ],
+      "drawn": 2,
+      "frames": 150,
+      "fps": 13.704393311106045,
+      "cpuMs": 1.2999999970197678,
+      "frameMs": 82.28195683500843,
+      "degraded": []
+     }
+    }
+   ],
+   "framesAll": [
+    {
+     "title": "深海信标 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "abyss",
+       "bubbles",
+       "still-sink",
+       "pixel-post"
+      ],
+      "drawn": 4,
+      "frames": 308,
+      "fps": 8.878479211638684,
+      "cpuMs": 1.5999999940395355,
+      "frameMs": 168.96047760987483,
+      "degraded": []
+     }
+    },
+    {
+     "title": "星海旋臂 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "abyss",
+       "nebula",
+       "pixel-post"
+      ],
+      "drawn": 3,
+      "frames": 309,
+      "fps": 8.87375027450016,
+      "cpuMs": 2.2000000029802322,
+      "frameMs": 168.95616921587282,
+      "degraded": []
+     }
+    },
+    {
+     "title": "晨光山门与主殿 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "temple"
+      ],
+      "drawn": 1,
+      "frames": 251,
+      "fps": 8.878865076323464,
+      "cpuMs": 3.9000000059604645,
+      "frameMs": 168.96868205488994,
+      "degraded": []
+     }
+    },
+    {
+     "title": "独立山门 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "temple"
+      ],
+      "drawn": 1,
+      "frames": 253,
+      "fps": 8.878128769835076,
+      "cpuMs": 2.8999999910593033,
+      "frameMs": 168.96703241491699,
+      "degraded": []
+     }
+    },
+    {
+     "title": "锦鲤池 preview",
+     "snap": {
+      "state": "ready",
+      "lod": "high",
+      "order": [
+       "paper-ink",
+       "koi-pond"
+      ],
+      "drawn": 2,
+      "frames": 311,
+      "fps": 8.873275283812134,
+      "cpuMs": 1.5,
+      "frameMs": 168.96298565006546,
+      "degraded": []
+     }
+    }
+   ],
+   "summaryTop": {
+    "errors": [],
+    "consoleWarnings": [
+     "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+     "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+    ],
+    "browserWarnings": [],
+    "network": {
+     "requests": 29,
+     "bytes": 11141787,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 7,
+      "(data)": 22
+     }
+    },
+    "dialogs": []
+   },
+   "summaryAll": {
+    "errors": [],
+    "consoleWarnings": [
+     "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+     "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+    ],
+    "browserWarnings": [],
+    "network": {
+     "requests": 29,
+     "bytes": 11141787,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 7,
+      "(data)": 22
+     }
+    },
+    "dialogs": []
+   },
+   "layout": [
+    {
+     "name": "深海信标",
+     "card": [
+      30,
+      131,
+      599,
+      652
+     ],
+     "frame": [
+      31,
+      228,
+      597,
+      336
+     ],
+     "controls": [
+      {
+       "label": "色板 · PALETTE",
+       "tag": "select",
+       "type": "select-one",
+       "value": "abyss",
+       "options": [
+        "abyss",
+        "tide",
+        "ink"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 49,
+       "y": 594,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "微粒密度 · DENSITY",
+       "tag": "input",
+       "type": "range",
+       "value": "1",
+       "checked": false,
+       "min": "0.4",
+       "max": "1.6",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 339,
+       "y": 596,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "光柱 · RAYS",
+       "tag": "input",
+       "type": "range",
+       "value": "0.55",
+       "checked": false,
+       "min": "0",
+       "max": "1",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 51,
+       "y": 653,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "焦散 · CAUSTICS",
+       "tag": "input",
+       "type": "range",
+       "value": "0.35",
+       "checked": false,
+       "min": "0",
+       "max": "1",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 339,
+       "y": 653,
+       "w": 224,
+       "h": 16
+      }
+     ]
+    },
+    {
+     "name": "星海旋臂",
+     "card": [
+      651,
+      131,
+      599,
+      652
+     ],
+     "frame": [
+      652,
+      228,
+      597,
+      336
+     ],
+     "controls": [
+      {
+       "label": "色板 · PALETTE",
+       "tag": "select",
+       "type": "select-one",
+       "value": "abyss",
+       "options": [
+        "violet",
+        "abyss",
+        "ember",
+        "aurora"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 670,
+       "y": 594,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "粒子密度 · DENSITY",
+       "tag": "input",
+       "type": "range",
+       "value": "1",
+       "checked": false,
+       "min": "0.45",
+       "max": "1.35",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 960,
+       "y": 596,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "星系半径 · SCALE",
+       "tag": "input",
+       "type": "range",
+       "value": "1",
+       "checked": false,
+       "min": "0.6",
+       "max": "1.6",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 672,
+       "y": 653,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "自转速度 · SPEED",
+       "tag": "input",
+       "type": "range",
+       "value": "0.85",
+       "checked": false,
+       "min": "0.2",
+       "max": "2",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 960,
+       "y": 653,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "指针脉冲 · PULSE",
+       "tag": "input",
+       "type": "range",
+       "value": "0.55",
+       "checked": false,
+       "min": "0",
+       "max": "1",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 672,
+       "y": 702,
+       "w": 224,
+       "h": 16
+      }
+     ]
+    },
+    {
+     "name": "晨光山门与主殿",
+     "card": [
+      30,
+      804,
+      599,
+      706
+     ],
+     "frame": [
+      31,
+      901,
+      597,
+      336
+     ],
+     "controls": [
+      {
+       "label": "方案 · SCENE",
+       "tag": "select",
+       "type": "select-one",
+       "value": "dawn",
+       "options": [
+        "dawn",
+        "snow",
+        "dusk",
+        "gate"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 49,
+       "y": 1268,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "雾 · FOG",
+       "tag": "input",
+       "type": "range",
+       "value": "1",
+       "checked": false,
+       "min": "0",
+       "max": "1.4",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 339,
+       "y": 1270,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "石灯 · LANTERNS",
+       "tag": "input",
+       "type": "range",
+       "value": "0.8",
+       "checked": false,
+       "min": "0",
+       "max": "1",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 51,
+       "y": 1327,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "镜头环绕 · ORBIT",
+       "tag": "input",
+       "type": "range",
+       "value": "0.7",
+       "checked": false,
+       "min": "0",
+       "max": "1",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 339,
+       "y": 1327,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "鸟居 · TORII",
+       "tag": "input",
+       "type": "checkbox",
+       "value": "on",
+       "checked": true,
+       "min": "",
+       "max": "",
+       "step": "",
+       "labelFor": null,
+       "inputId": null,
+       "x": 53,
+       "y": 1379,
+       "w": 13,
+       "h": 13
+      },
+      {
+       "label": "松林 · PINES",
+       "tag": "input",
+       "type": "checkbox",
+       "value": "on",
+       "checked": true,
+       "min": "",
+       "max": "",
+       "step": "",
+       "labelFor": null,
+       "inputId": null,
+       "x": 341,
+       "y": 1379,
+       "w": 13,
+       "h": 13
+      },
+      {
+       "label": "主殿 · HALL",
+       "tag": "input",
+       "type": "checkbox",
+       "value": "on",
+       "checked": true,
+       "min": "",
+       "max": "",
+       "step": "",
+       "labelFor": null,
+       "inputId": null,
+       "x": 53,
+       "y": 1430,
+       "w": 13,
+       "h": 13
+      }
+     ]
+    },
+    {
+     "name": "独立山门",
+     "card": [
+      651,
+      804,
+      599,
+      706
+     ],
+     "frame": [
+      652,
+      901,
+      597,
+      336
+     ],
+     "controls": [
+      {
+       "label": "方案 · SCENE",
+       "tag": "select",
+       "type": "select-one",
+       "value": "gate",
+       "options": [
+        "gate",
+        "dawn"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 670,
+       "y": 1268,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "雾 · FOG",
+       "tag": "input",
+       "type": "range",
+       "value": "1",
+       "checked": false,
+       "min": "0",
+       "max": "1.4",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 960,
+       "y": 1270,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "石灯 · LANTERNS",
+       "tag": "input",
+       "type": "range",
+       "value": "0.9",
+       "checked": false,
+       "min": "0",
+       "max": "1",
+       "step": "0.05",
+       "labelFor": null,
+       "inputId": null,
+       "x": 672,
+       "y": 1327,
+       "w": 224,
+       "h": 16
+      },
+      {
+       "label": "主殿 · HALL",
+       "tag": "input",
+       "type": "checkbox",
+       "value": "on",
+       "checked": false,
+       "min": "",
+       "max": "",
+       "step": "",
+       "labelFor": null,
+       "inputId": null,
+       "x": 962,
+       "y": 1330,
+       "w": 13,
+       "h": 13
+      }
+     ]
+    },
+    {
+     "name": "锦鲤池",
+     "card": [
+      30,
+      1532,
+      599,
+      660
+     ],
+     "frame": [
+      31,
+      1629,
+      597,
+      336
+     ],
+     "controls": [
+      {
+       "label": "风格 · STYLE",
+       "tag": "select",
+       "type": "select-one",
+       "value": "ink",
+       "options": [
+        "ink",
+        "paint",
+        "real"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 49,
+       "y": 1996,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "镜头 · CAM",
+       "tag": "select",
+       "type": "select-one",
+       "value": "top",
+       "options": [
+        "top",
+        "angle",
+        "orbit"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 337,
+       "y": 1996,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "池底 · FLOOR",
+       "tag": "select",
+       "type": "select-one",
+       "value": "pebble",
+       "options": [
+        "pebble",
+        "sky",
+        "dark"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 49,
+       "y": 2053,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "雨 · RAIN",
+       "tag": "select",
+       "type": "select-one",
+       "value": "dry",
+       "options": [
+        "dry",
+        "drizzle",
+        "rain"
+       ],
+       "labelFor": null,
+       "inputId": null,
+       "x": 337,
+       "y": 2053,
+       "w": 274,
+       "h": 28
+      },
+      {
+       "label": "种子 · SEED",
+       "tag": "input",
+       "type": "range",
+       "value": "999999",
+       "checked": false,
+       "min": "0",
+       "max": "999999",
+       "step": "1",
+       "labelFor": null,
+       "inputId": null,
+       "x": 51,
+       "y": 2112,
+       "w": 222,
+       "h": 16
+      }
+     ]
+    }
+   ],
+   "text": "Stage Templates · Studio\n5 个模板 · 单 HTML · 零外部请求 · 参数走 query\n\n第一层：templates.mjs 注册 / 第二层：build-templates.mjs 构建与体积门 / 第三层：这个 Studio。生成于 2026-11-24T02:53:44.207Z\n\n深海信标\ndeepsea · preset a2-deepsea · 28.8 KB / gzip 11.4 KB\nabyss + bubbles + still-sink + pixel-post\n2D · READY\n色板 · PALETTE\nabyss\ntide\nink\n微粒密度 · DENSITY\n1\n光柱 · RAYS\n0.55\n焦散 · CAUSTICS\n0.35\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n星海旋臂\nnebula · preset a2-nebula · 508.2 KB / gzip 132.9 KB\nabyss + nebula + pixel-post\nGL · READY\n色板 · PALETTE\nviolet\nabyss\nember\naurora\n粒子密度 · DENSITY\n1\n星系半径 · SCALE\n1\n自转速度 · SPEED\n0.85\n指针脉冲 · PULSE\n0.55\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n晨光山门与主殿\ntemple · preset a2-temple · 4875.6 KB / gzip 3375.5 KB\ntemple\nGL · READY\n方案 · SCENE\ndawn\nsnow\ndusk\ngate\n雾 · FOG\n1\n石灯 · LANTERNS\n0.82\n镜头环绕 · ORBIT\n0.7\n鸟居 · TORII\n开关\n松林 · PINES\n开关\n主殿 · HALL\n开关\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n独立山门\ngate · preset a2-gate · 4875.6 KB / gzip 3375.5 KB\ntemple\nGL · READY\n方案 · SCENE\ngate\ndawn\n雾 · FOG\n1\n石灯 · LANTERNS\n0.9\n主殿 · HALL\n开关\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n锦鲤池\nkoi · preset koi · 577.5 KB / gzip 158.4 KB\npaper-ink + koi-pond\nGL · READY\n风格 · STYLE\nink\npaint\nreal\n镜头 · CAM\ntop\nangle\norbit\n池底 · FLOOR\npebble\nsky\ndark\n雨 · RAIN\ndry\ndrizzle\nrain\n种子 · SEED\n20260312\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n参数控件只改 query，不重写构建产物；要固化默认值，改 shared/product/templates.mjs 后重跑构建。\n独立页打开的是 dist/templates/<id>/index.html；iframe 与它同源，无服务器也能用。"
+  },
+  "load": [
+   {
+    "run": 1,
+    "rec": {
+     "loadEventMs": 278,
+     "dclMs": 273,
+     "frames": [
+      {
+       "name": "deepsea",
+       "firstHandleMs": 950,
+       "firstVisibleMs": 950,
+       "lum": 31.4,
+       "maxFrames": 14
+      },
+      {
+       "name": "nebula",
+       "firstHandleMs": 10454,
+       "firstVisibleMs": 10454,
+       "lum": 32,
+       "maxFrames": 11
+      },
+      {
+       "name": "temple",
+       "firstHandleMs": 28256,
+       "firstVisibleMs": 28256,
+       "lum": 22.5,
+       "maxFrames": 4
+      },
+      {
+       "name": "gate",
+       "firstHandleMs": 28256,
+       "firstVisibleMs": 28256,
+       "lum": 25.6,
+       "maxFrames": 3
+      },
+      {
+       "name": "koi",
+       "firstHandleMs": 10454,
+       "firstVisibleMs": 10454,
+       "lum": 202.7,
+       "maxFrames": 10
+      }
+     ],
+     "samples": 9
+    },
+    "loadEventEnd": 278,
+    "dcl": 273,
+    "fcp": {
+     "first-paint": 872,
+     "first-contentful-paint": 872
+    },
+    "fpsAt40s": {
+     "frames": 12,
+     "ms": 2245,
+     "fps": 5.3
+    },
+    "iframeFps": [
+     11.6,
+     11.3,
+     10.7,
+     10.8,
+     11.1
+    ],
+    "iframeState": [
+     "ready/high",
+     "ready/high",
+     "ready/high",
+     "ready/high",
+     "ready/high"
+    ],
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [
+      "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+      "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+     ],
+     "browserWarnings": [],
+     "network": {
+      "requests": 29,
+      "bytes": 11141787,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 7,
+       "(data)": 22
+      }
+     },
+     "dialogs": []
+    }
+   },
+   {
+    "run": 2,
+    "rec": {
+     "loadEventMs": 265,
+     "dclMs": 260,
+     "frames": [
+      {
+       "name": "deepsea",
+       "firstHandleMs": 8604,
+       "firstVisibleMs": 8604,
+       "lum": 31.5,
+       "maxFrames": 143
+      },
+      {
+       "name": "nebula",
+       "firstHandleMs": 8604,
+       "firstVisibleMs": 8604,
+       "lum": 32,
+       "maxFrames": 143
+      },
+      {
+       "name": "temple",
+       "firstHandleMs": 16162,
+       "firstVisibleMs": 16162,
+       "lum": 22.4,
+       "maxFrames": 139
+      },
+      {
+       "name": "gate",
+       "firstHandleMs": 25701,
+       "firstVisibleMs": 25701,
+       "lum": 25.6,
+       "maxFrames": 137
+      },
+      {
+       "name": "koi",
+       "firstHandleMs": 8604,
+       "firstVisibleMs": 8604,
+       "lum": 202.8,
+       "maxFrames": 142
+      }
+     ],
+     "samples": 101
+    },
+    "loadEventEnd": 265,
+    "dcl": 260,
+    "fcp": {
+     "first-paint": 1288,
+     "first-contentful-paint": 1288
+    },
+    "fpsAt40s": {
+     "frames": 11,
+     "ms": 2345,
+     "fps": 4.7
+    },
+    "iframeFps": [
+     10,
+     10,
+     10,
+     10,
+     10
+    ],
+    "iframeState": [
+     "ready/high",
+     "ready/high",
+     "ready/high",
+     "ready/high",
+     "ready/high"
+    ],
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [
+      "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+      "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+     ],
+     "browserWarnings": [],
+     "network": {
+      "requests": 29,
+      "bytes": 11141787,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 7,
+       "(data)": 22
+      }
+     },
+     "dialogs": []
+    }
+   },
+   {
+    "run": 3,
+    "rec": {
+     "loadEventMs": 260,
+     "dclMs": 256,
+     "frames": [
+      {
+       "name": "deepsea",
+       "firstHandleMs": 887,
+       "firstVisibleMs": 887,
+       "lum": 31.4,
+       "maxFrames": 139
+      },
+      {
+       "name": "nebula",
+       "firstHandleMs": 7948,
+       "firstVisibleMs": 7948,
+       "lum": 32,
+       "maxFrames": 137
+      },
+      {
+       "name": "temple",
+       "firstHandleMs": 16449,
+       "firstVisibleMs": 16449,
+       "lum": 22.4,
+       "maxFrames": 133
+      },
+      {
+       "name": "gate",
+       "firstHandleMs": 31179,
+       "firstVisibleMs": 31179,
+       "lum": 25.6,
+       "maxFrames": 131
+      },
+      {
+       "name": "koi",
+       "firstHandleMs": 7948,
+       "firstVisibleMs": 7948,
+       "lum": 202.8,
+       "maxFrames": 136
+      }
+     ],
+     "samples": 56
+    },
+    "loadEventEnd": 260,
+    "dcl": 256,
+    "fcp": {
+     "first-paint": 788,
+     "first-contentful-paint": 788
+    },
+    "fpsAt40s": {
+     "frames": 22,
+     "ms": 2118,
+     "fps": 10.4
+    },
+    "iframeFps": [
+     14.1,
+     14.1,
+     14.1,
+     14.1,
+     14.1
+    ],
+    "iframeState": [
+     "ready/high",
+     "ready/high",
+     "ready/high",
+     "ready/high",
+     "ready/high"
+    ],
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [
+      "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+      "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+     ],
+     "browserWarnings": [],
+     "network": {
+      "requests": 29,
+      "bytes": 11141787,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 7,
+       "(data)": 22
+      }
+     },
+     "dialogs": []
+    }
+   }
+  ],
+  "dom": {
+   "warnEls": 0,
+   "okEls": 0,
+   "badges": [
+    "2D · READY",
+    "GL · READY",
+    "GL · READY",
+    "GL · READY",
+    "GL · READY"
+   ],
+   "meta": [
+    "deepsea · preset a2-deepsea · 28.8 KB / gzip 11.4 KB\nabyss + bubbles + still-sink + pixel-post",
+    "nebula · preset a2-nebula · 508.2 KB / gzip 132.9 KB\nabyss + nebula + pixel-post",
+    "temple · preset a2-temple · 4875.6 KB / gzip 3375.5 KB\ntemple",
+    "gate · preset a2-gate · 4875.6 KB / gzip 3375.5 KB\ntemple",
+    "koi · preset koi · 577.5 KB / gzip 158.4 KB\npaper-ink + koi-pond"
+   ],
+   "actions": [
+    "a:打开独立页 | button:重置参数 | span:参数写进 query，iframe 即时刷新",
+    "a:打开独立页 | button:重置参数 | span:参数写进 query，iframe 即时刷新",
+    "a:打开独立页 | button:重置参数 | span:参数写进 query，iframe 即时刷新",
+    "a:打开独立页 | button:重置参数 | span:参数写进 query，iframe 即时刷新",
+    "a:打开独立页 | button:重置参数 | span:参数写进 query，iframe 即时刷新"
+   ],
+   "labels": [
+    "色板 · PALETTE",
+    "微粒密度 · DENSITY",
+    "光柱 · RAYS",
+    "焦散 · CAUSTICS",
+    "色板 · PALETTE",
+    "粒子密度 · DENSITY",
+    "星系半径 · SCALE",
+    "自转速度 · SPEED",
+    "指针脉冲 · PULSE",
+    "方案 · SCENE",
+    "雾 · FOG",
+    "石灯 · LANTERNS",
+    "镜头环绕 · ORBIT",
+    "鸟居 · TORII",
+    "松林 · PINES",
+    "主殿 · HALL",
+    "方案 · SCENE",
+    "雾 · FOG",
+    "石灯 · LANTERNS",
+    "主殿 · HALL",
+    "风格 · STYLE",
+    "镜头 · CAM",
+    "池底 · FLOOR",
+    "雨 · RAIN",
+    "种子 · SEED"
+   ],
+   "colorInputs": 0,
+   "rangeInputs": 13,
+   "checkboxes": 4,
+   "selects": 8,
+   "downloadAttrs": 0,
+   "buttons": [
+    "重置参数",
+    "重置参数",
+    "重置参数",
+    "重置参数",
+    "重置参数"
+   ],
+   "links": [
+    "打开独立页 → ../templates/deepsea/index.html?palette=abyss&density=1&rays [_blank]",
+    "打开独立页 → ../templates/nebula/index.html?palette=abyss&density=1&scale [_blank]",
+    "打开独立页 → ../templates/temple/index.html?scene=dawn&fog=1&lanterns=0.8 [_blank]",
+    "打开独立页 → ../templates/gate/index.html?scene=gate&fog=1&lanterns=0.9&h [_blank]",
+    "打开独立页 → ../templates/koi/index.html?style=ink&cam=top&floor=pebble&r [_blank]"
+   ],
+   "koiSeed": {
+    "sliderValue": "999999",
+    "output": "20260312",
+    "min": "0",
+    "max": "999999",
+    "thumbPct": 100
+   },
+   "lang": "zh-CN",
+   "title": "Stage Templates · Studio"
+  },
+  "params": [
+   {
+    "card": "deepsea",
+    "key": "palette",
+    "how": "focus + ArrowDown x2",
+    "value": "abyss→ink",
+    "checkedAfter": null,
+    "srcWrites": 2,
+    "reloadMs": 838,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 1.39,
+     "changedPct": 1.6
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 11.68,
+     "changedPct": 45.7
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-deepsea-palette.jpg"
+   },
+   {
+    "card": "deepsea",
+    "key": "density",
+    "how": "mouse click range at 100%",
+    "value": "1→1.6",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 511,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.15,
+     "changedPct": 7.1
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.3,
+     "changedPct": 7.5
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-deepsea-density.jpg"
+   },
+   {
+    "card": "deepsea",
+    "key": "rays",
+    "how": "mouse click range at 0%",
+    "value": "0.55→0",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 654,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.17,
+     "changedPct": 7.1
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 5.55,
+     "changedPct": 11.9
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-deepsea-rays.jpg"
+   },
+   {
+    "card": "deepsea",
+    "key": "caustics",
+    "how": "mouse click range at 100%",
+    "value": "0.35→1",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 508,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.52,
+     "changedPct": 9.5
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.54,
+     "changedPct": 9.5
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-deepsea-caustics.jpg"
+   },
+   {
+    "card": "nebula",
+    "key": "palette",
+    "how": "focus + ArrowDown x2",
+    "value": "abyss→aurora",
+    "checkedAfter": null,
+    "srcWrites": 2,
+    "reloadMs": 828,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 6.34,
+     "changedPct": 16.4
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 6.52,
+     "changedPct": 17
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-nebula-palette.jpg"
+   },
+   {
+    "card": "nebula",
+    "key": "density",
+    "how": "mouse click range at 0%",
+    "value": "1→0.45",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 595,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.35,
+     "changedPct": 8
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.39,
+     "changedPct": 8.2
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-nebula-density.jpg"
+   },
+   {
+    "card": "nebula",
+    "key": "scale",
+    "how": "mouse click range at 100%",
+    "value": "1→1.6",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 581,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.44,
+     "changedPct": 8.4
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 2.66,
+     "changedPct": 6.4
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-nebula-scale.jpg"
+   },
+   {
+    "card": "nebula",
+    "key": "speed",
+    "how": "mouse click range at 100%",
+    "value": "0.85→2",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 696,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 2.35,
+     "changedPct": 4.8
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 3.96,
+     "changedPct": 9.5
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-nebula-speed.jpg"
+   },
+   {
+    "card": "nebula",
+    "key": "pulse",
+    "how": "mouse click range at 0%",
+    "value": "0.55→0",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 1666,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.46,
+     "changedPct": 7.3
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 7.13,
+     "changedPct": 18.7
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-nebula-pulse.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "scene",
+    "how": "focus + ArrowDown x1",
+    "value": "dawn→snow",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 2146,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 1.58,
+     "changedPct": 0.5
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 43.17,
+     "changedPct": 70.2
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-temple-scene.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "fog",
+    "how": "mouse click range at 0%",
+    "value": "1→0",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 8173,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 5.53,
+     "changedPct": 12.3
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 5.07,
+     "changedPct": 10.3
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-temple-fog.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "lanterns",
+    "how": "mouse click range at 0%",
+    "value": "0.8→0",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 19849,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 3.89,
+     "changedPct": 6
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 6.01,
+     "changedPct": 14.4
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-temple-lanterns.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "orbit",
+    "how": "mouse click range at 0%",
+    "value": "0.7→0",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 7575,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 5.7,
+     "changedPct": 12.5
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 3.08,
+     "changedPct": 3.2
+    },
+    "usedFallback": true,
+    "shot": "studio-参数-temple-orbit.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "torii",
+    "how": "mouse click checkbox",
+    "value": "on→on",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 8094,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 1.67,
+     "changedPct": 0.7
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 7.73,
+     "changedPct": 18.5
+    },
+    "usedFallback": true,
+    "shot": "studio-参数-temple-torii.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "pines",
+    "how": "mouse click checkbox",
+    "value": "on→on",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 10044,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 5.04,
+     "changedPct": 11
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 19.26,
+     "changedPct": 19.2
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-temple-pines.jpg"
+   },
+   {
+    "card": "temple",
+    "key": "hall",
+    "how": "mouse click checkbox",
+    "value": "on→on",
+    "checkedAfter": true,
+    "srcWrites": 0,
+    "reloadMs": 91047,
+    "timeout": true,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 2.25,
+     "changedPct": 1.4
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 22.39,
+     "changedPct": 24
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-temple-hall.jpg"
+   },
+   {
+    "card": "gate",
+    "key": "scene",
+    "how": "focus + ArrowDown x1",
+    "value": "gate→dawn",
+    "checkedAfter": null,
+    "srcWrites": 1,
+    "reloadMs": 2803,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 1.42,
+     "changedPct": 0.4
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 38.17,
+     "changedPct": 47.5
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-gate-scene.jpg"
+   },
+   {
+    "card": "gate",
+    "key": "fog",
+    "how": "mouse click range at 0%",
+    "value": "1→0",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 1999,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 1.45,
+     "changedPct": 0.4
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 2.83,
+     "changedPct": 3.5
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-gate-fog.jpg"
+   },
+   {
+    "card": "gate",
+    "key": "lanterns",
+    "how": "mouse click range at 0%",
+    "value": "0.9→0",
+    "checkedAfter": false,
+    "srcWrites": 1,
+    "reloadMs": 6671,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 1.42,
+     "changedPct": 0.3
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 3.14,
+     "changedPct": 5.6
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-gate-lanterns.jpg"
+   },
+   {
+    "card": "gate",
+    "key": "hall",
+    "how": "mouse click checkbox",
+    "value": "on→on",
+    "checkedAfter": true,
+    "srcWrites": 1,
+    "reloadMs": 11449,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.47,
+     "changedPct": 9.7
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 4.11,
+     "changedPct": 8.7
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-gate-hall.jpg"
+   },
+   {
+    "card": "koi",
+    "key": "style",
+    "how": "focus + ArrowDown x2",
+    "value": "ink→real",
+    "checkedAfter": null,
+    "srcWrites": 2,
+    "reloadMs": 4391,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 17.83,
+     "changedPct": 24.5
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 111.57,
+     "changedPct": 97.3
+    },
+    "usedFallback": true,
+    "shot": "studio-参数-koi-style.jpg"
+   },
+   {
+    "card": "koi",
+    "key": "cam",
+    "how": "focus + ArrowDown x2",
+    "value": "top→orbit",
+    "checkedAfter": null,
+    "srcWrites": 2,
+    "reloadMs": 8112,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 17.21,
+     "changedPct": 23.5
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 24.23,
+     "changedPct": 30.8
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-koi-cam.jpg"
+   },
+   {
+    "card": "koi",
+    "key": "floor",
+    "how": "focus + ArrowDown x2",
+    "value": "pebble→dark",
+    "checkedAfter": null,
+    "srcWrites": 2,
+    "reloadMs": 8212,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 3.05,
+     "changedPct": 5.7
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 2.14,
+     "changedPct": 3.4
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-koi-floor.jpg"
+   },
+   {
+    "card": "koi",
+    "key": "rain",
+    "how": "focus + ArrowDown x2",
+    "value": "dry→rain",
+    "checkedAfter": null,
+    "srcWrites": 2,
+    "reloadMs": 2114,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 2.55,
+     "changedPct": 4.4
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 14.46,
+     "changedPct": 20.9
+    },
+    "usedFallback": false,
+    "shot": "studio-参数-koi-rain.jpg"
+   },
+   {
+    "card": "koi",
+    "key": "seed",
+    "how": "mouse click range at 20%",
+    "value": "999999→191411",
+    "checkedAfter": false,
+    "srcWrites": 2,
+    "reloadMs": 1428,
+    "timeout": false,
+    "AA": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 17.83,
+     "changedPct": 24.5
+    },
+    "AB": {
+     "size": [
+      590,
+      332
+     ],
+     "meanAbsDiff": 18.23,
+     "changedPct": 22.5
+    },
+    "usedFallback": true,
+    "shot": "studio-参数-koi-seed.jpg"
+   }
+  ],
+  "hallRetest": {
+   "x": 60,
+   "y": 539,
+   "checked": true,
+   "hit": "input:checkbox",
+   "frame": {
+    "x": 31,
+    "y": 897,
+    "width": 590,
+    "height": 332
+   },
+   "viewport": [
+    1280,
+    1100
+   ],
+   "reloadMs": 4844,
+   "checkedAfter": false,
+   "diff": {
+    "size": [
+     590,
+     332
+    ],
+    "meanAbsDiff": 24.57,
+    "changedPct": 32.3
+   }
+  },
+  "drag": {
+   "run1": {
+    "srcWrites": 18,
+    "dragMs": 8024,
+    "releaseToUsableMs": 4134,
+    "fogValue": "0.1"
+   },
+   "run2": {
+    "srcWrites": 18,
+    "dragMs": 15170,
+    "releaseToUsableMs": 3236,
+    "fogValue": "0.1"
+   }
+  },
+  "reset": {
+   "clicked": "重置参数",
+   "beforeReset": [
+    "tide",
+    "ember"
+   ],
+   "pageReloaded": true,
+   "afterReset": {
+    "scrollY": 338,
+    "cards": [
+     "abyss",
+     "abyss"
+    ]
+   }
+  },
+  "mobile": {
+   "nav": {
+    "url": "http://127.0.0.1:8094/studio/",
+    "loadMs": 156,
+    "readyMs": null,
+    "snapshot": null,
+    "ready": false,
+    "wallMs": 361
+   },
+   "env": {
+    "viewport": [
+     390,
+     844
+    ],
+    "dpr": 3,
+    "docHeight": 3226,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 5,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 220,
+    "domContentLoaded": 220,
+    "loadEventEnd": 224,
+    "paint": {
+     "first-paint": 588,
+     "first-contentful-paint": 588
+    }
+   },
+   "layout": {
+    "docHeight": 3226,
+    "docWidth": 390,
+    "viewport": [
+     390,
+     844
+    ],
+    "header": [
+     30,
+     28,
+     330,
+     185
+    ],
+    "cards": [
+     {
+      "name": "深海信标",
+      "card": [
+       30,
+       237,
+       330,
+       519
+      ],
+      "frame": [
+       31,
+       369,
+       328,
+       185
+      ],
+      "controls": [
+       31,
+       553,
+       328,
+       124
+      ],
+      "frameControlsOverlap": false
+     },
+     {
+      "name": "星海旋臂",
+      "card": [
+       30,
+       778,
+       330,
+       550
+      ],
+      "frame": [
+       31,
+       892,
+       328,
+       185
+      ],
+      "controls": [
+       31,
+       1077,
+       328,
+       173
+      ],
+      "frameControlsOverlap": false
+     },
+     {
+      "name": "晨光山门与主殿",
+      "card": [
+       30,
+       1350,
+       330,
+       605
+      ],
+      "frame": [
+       31,
+       1465,
+       328,
+       185
+      ],
+      "controls": [
+       31,
+       1649,
+       328,
+       227
+      ],
+      "frameControlsOverlap": false
+     },
+     {
+      "name": "独立山门",
+      "card": [
+       30,
+       1977,
+       330,
+       504
+      ],
+      "frame": [
+       31,
+       2091,
+       328,
+       185
+      ],
+      "controls": [
+       31,
+       2276,
+       328,
+       127
+      ],
+      "frameControlsOverlap": false
+     },
+     {
+      "name": "锦鲤池",
+      "card": [
+       30,
+       2503,
+       330,
+       558
+      ],
+      "frame": [
+       31,
+       2617,
+       328,
+       185
+      ],
+      "controls": [
+       31,
+       2802,
+       328,
+       181
+      ],
+      "frameControlsOverlap": false
+     }
+    ],
+    "fontPx": "13px",
+    "controlLabelPx": "10px",
+    "selectH": 28,
+    "rangeH": 16,
+    "checkboxW": 13
+   },
+   "fpsIdle": {
+    "frames": 114,
+    "ms": 2001,
+    "fps": 57
+   },
+   "framesIdle": [
+    "ready/high/fps57",
+    "ready/high/fps57",
+    "ready/high/fps57",
+    "ready/high/fps57",
+    "ready/high/fps57"
+   ],
+   "control": {
+    "before": {
+     "value": "1",
+     "x": 204,
+     "y": 586.25,
+     "w": 89,
+     "h": 16,
+     "frameTop": 369,
+     "frameBottom": 553,
+     "src": "../templates/deepsea/index.html?palette=abyss&density=1&rays=0.55&caustics=0.35"
+    },
+    "reloadMs": 867,
+    "after": {
+     "value": "1.45",
+     "src": "../templates/deepsea/index.html?palette=abyss&density=1.45&rays=0.55&caustics=0.35"
+    }
+   },
+   "framesAll": [
+    "ready/high/fps51/d0",
+    "ready/high/fps51/d0",
+    "ready/high/fps51/d0",
+    "ready/high/fps51/d0",
+    "ready/high/fps51/d0"
+   ],
+   "fpsAll": {
+    "frames": 112,
+    "ms": 2004,
+    "fps": 55.9
+   },
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [
+     "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+     "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+    ],
+    "browserWarnings": [],
+    "network": {
+     "requests": 30,
+     "bytes": 11171476,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 8,
+      "(data)": 22
+     }
+    },
+    "dialogs": []
+   },
+   "text": "Stage Templates · Studio\n5 个模板 · 单 HTML · 零外部请求 · 参数走 query\n\n第一层：templates.mjs 注册 / 第二层：build-templates.mjs 构建与体积门 / 第三层：这个 Studio。生成于 2026-11-24T02:53:44.207Z\n\n深海信标\ndeepsea · preset a2-deepsea · 28.8 KB / gzip 11.4 KB\nabyss + bubbles + still-sink + pixel-post\n2D · READY\n色板 · PALETTE\nabyss\ntide\nink\n微粒密度 · DENSITY\n1.45\n光柱 · RAYS\n0.55\n焦散 · CAUSTICS\n0.35\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n星海旋臂\nnebula · preset a2-nebula · 508.2 KB / gzip 132.9 KB\nabyss + nebula + pixel-post\nGL · READY\n色板 · PALETTE\nviolet\nabyss\nember\naurora\n粒子密度 · DENSITY\n1\n星系半径 · SCALE\n1\n自转速度 · SPEED\n0.85\n指针脉冲 · PULSE\n0.55\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n晨光山门与主殿\ntemple · preset a2-temple · 4875.6 KB / gzip 3375.5 KB\ntemple\nGL · READY\n方案 · SCENE\ndawn\nsnow\ndusk\ngate\n雾 · FOG\n1\n石灯 · LANTERNS\n0.82\n镜头环绕 · ORBIT\n0.7\n鸟居 · TORII\n开关\n松林 · PINES\n开关\n主殿 · HALL\n开关\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n独立山门\ngate · preset a2-gate · 4875.6 KB / gzip 3375.5 KB\ntemple\nGL · READY\n方案 · SCENE\ngate\ndawn\n雾 · FOG\n1\n石灯 · LANTERNS\n0.9\n主殿 · HALL\n开关\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n锦鲤池\nkoi · preset koi · 577.5 KB / gzip 158.4 KB\npaper-ink + koi-pond\nGL · READY\n风格 · STYLE\nink\npaint\nreal\n镜头 · CAM\ntop\nangle\norbit\n池底 · FLOOR\npebble\nsky\ndark\n雨 · RAIN\ndry\ndrizzle\nrain\n种子 · SEED\n20260312\n打开独立页\n重置参数\n参数写进 query，iframe 即时刷新\n参数控件只改 query，不重写构建产物；要固化默认值，改 shared/product/templates.mjs 后重跑构建。\n独立页打开的是 dist/templates/<id>/index.html；iframe 与它同源，无服务器也能用。"
+  },
+  "fileStudio": {
+   "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/studio/index.html",
+   "nav": {
+    "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/studio/index.html",
+    "loadMs": 133,
+    "readyMs": null,
+    "snapshot": null,
+    "ready": false,
+    "wallMs": 544
+   },
+   "frames": [
+    {
+     "src": "../templates/deepsea/index.html?palette=abyss&density=1&rays=0.55&caustics=0.35",
+     "title": "深海信标 preview",
+     "canvas": true,
+     "bodyState": "ready",
+     "hasHandle": true,
+     "readyState": "complete"
+    },
+    {
+     "src": "../templates/nebula/index.html?palette=abyss&density=1&scale=1&speed=0.85&pulse=0.55",
+     "title": "星海旋臂 preview",
+     "canvas": true,
+     "bodyState": "ready",
+     "hasHandle": true,
+     "readyState": "complete"
+    },
+    {
+     "src": "../templates/temple/index.html?scene=dawn&fog=1&lanterns=0.82&orbit=0.7&torii=1&pines=1&hall=1",
+     "title": "晨光山门与主殿 preview",
+     "canvas": true,
+     "bodyState": "ready",
+     "hasHandle": true,
+     "readyState": "complete"
+    },
+    {
+     "src": "../templates/gate/index.html?scene=gate&fog=1&lanterns=0.9&hall=0",
+     "title": "独立山门 preview",
+     "canvas": true,
+     "bodyState": "ready",
+     "hasHandle": true,
+     "readyState": "loading"
+    },
+    {
+     "src": "../templates/koi/index.html?style=ink&cam=top&floor=pebble&rain=dry&seed=20260312",
+     "title": "锦鲤池 preview",
+     "canvas": true,
+     "bodyState": "ready",
+     "hasHandle": true,
+     "readyState": "complete"
+    }
+   ],
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [
+     "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+     "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+    ],
+    "browserWarnings": [],
+    "network": {
+     "requests": 28,
+     "bytes": 11138783,
+     "failed": [],
+     "hosts": {
+      "(inline:file:///C:/U)": 6,
+      "(data)": 22
+     }
+    },
+    "dialogs": []
+   }
+  },
+  "saved": {
+   "deepsea": {
+    "url": "http://127.0.0.1:8094/templates/deepsea/index.html?palette=ink&density=1.6&rays=0.55&caustics=0.35",
+    "status": 200,
+    "raw": 29480,
+    "gzip": 11684,
+    "identicalToDist": true,
+    "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\export\\deepsea-saved.html",
+    "opened": {
+     "ready": true,
+     "readyMs": 793,
+     "state": "ready",
+     "errors": [],
+     "network": {
+      "requests": 1,
+      "bytes": 29480,
+      "failed": [],
+      "hosts": {
+       "(inline:file:///C:/U)": 1
+      }
+     }
+    },
+    "vsDefault": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 0.3,
+     "changedPct": 0.3
+    },
+    "vsTuned": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 11.03,
+     "changedPct": 35.5
+    }
+   },
+   "nebula": {
+    "url": "http://127.0.0.1:8094/templates/nebula/index.html?palette=ember&density=1&scale=1.6&speed=2&pulse=0.55",
+    "status": 200,
+    "raw": 520388,
+    "gzip": 136102,
+    "identicalToDist": true,
+    "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\export\\nebula-saved.html",
+    "opened": {
+     "ready": true,
+     "readyMs": 370,
+     "state": "ready",
+     "errors": [],
+     "network": {
+      "requests": 1,
+      "bytes": 520388,
+      "failed": [],
+      "hosts": {
+       "(inline:file:///C:/U)": 1
+      }
+     }
+    },
+    "vsDefault": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 1.46,
+     "changedPct": 1.6
+    },
+    "vsTuned": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 0.86,
+     "changedPct": 1.5
+    }
+   },
+   "temple": {
+    "url": "http://127.0.0.1:8094/templates/temple/index.html?scene=snow&fog=0&lanterns=0&orbit=0.7&torii=1&pines=1&hall=1",
+    "status": 200,
+    "raw": 4992587,
+    "gzip": 3456486,
+    "identicalToDist": true,
+    "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\export\\temple-saved.html",
+    "opened": {
+     "ready": true,
+     "readyMs": 11990,
+     "state": "ready",
+     "errors": [],
+     "network": {
+      "requests": 13,
+      "bytes": 4992587,
+      "failed": [],
+      "hosts": {
+       "(inline:file:///C:/U)": 1,
+       "(data)": 12
+      }
+     }
+    },
+    "vsDefault": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 84.01,
+     "changedPct": 92.8
+    },
+    "vsTuned": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 131.42,
+     "changedPct": 99.7
+    }
+   },
+   "gate": {
+    "url": "http://127.0.0.1:8094/templates/gate/index.html?scene=dawn&fog=0&lanterns=0.9&hall=1",
+    "status": 200,
+    "raw": 4992577,
+    "gzip": 3456483,
+    "identicalToDist": true,
+    "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\export\\gate-saved.html",
+    "opened": {
+     "ready": true,
+     "readyMs": 6719,
+     "state": "ready",
+     "errors": [],
+     "network": {
+      "requests": 11,
+      "bytes": 4992577,
+      "failed": [],
+      "hosts": {
+       "(inline:file:///C:/U)": 1,
+       "(data)": 10
+      }
+     }
+    },
+    "vsDefault": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 1.49,
+     "changedPct": 0.1
+    },
+    "vsTuned": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 40.31,
+     "changedPct": 59.4
+    }
+   },
+   "koi": {
+    "url": "http://127.0.0.1:8094/templates/koi/index.html?style=real&cam=orbit&floor=dark&rain=rain&seed=191411",
+    "status": 200,
+    "raw": 591332,
+    "gzip": 162204,
+    "identicalToDist": true,
+    "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\export\\koi-saved.html",
+    "opened": {
+     "ready": true,
+     "readyMs": 4349,
+     "state": "ready",
+     "errors": [],
+     "network": {
+      "requests": 1,
+      "bytes": 591332,
+      "failed": [],
+      "hosts": {
+       "(inline:file:///C:/U)": 1
+      }
+     }
+    },
+    "vsDefault": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 190.32,
+     "changedPct": 98.7
+    },
+    "vsTuned": {
+     "size": [
+      1280,
+      720
+     ],
+     "meanAbsDiff": 132.81,
+     "changedPct": 99
+    }
+   }
+  }
+ },
+ "templates": {
+  "firstPaint": {
+   "deepsea-desktop": {
+    "firstHandleMs": 654,
+    "firstStructMs": 815,
+    "stableMs": 815,
+    "samples": 363,
+    "dcl": 653,
+    "loadEventEnd": 654,
+    "fcp": {
+     "first-paint": 888,
+     "first-contentful-paint": 888
+    },
+    "lumAt": {
+     "500": null,
+     "1000": [
+      957,
+      32.1,
+      13.8
+     ],
+     "2000": [
+      1961,
+      31.9,
+      13
+     ],
+     "3000": [
+      2968,
+      32.1,
+      13.5
+     ],
+     "5000": [
+      4994,
+      31.9,
+      13.4
+     ],
+     "8000": [
+      7955,
+      31.8,
+      13.2
+     ],
+     "12000": [
+      11968,
+      31.7,
+      13
+     ],
+     "20000": [
+      19946,
+      31.4,
+      12.8
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 2,
+      "bytes": 29928,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "deepsea-mobile": {
+    "firstHandleMs": 339,
+    "firstStructMs": 732,
+    "stableMs": 732,
+    "samples": 130,
+    "dcl": 699,
+    "loadEventEnd": 700,
+    "fcp": {
+     "first-paint": 1480,
+     "first-contentful-paint": 1480
+    },
+    "lumAt": {
+     "500": [
+      339,
+      0,
+      0
+     ],
+     "1000": [
+      732,
+      29.5,
+      13
+     ],
+     "2000": [
+      1598,
+      29.6,
+      13.5
+     ],
+     "3000": [
+      2930,
+      29.5,
+      12.2
+     ],
+     "5000": [
+      4985,
+      29.6,
+      13.2
+     ],
+     "8000": [
+      7622,
+      0,
+      0
+     ],
+     "12000": [
+      11949,
+      28.5,
+      12.4
+     ],
+     "20000": [
+      19983,
+      28.5,
+      12.8
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 2,
+      "bytes": 29928,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "nebula-desktop": {
+    "firstHandleMs": 1304,
+    "firstStructMs": 1304,
+    "stableMs": 4300,
+    "samples": 190,
+    "dcl": 1303,
+    "loadEventEnd": 1304,
+    "fcp": {
+     "first-paint": 992,
+     "first-contentful-paint": 992
+    },
+    "lumAt": {
+     "500": [
+      222,
+      0,
+      0
+     ],
+     "1000": [
+      222,
+      0,
+      0
+     ],
+     "2000": [
+      1723,
+      30.4,
+      14.7
+     ],
+     "3000": [
+      2782,
+      32.9,
+      14.1
+     ],
+     "5000": [
+      4924,
+      35,
+      13.6
+     ],
+     "8000": [
+      7941,
+      38.1,
+      12.7
+     ],
+     "12000": [
+      11950,
+      38.4,
+      13.1
+     ],
+     "20000": [
+      19965,
+      38.4,
+      13.3
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 2,
+      "bytes": 520899,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "nebula-mobile": {
+    "firstHandleMs": 802,
+    "firstStructMs": 802,
+    "stableMs": 802,
+    "samples": 359,
+    "dcl": 801,
+    "loadEventEnd": 802,
+    "fcp": {
+     "first-paint": 984,
+     "first-contentful-paint": 984
+    },
+    "lumAt": {
+     "500": null,
+     "1000": [
+      802,
+      29.8,
+      17
+     ],
+     "2000": [
+      1950,
+      29.3,
+      17.1
+     ],
+     "3000": [
+      2950,
+      29.1,
+      17.3
+     ],
+     "5000": [
+      4963,
+      29.6,
+      17.5
+     ],
+     "8000": [
+      7995,
+      29.1,
+      17.1
+     ],
+     "12000": [
+      11979,
+      29.3,
+      17.3
+     ],
+     "20000": [
+      19939,
+      29.3,
+      17.2
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 2,
+      "bytes": 520899,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "temple-desktop": {
+    "firstHandleMs": 4841,
+    "firstStructMs": 4841,
+    "stableMs": 9860,
+    "samples": 140,
+    "dcl": 4839,
+    "loadEventEnd": 4840,
+    "fcp": {
+     "first-paint": 536,
+     "first-contentful-paint": 536
+    },
+    "lumAt": {
+     "500": [
+      115,
+      0,
+      0
+     ],
+     "1000": [
+      115,
+      0,
+      0
+     ],
+     "2000": [
+      115,
+      0,
+      0
+     ],
+     "3000": [
+      115,
+      0,
+      0
+     ],
+     "5000": [
+      4841,
+      24.7,
+      41.5
+     ],
+     "8000": [
+      4841,
+      24.7,
+      41.5
+     ],
+     "12000": [
+      11958,
+      94.7,
+      70.6
+     ],
+     "20000": [
+      19934,
+      94.8,
+      71.3
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 14,
+      "bytes": 4993719,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2,
+       "(data)": 12
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "temple-mobile": {
+    "firstHandleMs": 8594,
+    "firstStructMs": 8594,
+    "stableMs": 13115,
+    "samples": 89,
+    "dcl": 8608,
+    "loadEventEnd": 8610,
+    "fcp": {
+     "first-paint": 880,
+     "first-contentful-paint": 880
+    },
+    "lumAt": {
+     "500": [
+      237,
+      0,
+      0
+     ],
+     "1000": [
+      237,
+      0,
+      0
+     ],
+     "2000": [
+      237,
+      0,
+      0
+     ],
+     "3000": [
+      237,
+      0,
+      0
+     ],
+     "5000": [
+      237,
+      0,
+      0
+     ],
+     "8000": [
+      237,
+      0,
+      0
+     ],
+     "12000": [
+      8594,
+      28.6,
+      55.2
+     ],
+     "20000": [
+      19904,
+      104.9,
+      73.7
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 14,
+      "bytes": 4993719,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2,
+       "(data)": 12
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "gate-desktop": {
+    "firstHandleMs": 5305,
+    "firstStructMs": 5305,
+    "stableMs": 10281,
+    "samples": 170,
+    "dcl": 5319,
+    "loadEventEnd": 5321,
+    "fcp": {
+     "first-paint": 696,
+     "first-contentful-paint": 696
+    },
+    "lumAt": {
+     "500": [
+      198,
+      0,
+      0
+     ],
+     "1000": [
+      198,
+      0,
+      0
+     ],
+     "2000": [
+      198,
+      0,
+      0
+     ],
+     "3000": [
+      198,
+      0,
+      0
+     ],
+     "5000": [
+      198,
+      0,
+      0
+     ],
+     "8000": [
+      5305,
+      27.4,
+      39.6
+     ],
+     "12000": [
+      11870,
+      115.7,
+      74
+     ],
+     "20000": [
+      19932,
+      115.9,
+      73.7
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 12,
+      "bytes": 4993709,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2,
+       "(data)": 10
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "gate-mobile": {
+    "firstHandleMs": 4299,
+    "firstStructMs": 4299,
+    "stableMs": 8418,
+    "samples": 202,
+    "dcl": 4311,
+    "loadEventEnd": 4312,
+    "fcp": {
+     "first-paint": 672,
+     "first-contentful-paint": 672
+    },
+    "lumAt": {
+     "500": [
+      165,
+      0,
+      0
+     ],
+     "1000": [
+      165,
+      0,
+      0
+     ],
+     "2000": [
+      165,
+      0,
+      0
+     ],
+     "3000": [
+      165,
+      0,
+      0
+     ],
+     "5000": [
+      4299,
+      19.4,
+      25.6
+     ],
+     "8000": [
+      4299,
+      19.4,
+      25.6
+     ],
+     "12000": [
+      11952,
+      104.3,
+      70.7
+     ],
+     "20000": [
+      19994,
+      104.8,
+      69.6
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [],
+     "browserWarnings": [],
+     "network": {
+      "requests": 12,
+      "bytes": 4993709,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2,
+       "(data)": 10
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "koi-desktop": {
+    "firstHandleMs": 6053,
+    "firstStructMs": 6053,
+    "stableMs": 6053,
+    "samples": 317,
+    "dcl": 6052,
+    "loadEventEnd": 6053,
+    "fcp": {
+     "first-paint": 6080,
+     "first-contentful-paint": 6080
+    },
+    "lumAt": {
+     "500": null,
+     "1000": null,
+     "2000": null,
+     "3000": null,
+     "5000": null,
+     "8000": [
+      7943,
+      206.3,
+      45.6
+     ],
+     "12000": [
+      11977,
+      206.6,
+      45.4
+     ],
+     "20000": [
+      19987,
+      206.5,
+      45.4
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [
+      "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+      "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+     ],
+     "browserWarnings": [],
+     "network": {
+      "requests": 2,
+      "bytes": 591860,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2
+      }
+     },
+     "dialogs": []
+    }
+   },
+   "koi-mobile": {
+    "firstHandleMs": 5412,
+    "firstStructMs": 5412,
+    "stableMs": 5412,
+    "samples": 281,
+    "dcl": 5411,
+    "loadEventEnd": 5411,
+    "fcp": {
+     "first-paint": 5444,
+     "first-contentful-paint": 5444
+    },
+    "lumAt": {
+     "500": null,
+     "1000": null,
+     "2000": null,
+     "3000": null,
+     "5000": null,
+     "8000": [
+      7953,
+      223.7,
+      39.2
+     ],
+     "12000": [
+      11944,
+      224.3,
+      39.3
+     ],
+     "20000": [
+      19967,
+      225.9,
+      35.2
+     ]
+    },
+    "summary": {
+     "errors": [],
+     "consoleWarnings": [
+      "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+      "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+     ],
+     "browserWarnings": [],
+     "network": {
+      "requests": 2,
+      "bytes": 591860,
+      "failed": [],
+      "hosts": {
+       "127.0.0.1:8094": 2
+      }
+     },
+     "dialogs": []
+    }
+   }
+  },
+  "interactions": {
+   "deepsea": {
+    "control": {
+     "actionMs": 0,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-control+200.jpg",
+       "at": 334,
+       "pair": 0,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.31,
+        "changedPct": 0.3
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-control+600.jpg",
+       "at": 746,
+       "pair": 1,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.45,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-control+1200.jpg",
+       "at": 1335,
+       "pair": 2,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.58,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-control+2000.jpg",
+       "at": 2139,
+       "pair": 3,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.2,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "hover": {
+     "actionMs": 909,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hover+200.jpg",
+       "at": 327,
+       "pair": 4,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.59,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hover+600.jpg",
+       "at": 738,
+       "pair": 5,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.67,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hover+1200.jpg",
+       "at": 1330,
+       "pair": 6,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.78,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hover+2000.jpg",
+       "at": 2119,
+       "pair": 7,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.37,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "tap": {
+     "actionMs": 489,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-tap+200.jpg",
+       "at": 336,
+       "pair": 8,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.49,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-tap+600.jpg",
+       "at": 742,
+       "pair": 9,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.58,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-tap+1200.jpg",
+       "at": 1322,
+       "pair": 10,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.14,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-tap+2000.jpg",
+       "at": 2132,
+       "pair": 11,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.28,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "hold": {
+     "actionMs": 2016,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hold+200.jpg",
+       "at": 327,
+       "pair": 12,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.73,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hold+600.jpg",
+       "at": 713,
+       "pair": 13,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.26,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hold+1200.jpg",
+       "at": 1332,
+       "pair": 14,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.9,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-hold+2000.jpg",
+       "at": 2121,
+       "pair": 15,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.47,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "drag": {
+     "actionMs": 1279,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-drag+200.jpg",
+       "at": 326,
+       "pair": 16,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.1,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-drag+600.jpg",
+       "at": 712,
+       "pair": 17,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.65,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-drag+1200.jpg",
+       "at": 1327,
+       "pair": 18,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.23,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-drag+2000.jpg",
+       "at": 2123,
+       "pair": 19,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.87,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "wheel": {
+     "actionMs": 33,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-wheel+200.jpg",
+       "at": 335,
+       "pair": 20,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.94,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-wheel+600.jpg",
+       "at": 726,
+       "pair": 21,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.44,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-wheel+1200.jpg",
+       "at": 1322,
+       "pair": 22,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.55,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-wheel+2000.jpg",
+       "at": 2126,
+       "pair": 23,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.67,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "dbl": {
+     "actionMs": 1091,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-dbl+200.jpg",
+       "at": 325,
+       "pair": 24,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.09,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-dbl+600.jpg",
+       "at": 731,
+       "pair": 25,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.13,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-dbl+1200.jpg",
+       "at": 1333,
+       "pair": 26,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.7,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\deepsea-x-dbl+2000.jpg",
+       "at": 2120,
+       "pair": 27,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.31,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "errors": []
+   },
+   "nebula": {
+    "control": {
+     "actionMs": 0,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-control+200.jpg",
+       "at": 338,
+       "pair": 28,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.01,
+        "changedPct": 1.2
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-control+600.jpg",
+       "at": 749,
+       "pair": 29,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.12,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-control+1200.jpg",
+       "at": 1339,
+       "pair": 30,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.21,
+        "changedPct": 1.3
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-control+2000.jpg",
+       "at": 2139,
+       "pair": 31,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.64,
+        "changedPct": 1.5
+       }
+      }
+     ]
+    },
+    "hover": {
+     "actionMs": 903,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hover+200.jpg",
+       "at": 362,
+       "pair": 32,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.56,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hover+600.jpg",
+       "at": 742,
+       "pair": 33,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.27,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hover+1200.jpg",
+       "at": 1342,
+       "pair": 34,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.3,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hover+2000.jpg",
+       "at": 2141,
+       "pair": 35,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.68,
+        "changedPct": 1.4
+       }
+      }
+     ]
+    },
+    "tap": {
+     "actionMs": 492,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-tap+200.jpg",
+       "at": 353,
+       "pair": 36,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.53,
+        "changedPct": 1.3
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-tap+600.jpg",
+       "at": 744,
+       "pair": 37,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.21,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-tap+1200.jpg",
+       "at": 1327,
+       "pair": 38,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.27,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-tap+2000.jpg",
+       "at": 2126,
+       "pair": 39,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.62,
+        "changedPct": 1.4
+       }
+      }
+     ]
+    },
+    "hold": {
+     "actionMs": 1996,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hold+200.jpg",
+       "at": 328,
+       "pair": 40,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.29,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hold+600.jpg",
+       "at": 727,
+       "pair": 41,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.34,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hold+1200.jpg",
+       "at": 1341,
+       "pair": 42,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.67,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-hold+2000.jpg",
+       "at": 2132,
+       "pair": 43,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.69,
+        "changedPct": 1.4
+       }
+      }
+     ]
+    },
+    "drag": {
+     "actionMs": 1312,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-drag+200.jpg",
+       "at": 323,
+       "pair": 44,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.24,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-drag+600.jpg",
+       "at": 727,
+       "pair": 45,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.59,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-drag+1200.jpg",
+       "at": 1327,
+       "pair": 46,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.34,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-drag+2000.jpg",
+       "at": 2134,
+       "pair": 47,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.7,
+        "changedPct": 1.5
+       }
+      }
+     ]
+    },
+    "wheel": {
+     "actionMs": 29,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-wheel+200.jpg",
+       "at": 340,
+       "pair": 48,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.47,
+        "changedPct": 1.2
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-wheel+600.jpg",
+       "at": 727,
+       "pair": 49,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.16,
+        "changedPct": 1.3
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-wheel+1200.jpg",
+       "at": 1342,
+       "pair": 50,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.56,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-wheel+2000.jpg",
+       "at": 2134,
+       "pair": 51,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.3,
+        "changedPct": 1.4
+       }
+      }
+     ]
+    },
+    "dbl": {
+     "actionMs": 1093,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-dbl+200.jpg",
+       "at": 316,
+       "pair": 52,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.26,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-dbl+600.jpg",
+       "at": 717,
+       "pair": 53,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.3,
+        "changedPct": 1.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-dbl+1200.jpg",
+       "at": 1332,
+       "pair": 54,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.34,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\nebula-x-dbl+2000.jpg",
+       "at": 2122,
+       "pair": 55,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.69,
+        "changedPct": 1.4
+       }
+      }
+     ]
+    },
+    "errors": []
+   },
+   "temple": {
+    "control": {
+     "actionMs": 0,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-control+200.jpg",
+       "at": 416,
+       "pair": 56,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.64,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-control+600.jpg",
+       "at": 813,
+       "pair": 57,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.89,
+        "changedPct": 0.8
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-control+1200.jpg",
+       "at": 1421,
+       "pair": 58,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.31,
+        "changedPct": 1.6
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-control+2000.jpg",
+       "at": 2192,
+       "pair": 59,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.7,
+        "changedPct": 2.4
+       }
+      }
+     ]
+    },
+    "hover": {
+     "actionMs": 949,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hover+200.jpg",
+       "at": 394,
+       "pair": 60,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 4.12,
+        "changedPct": 6.3
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hover+600.jpg",
+       "at": 802,
+       "pair": 61,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 4.26,
+        "changedPct": 6.7
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hover+1200.jpg",
+       "at": 1403,
+       "pair": 62,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 4.49,
+        "changedPct": 7.4
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hover+2000.jpg",
+       "at": 2193,
+       "pair": 63,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 4.76,
+        "changedPct": 8.2
+       }
+      }
+     ]
+    },
+    "tap": {
+     "actionMs": 513,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-tap+200.jpg",
+       "at": 400,
+       "pair": 64,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.25,
+        "changedPct": 3.9
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-tap+600.jpg",
+       "at": 799,
+       "pair": 65,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.16,
+        "changedPct": 3.6
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-tap+1200.jpg",
+       "at": 1400,
+       "pair": 66,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.11,
+        "changedPct": 3.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-tap+2000.jpg",
+       "at": 2177,
+       "pair": 67,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.02,
+        "changedPct": 3.3
+       }
+      }
+     ]
+    },
+    "hold": {
+     "actionMs": 2029,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hold+200.jpg",
+       "at": 367,
+       "pair": 68,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.79,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hold+600.jpg",
+       "at": 764,
+       "pair": 69,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.87,
+        "changedPct": 0.6
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hold+1200.jpg",
+       "at": 1398,
+       "pair": 70,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.97,
+        "changedPct": 0.8
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-hold+2000.jpg",
+       "at": 2191,
+       "pair": 71,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.16,
+        "changedPct": 1.1
+       }
+      }
+     ]
+    },
+    "drag": {
+     "actionMs": 1335,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-drag+200.jpg",
+       "at": 375,
+       "pair": 72,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.88,
+        "changedPct": 0.8
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-drag+600.jpg",
+       "at": 794,
+       "pair": 73,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.74,
+        "changedPct": 0.6
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-drag+1200.jpg",
+       "at": 1373,
+       "pair": 74,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.78,
+        "changedPct": 0.7
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-drag+2000.jpg",
+       "at": 2152,
+       "pair": 75,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.99,
+        "changedPct": 1.3
+       }
+      }
+     ]
+    },
+    "wheel": {
+     "actionMs": 32,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-wheel+200.jpg",
+       "at": 351,
+       "pair": 76,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.55,
+        "changedPct": 0.3
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-wheel+600.jpg",
+       "at": 781,
+       "pair": 77,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.75,
+        "changedPct": 0.7
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-wheel+1200.jpg",
+       "at": 1411,
+       "pair": 78,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.08,
+        "changedPct": 1.3
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-wheel+2000.jpg",
+       "at": 2189,
+       "pair": 79,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.67,
+        "changedPct": 2.6
+       }
+      }
+     ]
+    },
+    "dbl": {
+     "actionMs": 1462,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-dbl+200.jpg",
+       "at": 396,
+       "pair": 80,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.65,
+        "changedPct": 5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-dbl+600.jpg",
+       "at": 770,
+       "pair": 81,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.86,
+        "changedPct": 5.7
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-dbl+1200.jpg",
+       "at": 1408,
+       "pair": 82,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 4.22,
+        "changedPct": 6.8
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\temple-x-dbl+2000.jpg",
+       "at": 2199,
+       "pair": 83,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 4.73,
+        "changedPct": 8
+       }
+      }
+     ]
+    },
+    "errors": []
+   },
+   "gate": {
+    "control": {
+     "actionMs": 0,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-control+200.jpg",
+       "at": 316,
+       "pair": 84,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.32,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-control+600.jpg",
+       "at": 719,
+       "pair": 85,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.45,
+        "changedPct": 0.3
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-control+1200.jpg",
+       "at": 1315,
+       "pair": 86,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.7,
+        "changedPct": 0.7
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-control+2000.jpg",
+       "at": 2126,
+       "pair": 87,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.97,
+        "changedPct": 1.2
+       }
+      }
+     ]
+    },
+    "hover": {
+     "actionMs": 904,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hover+200.jpg",
+       "at": 313,
+       "pair": 88,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.22,
+        "changedPct": 3.8
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hover+600.jpg",
+       "at": 716,
+       "pair": 89,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.32,
+        "changedPct": 4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hover+1200.jpg",
+       "at": 1316,
+       "pair": 90,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.46,
+        "changedPct": 4.3
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hover+2000.jpg",
+       "at": 2125,
+       "pair": 91,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 3.63,
+        "changedPct": 4.8
+       }
+      }
+     ]
+    },
+    "tap": {
+     "actionMs": 519,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-tap+200.jpg",
+       "at": 308,
+       "pair": 92,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.78,
+        "changedPct": 2.7
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-tap+600.jpg",
+       "at": 713,
+       "pair": 93,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.74,
+        "changedPct": 2.7
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-tap+1200.jpg",
+       "at": 1311,
+       "pair": 94,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.67,
+        "changedPct": 2.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-tap+2000.jpg",
+       "at": 2104,
+       "pair": 95,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.64,
+        "changedPct": 2.4
+       }
+      }
+     ]
+    },
+    "hold": {
+     "actionMs": 1997,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hold+200.jpg",
+       "at": 321,
+       "pair": 96,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.55,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hold+600.jpg",
+       "at": 706,
+       "pair": 97,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.59,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hold+1200.jpg",
+       "at": 1316,
+       "pair": 98,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.68,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-hold+2000.jpg",
+       "at": 2125,
+       "pair": 99,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.74,
+        "changedPct": 0.6
+       }
+      }
+     ]
+    },
+    "drag": {
+     "actionMs": 1319,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-drag+200.jpg",
+       "at": 313,
+       "pair": 100,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.65,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-drag+600.jpg",
+       "at": 719,
+       "pair": 101,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.61,
+        "changedPct": 0.5
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-drag+1200.jpg",
+       "at": 1315,
+       "pair": 102,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.52,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-drag+2000.jpg",
+       "at": 2112,
+       "pair": 103,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.51,
+        "changedPct": 0.5
+       }
+      }
+     ]
+    },
+    "wheel": {
+     "actionMs": 24,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-wheel+200.jpg",
+       "at": 313,
+       "pair": 104,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.29,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-wheel+600.jpg",
+       "at": 718,
+       "pair": 105,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.38,
+        "changedPct": 0.2
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-wheel+1200.jpg",
+       "at": 1318,
+       "pair": 106,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.53,
+        "changedPct": 0.3
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-wheel+2000.jpg",
+       "at": 2131,
+       "pair": 107,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.76,
+        "changedPct": 0.8
+       }
+      }
+     ]
+    },
+    "dbl": {
+     "actionMs": 1083,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-dbl+200.jpg",
+       "at": 321,
+       "pair": 108,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.33,
+        "changedPct": 1.8
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-dbl+600.jpg",
+       "at": 706,
+       "pair": 109,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.45,
+        "changedPct": 2.1
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-dbl+1200.jpg",
+       "at": 1323,
+       "pair": 110,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.69,
+        "changedPct": 2.7
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\gate-x-dbl+2000.jpg",
+       "at": 2122,
+       "pair": 111,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 2.98,
+        "changedPct": 3.5
+       }
+      }
+     ]
+    },
+    "errors": []
+   },
+   "koi": {
+    "control": {
+     "actionMs": 0,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-control+200.jpg",
+       "at": 314,
+       "pair": 112,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.16,
+        "changedPct": 0.2
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-control+600.jpg",
+       "at": 706,
+       "pair": 113,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.26,
+        "changedPct": 0.2
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-control+1200.jpg",
+       "at": 1307,
+       "pair": 114,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.28,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-control+2000.jpg",
+       "at": 2109,
+       "pair": 115,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.28,
+        "changedPct": 0.1
+       }
+      }
+     ]
+    },
+    "hover": {
+     "actionMs": 901,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hover+200.jpg",
+       "at": 299,
+       "pair": 116,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.34,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hover+600.jpg",
+       "at": 697,
+       "pair": 117,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.39,
+        "changedPct": 0.2
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hover+1200.jpg",
+       "at": 1311,
+       "pair": 118,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.36,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hover+2000.jpg",
+       "at": 2119,
+       "pair": 119,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.32,
+        "changedPct": 0.1
+       }
+      }
+     ]
+    },
+    "tap": {
+     "actionMs": 476,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-tap+200.jpg",
+       "at": 292,
+       "pair": 120,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.74,
+        "changedPct": 1.5
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-tap+600.jpg",
+       "at": 711,
+       "pair": 121,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.6,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-tap+1200.jpg",
+       "at": 1307,
+       "pair": 122,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.5,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-tap+2000.jpg",
+       "at": 2113,
+       "pair": 123,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.34,
+        "changedPct": 0
+       }
+      }
+     ]
+    },
+    "hold": {
+     "actionMs": 2001,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hold+200.jpg",
+       "at": 294,
+       "pair": 124,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.59,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hold+600.jpg",
+       "at": 697,
+       "pair": 125,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.34,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hold+1200.jpg",
+       "at": 1307,
+       "pair": 126,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.41,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-hold+2000.jpg",
+       "at": 2114,
+       "pair": 127,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.4,
+        "changedPct": 0.1
+       }
+      }
+     ]
+    },
+    "drag": {
+     "actionMs": 1283,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-drag+200.jpg",
+       "at": 308,
+       "pair": 128,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.77,
+        "changedPct": 3.7
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-drag+600.jpg",
+       "at": 695,
+       "pair": 129,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 1.29,
+        "changedPct": 2.2
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-drag+1200.jpg",
+       "at": 1308,
+       "pair": 130,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.86,
+        "changedPct": 0.7
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-drag+2000.jpg",
+       "at": 2098,
+       "pair": 131,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.45,
+        "changedPct": 0
+       }
+      }
+     ]
+    },
+    "wheel": {
+     "actionMs": 20,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-wheel+200.jpg",
+       "at": 313,
+       "pair": 132,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.51,
+        "changedPct": 0
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-wheel+600.jpg",
+       "at": 716,
+       "pair": 133,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.38,
+        "changedPct": 0
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-wheel+1200.jpg",
+       "at": 1294,
+       "pair": 134,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.42,
+        "changedPct": 0
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-wheel+2000.jpg",
+       "at": 2112,
+       "pair": 135,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.39,
+        "changedPct": 0
+       }
+      }
+     ]
+    },
+    "dbl": {
+     "actionMs": 1109,
+     "posts": [
+      {
+       "t": 200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-dbl+200.jpg",
+       "at": 306,
+       "pair": 136,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.87,
+        "changedPct": 1.1
+       }
+      },
+      {
+       "t": 600,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-dbl+600.jpg",
+       "at": 706,
+       "pair": 137,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.77,
+        "changedPct": 0.4
+       }
+      },
+      {
+       "t": 1200,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-dbl+1200.jpg",
+       "at": 1304,
+       "pair": 138,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.6,
+        "changedPct": 0.1
+       }
+      },
+      {
+       "t": 2000,
+       "file": "c:\\Users\\Lenovo\\WorkBuddy\\2026-11-17-13-04-03\\emopulse_station_cluster\\_scratch\\review-1124\\ux-a2\\diff\\koi-x-dbl+2000.jpg",
+       "at": 2094,
+       "pair": 139,
+       "diff": {
+        "size": [
+         1280,
+         720
+        ],
+        "meanAbsDiff": 0.39,
+        "changedPct": 0
+       }
+      }
+     ]
+    },
+    "errors": []
+   }
+  },
+  "finalFps": {
+   "deepsea": {
+    "readyMs": 897,
+    "fps1": 57.3,
+    "fps2": 55.5,
+    "selfFps": 56.4,
+    "frameMs": 17.9,
+    "cpuMs": 0.6,
+    "lod": "high",
+    "state": "ready"
+   },
+   "nebula": {
+    "readyMs": 1567,
+    "fps1": 56.9,
+    "fps2": 57,
+    "selfFps": 57.1,
+    "frameMs": 17.5,
+    "cpuMs": 0.8,
+    "lod": "high",
+    "state": "ready"
+   },
+   "temple": {
+    "readyMs": 8447,
+    "fps1": 53.3,
+    "fps2": 56.7,
+    "selfFps": 57,
+    "frameMs": 17.5,
+    "cpuMs": 2,
+    "lod": "high",
+    "state": "ready"
+   },
+   "gate": {
+    "readyMs": 7193,
+    "fps1": 57.1,
+    "fps2": 57.1,
+    "selfFps": 57.3,
+    "frameMs": 17.5,
+    "cpuMs": 1.3,
+    "lod": "high",
+    "state": "ready"
+   },
+   "koi": {
+    "readyMs": 5047,
+    "fps1": 57.1,
+    "fps2": 57.1,
+    "selfFps": 57.4,
+    "frameMs": 17.4,
+    "cpuMs": 0.6,
+    "lod": "high",
+    "state": "ready"
+   }
+  },
+  "koiSameAge": {
+   "A/A": {
+    "size": [
+     1280,
+     720
+    ],
+    "meanAbsDiff": 2.61,
+    "changedPct": 4.1
+   },
+   "cam=orbit": {
+    "size": [
+     1280,
+     720
+    ],
+    "meanAbsDiff": 19.45,
+    "changedPct": 27.5
+   },
+   "floor=dark": {
+    "size": [
+     1280,
+     720
+    ],
+    "meanAbsDiff": 4,
+    "changedPct": 8.3
+   },
+   "rain=rain": {
+    "size": [
+     1280,
+     720
+    ],
+    "meanAbsDiff": 4.16,
+    "changedPct": 8.4
+   },
+   "cam=angle(未声明)": {
+    "size": [
+     1280,
+     720
+    ],
+    "meanAbsDiff": 19.8,
+    "changedPct": 27.5
+   }
+  }
+ },
+ "previews": {
+  "empty": {
+   "desktop": {
+    "readyMs": 703,
+    "loadMs": 203,
+    "fcp": 592,
+    "fpsIdle": 56.3,
+    "state": "ready",
+    "lod": "high",
+    "order": [],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 18553,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 628,
+    "fcp": 632,
+    "fpsIdle": 56.9,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "field": {
+   "desktop": {
+    "readyMs": 762,
+    "loadMs": 398,
+    "fcp": 692,
+    "fpsIdle": 57,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "field-ground",
+     "pixel-post"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 27118,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 721,
+    "fcp": 692,
+    "fpsIdle": 50.6,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "field-l0": {
+   "desktop": {
+    "readyMs": 657,
+    "loadMs": 407,
+    "fcp": 620,
+    "fpsIdle": 57.2,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "field-ground"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 24150,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 537,
+    "fcp": 500,
+    "fpsIdle": 56.5,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "hug": {
+   "desktop": {
+    "readyMs": 932,
+    "loadMs": 801,
+    "fcp": 792,
+    "fpsIdle": 56.3,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "hug-meadow"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 524605,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 2341,
+    "fcp": 2172,
+    "fpsIdle": 22.9,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "still": {
+   "desktop": {
+    "readyMs": 1550,
+    "loadMs": 638,
+    "fcp": 1544,
+    "fpsIdle": 10,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "tide-medium",
+     "voxel-world",
+     "bubbles",
+     "still-sink",
+     "pixel-post"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 133869,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 1313,
+    "fcp": 1228,
+    "fpsIdle": 20.2,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "tide-a": {
+   "desktop": {
+    "readyMs": 806,
+    "loadMs": 559,
+    "fcp": 716,
+    "fpsIdle": 56.6,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "tide-medium"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 22794,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 678,
+    "fcp": 544,
+    "fpsIdle": 56.7,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "tide-b": {
+   "desktop": {
+    "readyMs": 701,
+    "loadMs": 445,
+    "fcp": 668,
+    "fpsIdle": 56.8,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "tide-medium"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 22776,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 800,
+    "fcp": 720,
+    "fpsIdle": 56.2,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "tide-c": {
+   "desktop": {
+    "readyMs": 935,
+    "loadMs": 798,
+    "fcp": 1812,
+    "fpsIdle": 57.1,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "tide-medium"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 22812,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 629,
+    "fcp": 604,
+    "fpsIdle": 56.5,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "bubbles-probe": {
+   "desktop": {
+    "readyMs": 900,
+    "loadMs": 526,
+    "fcp": 804,
+    "fpsIdle": 46.7,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "tide-medium",
+     "bubbles"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 24105,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 1592,
+    "fcp": 1524,
+    "fpsIdle": 56.2,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "koi-nolimit": {
+   "desktop": {
+    "readyMs": 7655,
+    "loadMs": 7531,
+    "fcp": 7548,
+    "fpsIdle": 52,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "paper-ink",
+     "koi-pond"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 2,
+    "network": {
+     "requests": 2,
+     "bytes": 591925,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 7262,
+    "fcp": 7140,
+    "fpsIdle": 56.2,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "koi": {
+   "desktop": {
+    "readyMs": 6515,
+    "loadMs": 6265,
+    "fcp": 6440,
+    "fpsIdle": 57.3,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "paper-ink",
+     "koi-pond"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 2,
+    "network": {
+     "requests": 2,
+     "bytes": 591860,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 5054,
+    "fcp": 4992,
+    "fpsIdle": 57.1,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "room": {
+   "desktop": {
+    "readyMs": 745,
+    "loadMs": 503,
+    "fcp": 640,
+    "fpsIdle": 56.6,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "paper-ink",
+     "pixel-post"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 27285,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 673,
+    "fcp": 644,
+    "fpsIdle": 56.9,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "dawn-desk": {
+   "desktop": {
+    "readyMs": 35971,
+    "loadMs": 34931,
+    "fcp": 35628,
+    "fpsIdle": 22.8,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "dawn-desk"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 4,
+     "bytes": 1779646,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2,
+      "(data)": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 13497,
+    "fcp": 13328,
+    "fpsIdle": 57.6,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "ink": {
+   "desktop": {
+    "readyMs": 839,
+    "loadMs": 585,
+    "fcp": 720,
+    "fpsIdle": 57.2,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "paper-ink",
+     "pixel-post"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 27328,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 596,
+    "fcp": 600,
+    "fpsIdle": 56.6,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "a2-deepsea": {
+   "desktop": {
+    "readyMs": 994,
+    "loadMs": 621,
+    "fcp": 912,
+    "fpsIdle": 57.1,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "abyss",
+     "bubbles",
+     "still-sink",
+     "pixel-post"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 29928,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 1
+   },
+   "mobile": {
+    "readyMs": 957,
+    "fcp": 888,
+    "fpsIdle": 56.9,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "a2-nebula": {
+   "desktop": {
+    "readyMs": 1188,
+    "loadMs": 940,
+    "fcp": 1072,
+    "fpsIdle": 57.1,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "abyss",
+     "nebula",
+     "pixel-post"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 2,
+     "bytes": 520899,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 817,
+    "fcp": 832,
+    "fpsIdle": 56.5,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "a2-temple": {
+   "desktop": {
+    "readyMs": 9990,
+    "loadMs": 5404,
+    "fcp": 5428,
+    "fpsIdle": 56.8,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "temple"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 14,
+     "bytes": 4993719,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2,
+      "(data)": 12
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 9580,
+    "fcp": 5024,
+    "fpsIdle": 48.2,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "a2-gate": {
+   "desktop": {
+    "readyMs": 7195,
+    "loadMs": 3668,
+    "fcp": 3660,
+    "fpsIdle": 57.2,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "temple"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 0,
+    "network": {
+     "requests": 12,
+     "bytes": 4993709,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2,
+      "(data)": 10
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 8489,
+    "fcp": 4560,
+    "fpsIdle": 35.2,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  },
+  "a2-koi": {
+   "desktop": {
+    "readyMs": 5754,
+    "loadMs": 5254,
+    "fcp": 5712,
+    "fpsIdle": 56.6,
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "paper-ink",
+     "koi-pond"
+    ],
+    "degraded": [],
+    "errors": [],
+    "warnings": 2,
+    "network": {
+     "requests": 2,
+     "bytes": 591860,
+     "failed": [],
+     "hosts": {
+      "127.0.0.1:8094": 2
+     }
+    },
+    "clickables": 2
+   },
+   "mobile": {
+    "readyMs": 5523,
+    "fcp": 5496,
+    "fpsIdle": 57.1,
+    "state": "ready",
+    "lod": "high",
+    "errors": []
+   }
+  }
+ },
+ "requests": {
+  "templates": {
+   "deepsea": [
+    {
+     "url": "http://127.0.0.1:8094/templates/deepsea/index.html",
+     "type": "Document",
+     "bytes": 29689
+    },
+    {
+     "url": "http://127.0.0.1:8094/favicon.ico",
+     "type": "Other",
+     "bytes": 239
+    }
+   ],
+   "nebula": [
+    {
+     "url": "http://127.0.0.1:8094/templates/nebula/index.html",
+     "type": "Document",
+     "bytes": 520660
+    },
+    {
+     "url": "http://127.0.0.1:8094/favicon.ico",
+     "type": "Other",
+     "bytes": 239
+    }
+   ],
+   "temple": [
+    {
+     "url": "http://127.0.0.1:8094/templates/temple/index.html",
+     "type": "Document",
+     "bytes": 4993480
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCgg",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwk",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "http://127.0.0.1:8094/favicon.ico",
+     "type": "Other",
+     "bytes": 239
+    }
+   ],
+   "gate": [
+    {
+     "url": "http://127.0.0.1:8094/templates/gate/index.html",
+     "type": "Document",
+     "bytes": 4993470
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCgg",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwk",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+     "type": "Image",
+     "bytes": 0
+    },
+    {
+     "url": "http://127.0.0.1:8094/favicon.ico",
+     "type": "Other",
+     "bytes": 239
+    }
+   ],
+   "koi": [
+    {
+     "url": "http://127.0.0.1:8094/templates/koi/index.html",
+     "type": "Document",
+     "bytes": 591621
+    },
+    {
+     "url": "http://127.0.0.1:8094/favicon.ico",
+     "type": "Other",
+     "bytes": 239
+    }
+   ]
+  },
+  "studioFirst": [
+   {
+    "url": "/studio/",
+    "type": "Document",
+    "bytes": 12628
+   },
+   {
+    "url": "/templates/koi/index.html?style=ink&cam=top&floor=pebble&rain=dry&seed=20260312",
+    "type": "Document",
+    "bytes": 591621
+   },
+   {
+    "url": "/templates/gate/index.html?scene=gate&fog=1&lanterns=0.9&hall=0",
+    "type": "Document",
+    "bytes": 4993470
+   },
+   {
+    "url": "/templates/nebula/index.html?palette=abyss&density=1&scale=1&speed=0.85&pulse=0.55",
+    "type": "Document",
+    "bytes": 520660
+   },
+   {
+    "url": "/templates/deepsea/index.html?palette=abyss&density=1&rays=0.55&caustics=0.35",
+    "type": "Document",
+    "bytes": 29689
+   },
+   {
+    "url": "/templates/temple/index.html?scene=dawn&fog=1&lanterns=0.82&orbit=0.7&torii=1&pines=1&hall",
+    "type": "Document",
+    "bytes": 4993480
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCgg",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwk",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCgg",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwk",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAA",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAUEAwUFBAUGBgUGCA4JCAcHCBEMDQo",
+    "type": "Image",
+    "bytes": 0
+   },
+   {
+    "url": "/favicon.ico",
+    "type": "Other",
+    "bytes": 239
+   }
+  ],
+  "studioMobile": {
+   "requests": 30,
+   "bytes": 11171476,
+   "failed": [],
+   "hosts": {
+    "127.0.0.1:8094": 8,
+    "(data)": 22
+   }
+  },
+  "studioFpsRetest": [
+   {
+    "vp": {
+     "width": 1280,
+     "height": 720
+    },
+    "top": [
+     41.3,
+     52.3
+    ],
+    "iframesTop": [
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms"
+    ],
+    "bottom": 57.1,
+    "iframesBottom": [
+     "ready/high/fps56/frame18ms",
+     "ready/high/fps56/frame18ms",
+     "ready/high/fps56/frame18ms",
+     "ready/high/fps56/frame18ms",
+     "ready/high/fps56/frame18ms"
+    ],
+    "errors": 0
+   },
+   {
+    "vp": {
+     "width": 390,
+     "height": 844,
+     "dpr": 3,
+     "mobile": true
+    },
+    "top": [
+     51.8,
+     56.9
+    ],
+    "iframesTop": [
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms"
+    ],
+    "bottom": 57,
+    "iframesBottom": [
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame18ms",
+     "ready/high/fps57/frame17ms"
+    ],
+    "errors": 0
+   }
+  ],
+  "deepseaSameAge": {
+   "A/A": [
+    0.85,
+    0
+   ],
+   "density=0.4": [
+    4.98,
+    8.8
+   ],
+   "density=1.6": [
+    0.11,
+    0.1
+   ],
+   "caustics=0": [
+    0.93,
+    0.2
+   ],
+   "caustics=1": [
+    0.15,
+    0
+   ],
+   "rays=0": [
+    4.3,
+    9.3
+   ],
+   "rays=1": [
+    2.69,
+    0.2
+   ],
+   "palette=ink": [
+    10.99,
+    35.3
+   ]
+  },
+  "koiRealSameAge": {
+   "A/A": [
+    1.18,
+    0.2
+   ],
+   "floor=dark": [
+    19.25,
+    56
+   ],
+   "floor=sky": [
+    85.65,
+    93.6
+   ],
+   "rain=rain": [
+    4.67,
+    8.6
+   ],
+   "cam=orbit": [
+    44.2,
+    76.4
+   ]
+  }
+ },
+ "fileDirect": {
+  "deepsea": {
+   "nav": {
+    "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/templates/deepsea/index.html",
+    "loadMs": 270,
+    "readyMs": 789,
+    "snapshot": {
+     "state": "ready",
+     "lod": "high",
+     "order": [
+      "abyss",
+      "bubbles",
+      "still-sink",
+      "pixel-post"
+     ],
+     "drawn": 4,
+     "frames": 9,
+     "fps": 50.47289949655188,
+     "cpuMs": 1.2000000029802322,
+     "frameMs": 39.721097534,
+     "degraded": []
+    },
+    "ready": true,
+    "wallMs": 799
+   },
+   "firstPaint": {
+    "first-paint": 716,
+    "first-contentful-paint": 716
+   },
+   "env": {
+    "viewport": [
+     1280,
+     720
+    ],
+    "dpr": 1,
+    "docHeight": 720,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 0,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 258,
+    "domContentLoaded": 258,
+    "loadEventEnd": 259,
+    "paint": {
+     "first-paint": 716,
+     "first-contentful-paint": 716
+    }
+   },
+   "fpsIdle": {
+    "frames": 113,
+    "ms": 2012,
+    "fps": 56.2
+   },
+   "snapshot": {
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "abyss",
+     "bubbles",
+     "still-sink",
+     "pixel-post"
+    ],
+    "drawn": 4,
+    "frames": 272,
+    "fps": 56.12969175409499,
+    "cpuMs": 0.8999999910593033,
+    "frameMs": 17.8190189340089,
+    "degraded": []
+   },
+   "bodyState": "ready",
+   "text": "state ready   lod high   fps 56   frame 17.8ms   cpu 1.40ms   drawn 4/4   budget 10.0ms   declared 4.82ms\nbiome tide   seed 20261123   frames 265\norder L0:abyss → L2:bubbles → L3:still-sink → L4:pixel-post",
+   "clickables": 1,
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [],
+    "browserWarnings": [],
+    "network": {
+     "requests": 1,
+     "bytes": 29480,
+     "failed": [],
+     "hosts": {
+      "(inline:file:///C:/U)": 1
+     }
+    },
+    "dialogs": []
+   },
+   "bootError": ""
+  },
+  "nebula": {
+   "nav": {
+    "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/templates/nebula/index.html",
+    "loadMs": 577,
+    "readyMs": 959,
+    "snapshot": {
+     "state": "ready",
+     "lod": "high",
+     "order": [
+      "abyss",
+      "nebula",
+      "pixel-post"
+     ],
+     "drawn": 3,
+     "frames": 8,
+     "fps": 26.70643063165069,
+     "cpuMs": 1.7999999970197678,
+     "frameMs": 33.23686756000001,
+     "degraded": []
+    },
+    "ready": true,
+    "wallMs": 975
+   },
+   "firstPaint": {
+    "first-paint": 900,
+    "first-contentful-paint": 900
+   },
+   "env": {
+    "viewport": [
+     1280,
+     720
+    ],
+    "dpr": 1,
+    "docHeight": 720,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 0,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 559,
+    "domContentLoaded": 559,
+    "loadEventEnd": 560,
+    "paint": {
+     "first-paint": 900,
+     "first-contentful-paint": 900
+    }
+   },
+   "fpsIdle": {
+    "frames": 16,
+    "ms": 2030,
+    "fps": 7.9
+   },
+   "snapshot": {
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "abyss",
+     "nebula",
+     "pixel-post"
+    ],
+    "drawn": 3,
+    "frames": 171,
+    "fps": 22.213820844946312,
+    "cpuMs": 2.7999999970197678,
+    "frameMs": 126.26535168531669,
+    "degraded": []
+   },
+   "bodyState": "ready",
+   "text": "state ready   lod high   fps 22   frame 126.3ms   cpu 2.80ms   drawn 3/3   budget 12.0ms   declared 6.35ms\nbiome tide   seed 20261123   frames 171\norder L0:abyss → L1:nebula → L4:pixel-post",
+   "clickables": 2,
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [],
+    "browserWarnings": [],
+    "network": {
+     "requests": 1,
+     "bytes": 520388,
+     "failed": [],
+     "hosts": {
+      "(inline:file:///C:/U)": 1
+     }
+    },
+    "dialogs": []
+   },
+   "bootError": ""
+  },
+  "temple": {
+   "nav": {
+    "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/templates/temple/index.html",
+    "loadMs": 10789,
+    "readyMs": 17410,
+    "snapshot": {
+     "state": "ready",
+     "lod": "high",
+     "order": [
+      "temple"
+     ],
+     "drawn": 1,
+     "frames": 5,
+     "fps": 8.318024930594783,
+     "cpuMs": 3.5999999940395355,
+     "frameMs": 1196.6082800000001,
+     "degraded": []
+    },
+    "ready": true,
+    "wallMs": 17447
+   },
+   "firstPaint": {
+    "first-paint": 384,
+    "first-contentful-paint": 384
+   },
+   "env": {
+    "viewport": [
+     1280,
+     720
+    ],
+    "dpr": 1,
+    "docHeight": 720,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 0,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 10747,
+    "domContentLoaded": 10747,
+    "loadEventEnd": 10750,
+    "paint": {
+     "first-paint": 384,
+     "first-contentful-paint": 384
+    }
+   },
+   "fpsIdle": {
+    "frames": 12,
+    "ms": 2109,
+    "fps": 5.7
+   },
+   "snapshot": {
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "temple"
+    ],
+    "drawn": 1,
+    "frames": 70,
+    "fps": 12.487730799718214,
+    "cpuMs": 2.3999999910593033,
+    "frameMs": 184.94303244211045,
+    "degraded": []
+   },
+   "bodyState": "ready",
+   "text": "state ready   lod high   fps 13   frame 187.6ms   cpu 2.30ms   drawn 1/1   budget 14.0ms   declared 7.50ms\nbiome room   seed 20261123   frames 69\norder L1:temple",
+   "clickables": 2,
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [],
+    "browserWarnings": [],
+    "network": {
+     "requests": 13,
+     "bytes": 4992587,
+     "failed": [],
+     "hosts": {
+      "(inline:file:///C:/U)": 1,
+      "(data)": 12
+     }
+    },
+    "dialogs": []
+   },
+   "bootError": ""
+  },
+  "gate": {
+   "nav": {
+    "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/templates/gate/index.html",
+    "loadMs": 5972,
+    "readyMs": 13515,
+    "snapshot": {
+     "state": "ready",
+     "lod": "high",
+     "order": [
+      "temple"
+     ],
+     "drawn": 1,
+     "frames": 6,
+     "fps": 10.678505861769965,
+     "cpuMs": 5.299999997019768,
+     "frameMs": 917.814698,
+     "degraded": []
+    },
+    "ready": true,
+    "wallMs": 13535
+   },
+   "firstPaint": {
+    "first-paint": 6164,
+    "first-contentful-paint": 6164
+   },
+   "env": {
+    "viewport": [
+     1280,
+     720
+    ],
+    "dpr": 1,
+    "docHeight": 720,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 0,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 5948,
+    "domContentLoaded": 5948,
+    "loadEventEnd": 5950,
+    "paint": {
+     "first-paint": 6164,
+     "first-contentful-paint": 6164
+    }
+   },
+   "fpsIdle": {
+    "frames": 44,
+    "ms": 2009,
+    "fps": 21.9
+   },
+   "snapshot": {
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "temple"
+    ],
+    "drawn": 1,
+    "frames": 81,
+    "fps": 35.064624116277024,
+    "cpuMs": 1.2000000029802322,
+    "frameMs": 36.50287133798158,
+    "degraded": []
+   },
+   "bodyState": "ready",
+   "text": "state ready   lod high   fps 30   frame 43.7ms   cpu 1.00ms   drawn 1/1   budget 12.0ms   declared 7.50ms\nbiome room   seed 20261123   frames 74\norder L1:temple",
+   "clickables": 2,
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [],
+    "browserWarnings": [],
+    "network": {
+     "requests": 11,
+     "bytes": 4992577,
+     "failed": [],
+     "hosts": {
+      "(inline:file:///C:/U)": 1,
+      "(data)": 10
+     }
+    },
+    "dialogs": []
+   },
+   "bootError": ""
+  },
+  "koi": {
+   "nav": {
+    "url": "file:///c:/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster/dist/templates/koi/index.html",
+    "loadMs": 1904,
+    "readyMs": 5877,
+    "snapshot": {
+     "state": "ready",
+     "lod": "high",
+     "order": [
+      "paper-ink",
+      "koi-pond"
+     ],
+     "drawn": 2,
+     "frames": 6,
+     "fps": 16.53988055770495,
+     "cpuMs": 2.5,
+     "frameMs": 271.133815,
+     "degraded": []
+    },
+    "ready": true,
+    "wallMs": 5891
+   },
+   "firstPaint": {
+    "first-paint": 5780,
+    "first-contentful-paint": 5780
+   },
+   "env": {
+    "viewport": [
+     1280,
+     720
+    ],
+    "dpr": 1,
+    "docHeight": 720,
+    "webgl2": true,
+    "webgl": true,
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgpu": true,
+    "maxTouchPoints": 0,
+    "cores": 8,
+    "deviceMemory": 16,
+    "reducedMotion": false,
+    "domInteractive": 1888,
+    "domContentLoaded": 1888,
+    "loadEventEnd": 1889,
+    "paint": {
+     "first-paint": 5780,
+     "first-contentful-paint": 5780
+    }
+   },
+   "fpsIdle": {
+    "frames": 16,
+    "ms": 2338,
+    "fps": 6.8
+   },
+   "snapshot": {
+    "state": "ready",
+    "lod": "high",
+    "order": [
+     "paper-ink",
+     "koi-pond"
+    ],
+    "drawn": 2,
+    "frames": 36,
+    "fps": 16.051832625887894,
+    "cpuMs": 0.7000000029802322,
+    "frameMs": 270.0582773157893,
+    "degraded": []
+   },
+   "bodyState": "ready",
+   "text": "state ready   lod high   fps 16   frame 270.1ms   cpu 0.70ms   drawn 2/2   budget 12.0ms   declared 9.80ms\nbiome ink   seed 20260312   frames 36\norder L0:paper-ink → L1:koi-pond",
+   "clickables": 2,
+   "summary": {
+    "errors": [],
+    "consoleWarnings": [
+     "THREE.WebGLProgram: Program Info Log: (74,1): warning X4000: use of potentially uninitialized variable (f_shape)",
+     "THREE.WebGLProgram: Program Info Log: (129,1): warning X4000: use of potentially uninitialized variable (f_shape)"
+    ],
+    "browserWarnings": [],
+    "network": {
+     "requests": 1,
+     "bytes": 591332,
+     "failed": [],
+     "hosts": {
+      "(inline:file:///C:/U)": 1
+     }
+    },
+    "dialogs": []
+   },
+   "bootError": ""
+  }
+ },
+ "stillRetest": "见 WALKTHROUGH §4：2/2 复现，约 3.4–4.6 秒起卡住 8.6–11.3 秒，期间截图全黑，句柄仍报 ready",
+ "assets": {
+  "size": [
+   {
+    "file": "dist/studio/index.html",
+    "raw": 11640,
+    "dataUriCount": 0,
+    "dataUriTypes": {},
+    "b64Chars": 0,
+    "b64PctOfRaw": 0,
+    "nonDataChars": 11640,
+    "gzipZlib": 4590,
+    "gzipWithoutData": 4590,
+    "dataShareOfGzipPct": 0
+   },
+   {
+    "file": "dist/templates/temple/index.html",
+    "raw": 4992561,
+    "dataUriCount": 12,
+    "dataUriTypes": {
+     "image/jpeg;base64": 9,
+     "image/png;base64": 3
+    },
+    "b64Chars": 4383116,
+    "b64PctOfRaw": 87.79,
+    "nonDataChars": 609445,
+    "gzipZlib": 3456486,
+    "gzipWithoutData": 161477,
+    "dataShareOfGzipPct": 95.3
+   },
+   {
+    "file": "dist/templates/gate/index.html",
+    "raw": 4992549,
+    "dataUriCount": 12,
+    "dataUriTypes": {
+     "image/jpeg;base64": 9,
+     "image/png;base64": 3
+    },
+    "b64Chars": 4383116,
+    "b64PctOfRaw": 87.79,
+    "nonDataChars": 609433,
+    "gzipZlib": 3456483,
+    "gzipWithoutData": 161480,
+    "dataShareOfGzipPct": 95.3
+   },
+   {
+    "file": "dist/templates/nebula/index.html",
+    "raw": 520366,
+    "dataUriCount": 0,
+    "dataUriTypes": {},
+    "b64Chars": 0,
+    "b64PctOfRaw": 0,
+    "nonDataChars": 520366,
+    "gzipZlib": 136102,
+    "gzipWithoutData": 136102,
+    "dataShareOfGzipPct": 0
+   },
+   {
+    "file": "dist/templates/koi/index.html",
+    "raw": 591310,
+    "dataUriCount": 0,
+    "dataUriTypes": {},
+    "b64Chars": 0,
+    "b64PctOfRaw": 0,
+    "nonDataChars": 591310,
+    "gzipZlib": 162204,
+    "gzipWithoutData": 162204,
+    "dataShareOfGzipPct": 0
+   },
+   {
+    "file": "dist/templates/deepsea/index.html",
+    "raw": 29460,
+    "dataUriCount": 0,
+    "dataUriTypes": {},
+    "b64Chars": 0,
+    "b64PctOfRaw": 0,
+    "nonDataChars": 29460,
+    "gzipZlib": 11684,
+    "gzipWithoutData": 11684,
+    "dataShareOfGzipPct": 0
+   },
+   {
+    "file": "dist/preview/dawn-desk.html",
+    "raw": 1778932,
+    "dataUriCount": 2,
+    "dataUriTypes": {
+     "image/jpeg;base64": 1,
+     "image/png;base64": 1
+    },
+    "b64Chars": 870544,
+    "b64PctOfRaw": 48.94,
+    "nonDataChars": 908388,
+    "gzipZlib": 931850,
+    "gzipWithoutData": 279565,
+    "dataShareOfGzipPct": 70
+   },
+   {
+    "file": "dist/preview/hug.html",
+    "raw": 524066,
+    "dataUriCount": 0,
+    "dataUriTypes": {},
+    "b64Chars": 0,
+    "b64PctOfRaw": 0,
+    "nonDataChars": 524066,
+    "gzipZlib": 136071,
+    "gzipWithoutData": 136071,
+    "dataShareOfGzipPct": 0
+   },
+   {
+    "file": "dist/preview/a2-koi.html",
+    "raw": 591310,
+    "dataUriCount": 0,
+    "dataUriTypes": {},
+    "b64Chars": 0,
+    "b64PctOfRaw": 0,
+    "nonDataChars": 591310,
+    "gzipZlib": 162204,
+    "gzipWithoutData": 162204,
+    "dataShareOfGzipPct": 0
+   }
+  ],
+  "gui": [
+   {
+    "file": "dist/studio/index.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 1,
+    "createElementInputColor": 0,
+    "elementSelect": 7,
+    "qualityWords": 0,
+    "exportWords": 0,
+    "budgetWords": 7
+   },
+   {
+    "file": "dist/templates/deepsea/index.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 0,
+    "qualityWords": 0,
+    "exportWords": 0,
+    "budgetWords": 17
+   },
+   {
+    "file": "dist/templates/nebula/index.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 2,
+    "qualityWords": 0,
+    "exportWords": 0,
+    "budgetWords": 17
+   },
+   {
+    "file": "dist/templates/gate/index.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 2,
+    "qualityWords": 9,
+    "exportWords": 0,
+    "budgetWords": 20
+   },
+   {
+    "file": "dist/templates/koi/index.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 2,
+    "qualityWords": 0,
+    "exportWords": 0,
+    "budgetWords": 17
+   },
+   {
+    "file": "dist/templates/temple/index.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 2,
+    "qualityWords": 9,
+    "exportWords": 0,
+    "budgetWords": 20
+   },
+   {
+    "file": "dist/preview/a2-temple.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 2,
+    "qualityWords": 9,
+    "exportWords": 0,
+    "budgetWords": 20
+   },
+   {
+    "file": "dist/preview/koi.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 2,
+    "qualityWords": 0,
+    "exportWords": 0,
+    "budgetWords": 17
+   },
+   {
+    "file": "dist/preview/still.html",
+    "lilGui": 0,
+    "datGui": 0,
+    "newGUI": 0,
+    "classGUI": 0,
+    "inputTypeColor": 0,
+    "inputTypeRange": 0,
+    "createElementInputColor": 0,
+    "elementSelect": 9,
+    "qualityWords": 0,
+    "exportWords": 0,
+    "budgetWords": 17
+   }
+  ],
+  "assetsSource": "// 由 AI 生成并压缩到 1024 JPEG 的写实表面贴图。\n// 生成来源：seedream 5.5，2026-11-23；用途：MaterialLab 的 albedo/alpha 基准。\n\nexport const ROOF_JPG = '",
+  "threeRevision": null,
+  "hasBeerLambert": true
+ },
+ "evidence": {
+  "dir": "docs/review-2026-11-24/ux-a2/",
+  "files": [
+   "WALKTHROUGH.md",
+   "export-deepsea-另存后file直开.jpg",
+   "export-gate-另存后file直开.jpg",
+   "export-koi-另存后file直开.jpg",
+   "export-koi-带参数网址.jpg",
+   "export-temple-另存后file直开.jpg",
+   "export-temple-带参数网址.jpg",
+   "metrics.json",
+   "preview-a2-deepsea-桌面-首屏.jpg",
+   "preview-a2-gate-桌面-首屏.jpg",
+   "preview-a2-koi-桌面-首屏.jpg",
+   "preview-a2-nebula-桌面-首屏.jpg",
+   "preview-a2-temple-桌面-首屏.jpg",
+   "preview-bubbles-probe-桌面-首屏.jpg",
+   "preview-dawn-desk-桌面-首屏.jpg",
+   "preview-empty-桌面-首屏.jpg",
+   "preview-field-l0-桌面-首屏.jpg",
+   "preview-field-桌面-首屏.jpg",
+   "preview-hug-桌面-首屏.jpg",
+   "preview-ink-桌面-首屏.jpg",
+   "preview-koi-nolimit-桌面-首屏.jpg",
+   "preview-koi-桌面-首屏.jpg",
+   "preview-room-桌面-首屏.jpg",
+   "preview-still-桌面-14s黑屏.jpg",
+   "preview-still-桌面-20s.jpg",
+   "preview-still-桌面-3s.jpg",
+   "preview-still-桌面-首屏.jpg",
+   "preview-tide-a-桌面-首屏.jpg",
+   "preview-tide-b-桌面-首屏.jpg",
+   "preview-tide-c-桌面-首屏.jpg",
+   "sheet-previews.jpg",
+   "sheet-studio-mobile.jpg",
+   "sheet-studio.jpg",
+   "sheet-templates-interactions.jpg",
+   "sheet-templates-mobile.jpg",
+   "sheet-templates.jpg",
+   "sheet-variants-1.jpg",
+   "sheet-variants-2.jpg",
+   "sheet-variants-3.jpg",
+   "studio-参数/studio-参数-deepsea-caustics.jpg",
+   "studio-参数/studio-参数-deepsea-density.jpg",
+   "studio-参数/studio-参数-deepsea-palette.jpg",
+   "studio-参数/studio-参数-deepsea-rays.jpg",
+   "studio-参数/studio-参数-gate-fog.jpg",
+   "studio-参数/studio-参数-gate-hall.jpg",
+   "studio-参数/studio-参数-gate-lanterns.jpg",
+   "studio-参数/studio-参数-gate-scene.jpg",
+   "studio-参数/studio-参数-koi-cam.jpg",
+   "studio-参数/studio-参数-koi-floor.jpg",
+   "studio-参数/studio-参数-koi-rain.jpg",
+   "studio-参数/studio-参数-koi-seed.jpg",
+   "studio-参数/studio-参数-koi-style.jpg",
+   "studio-参数/studio-参数-nebula-density.jpg",
+   "studio-参数/studio-参数-nebula-palette.jpg",
+   "studio-参数/studio-参数-nebula-pulse.jpg",
+   "studio-参数/studio-参数-nebula-scale.jpg",
+   "studio-参数/studio-参数-nebula-speed.jpg",
+   "studio-参数/studio-参数-temple-fog.jpg",
+   "studio-参数/studio-参数-temple-hall.jpg",
+   "studio-参数/studio-参数-temple-lanterns.jpg",
+   "studio-参数/studio-参数-temple-orbit.jpg",
+   "studio-参数/studio-参数-temple-pines.jpg",
+   "studio-参数/studio-参数-temple-scene.jpg",
+   "studio-参数/studio-参数-temple-torii.jpg",
+   "studio-手机-控件区.jpg",
+   "studio-手机-整页.jpg",
+   "studio-手机-调参后.jpg",
+   "studio-手机-首屏.jpg",
+   "studio-桌面-file直开.jpg",
+   "studio-桌面-拖动滑块后-temple.jpg",
+   "studio-桌面-整页.jpg",
+   "studio-桌面-预览就绪.jpg",
+   "studio-桌面-首屏.jpg",
+   "template-deepsea-手机-首屏.jpg",
+   "template-deepsea-桌面-caustics-0.jpg",
+   "template-deepsea-桌面-caustics-1.jpg",
+   "template-deepsea-桌面-density-0.4.jpg",
+   "template-deepsea-桌面-density-1.6.jpg",
+   "template-deepsea-桌面-palette-ink.jpg",
+   "template-deepsea-桌面-palette-tide.jpg",
+   "template-deepsea-桌面-rays-0.jpg",
+   "template-deepsea-桌面-交互-hover+600ms.jpg",
+   "template-deepsea-桌面-交互-tap+600ms.jpg",
+   "template-deepsea-桌面-停留10s.jpg",
+   "template-deepsea-桌面-首屏.jpg",
+   "template-gate-手机-首屏.jpg",
+   "template-gate-桌面-hall-1.jpg",
+   "template-gate-桌面-scene-dawn.jpg",
+   "template-gate-桌面-scene-snow.jpg",
+   "template-gate-桌面-交互-hover+600ms.jpg",
+   "template-gate-桌面-交互-tap+600ms.jpg",
+   "template-gate-桌面-停留10s.jpg",
+   "template-gate-桌面-首屏.jpg",
+   "template-koi-手机-首屏.jpg",
+   "template-koi-桌面-cam-orbit.jpg",
+   "template-koi-桌面-floor-dark.jpg",
+   "template-koi-桌面-rain-rain.jpg",
+   "template-koi-桌面-real-floor-dark.jpg",
+   "template-koi-桌面-real-rain-rain.jpg",
+   "template-koi-桌面-seed-191411.jpg",
+   "template-koi-桌面-style-paint.jpg",
+   "template-koi-桌面-style-real.jpg",
+   "template-koi-桌面-交互-drag+600ms.jpg",
+   "template-koi-桌面-交互-hover+600ms.jpg",
+   "template-koi-桌面-交互-tap+600ms.jpg",
+   "template-koi-桌面-交互-wheel+600ms.jpg",
+   "template-koi-桌面-停留10s.jpg",
+   "template-koi-桌面-拖动后.jpg",
+   "template-koi-桌面-点击后.jpg",
+   "template-koi-桌面-首屏.jpg",
+   "template-nebula-手机-首屏.jpg",
+   "template-nebula-桌面-density-0.45.jpg",
+   "template-nebula-桌面-palette-ember.jpg",
+   "template-nebula-桌面-palette-violet.jpg",
+   "template-nebula-桌面-scale-0.6.jpg",
+   "template-nebula-桌面-scale-1.6.jpg",
+   "template-nebula-桌面-speed-2.jpg",
+   "template-nebula-桌面-交互-hover+600ms.jpg",
+   "template-nebula-桌面-交互-tap+600ms.jpg",
+   "template-nebula-桌面-停留10s.jpg",
+   "template-nebula-桌面-首屏.jpg",
+   "template-temple-手机-首屏.jpg",
+   "template-temple-桌面-fog-0.jpg",
+   "template-temple-桌面-hall-0.jpg",
+   "template-temple-桌面-lanterns-0.jpg",
+   "template-temple-桌面-orbit-0.jpg",
+   "template-temple-桌面-pines-0.jpg",
+   "template-temple-桌面-scene-dusk.jpg",
+   "template-temple-桌面-scene-gate.jpg",
+   "template-temple-桌面-scene-snow.jpg",
+   "template-temple-桌面-torii-0.jpg",
+   "template-temple-桌面-交互-hover+600ms.jpg",
+   "template-temple-桌面-交互-tap+600ms.jpg",
+   "template-temple-桌面-停留10s.jpg",
+   "template-temple-桌面-首屏.jpg"
+  ],
+  "count": 135,
+  "bytes": 12144546
+ }
+}

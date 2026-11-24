@@ -1,0 +1,39 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/mutation-probe.mjs
+# start: 2026-11-24 11:03:14
+[mutation-probe] 死参数探针（Mode A 纯核 / Mode B 指令指纹，ARCHITECTURE-REUSE §4.3）
+  阈值：变异 ±10% / 变化 > 1e-9 / 每符号 ≥ 2 条用例
+
+一、Mode A · 自检（白盒样本，故意植入 1 个死参数 + 1 个活参数做反向对照）
+  零件              符号              参数键              敏感   最坏 |Δ|   变异明细
+  自检样本              shape             gain                ✓      4.50e-1   ×0.9:4.50e-1 ×1.1:4.50e-1
+  自检样本              shape             deadGain            ✗ 死    0         ×0.9:未变 ×1.1:未变
+  结论：抓到死参数 ["deadGain"]；活参数 gain 未被误杀
+
+二、Mode A · 真实零件（来源：manifest.provenance.ported[].params）
+  ⏳ 10 件已注册零件中 0 件声明了 ported[].params —— 探针今天没有真实探测量。
+     这不是「死参数 = 0 已验收」，而是「尚无参数可探」（存量）。
+     判据：manifest 的 ported[].params 是唯一入口，T-R03/T-R05 接线后本表自动长出内容。
+
+三、Mode B · 自检（合成重放样本：错峰释放 + 透明度衰减，640×240，0–3 s / 0.1 s 步长）
+  重放规模：31 帧 / 1148 条指令 / 实际绘制 164 颗
+  确定性：独立录制 def003d0c54afaa8… vs def003d0c54afaa8… → 相等 ✓
+  确定性：同一 ctx reset 后重放 def003d0c54afaa8… → 相等 ✓
+  detach       ✓ 敏感   ×0.9:变  ×1.1:变
+  wind         ✓ 敏感   ×0.9:变  ×1.1:变
+  alphaBase    ✓ 敏感   ×0.9:变  ×1.1:变
+  unusedGain   ✗ 死   ×0.9:未变  ×1.1:未变
+
+四、Mode B · 真实零件（输出必须经 Canvas2D 才能观察的零件）
+  ⏳ 无目标：壳探针需要「已有 core 可装载 + 输出经 canvas」的零件（dandelion 属 T-R05，core 未落地）。
+     这不是「Mode B 全绿」，而是「尚无壳目标可探」（存量）。
+
+[mutation-probe] 死参数 = 0（门要求 = 0）
+  真实零件：Mode A 探测 0 个符号 / Mode B 探测 0 个目标
+  ⏳ blow-input（D3）的 ported[].params 全空 → 死参数探针无可测面（存量：算法尚未接线，属 T-R03/T-R05 施工面）
+  ⏳ dandelion（D3）的 ported[].params 全空 → 死参数探针无可测面（存量：算法尚未接线，属 T-R03/T-R05 施工面）
+
+[mutation-probe] ✅ PASS：9 项断言（自检抓到植入的死参数且未误杀活参数；真实零件死参数 = 0）
+# exit: 0
+# elapsed: 2465ms

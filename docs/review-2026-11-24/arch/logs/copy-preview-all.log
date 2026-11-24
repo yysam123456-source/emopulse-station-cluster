@@ -1,0 +1,113 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: for each preset in --list: node shared/stage/preview/build.mjs --preset <name>
+# start: 2026-11-24 11:12:33
+=== preset empty
+[preview] preset=empty  parts=(none)  gl=false
+[preview] 脚本 16767 B → 单文件 18105 B（盘上 18105 B）
+[preview] 输出 dist\preview\empty.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset field
+[preview] preset=field  parts=field-ground,pixel-post  gl=false
+[preview] 脚本 25318 B → 单文件 26670 B（盘上 26670 B）
+[preview] 输出 dist\preview\field.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset field-l0
+[preview] preset=field-l0  parts=field-ground  gl=false
+[preview] 脚本 22343 B → 单文件 23702 B（盘上 23702 B）
+[preview] 输出 dist\preview\field-l0.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset hug
+[preview] preset=hug  parts=hug-meadow  gl=true
+[preview] 脚本 522690 B → 单文件 524094 B（盘上 524094 B）
+[preview] 输出 dist\preview\hug.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset still
+[preview] preset=still  parts=tide-medium,voxel-world,bubbles,still-sink,pixel-post  gl=true
+[preview] 脚本 131948 B → 单文件 133404 B（盘上 133404 B）
+[preview] 输出 dist\preview\still.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset tide-a
+[preview] preset=tide-a  parts=tide-medium  gl=false
+[preview] 脚本 20974 B → 单文件 22346 B（盘上 22346 B）
+[preview] 输出 dist\preview\tide-a.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset tide-b
+[preview] preset=tide-b  parts=tide-medium  gl=false
+[preview] 脚本 20962 B → 单文件 22328 B（盘上 22328 B）
+[preview] 输出 dist\preview\tide-b.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset tide-c
+[preview] preset=tide-c  parts=tide-medium  gl=false
+[preview] 脚本 20986 B → 单文件 22364 B（盘上 22364 B）
+[preview] 输出 dist\preview\tide-c.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset bubbles-probe
+[preview] preset=bubbles-probe  parts=tide-medium,bubbles  gl=false
+[preview] 脚本 22274 B → 单文件 23657 B（盘上 23657 B）
+[preview] 输出 dist\preview\bubbles-probe.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset koi-nolimit
+[preview] preset=koi-nolimit  parts=paper-ink,koi-pond  gl=true
+[preview] 脚本 589957 B → 单文件 591397 B（盘上 591397 B）
+[preview] 输出 dist\preview\koi-nolimit.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset koi
+[preview] preset=koi  parts=paper-ink,koi-pond  gl=true
+[preview] 脚本 589922 B → 单文件 591332 B（盘上 591332 B）
+[preview] 输出 dist\preview\koi.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset room
+[preview] preset=room  parts=paper-ink,pixel-post  gl=false
+[preview] 脚本 25468 B → 单文件 26837 B（盘上 26837 B）
+[preview] 输出 dist\preview\room.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset dawn-desk
+[preview] preset=dawn-desk  parts=dawn-desk  gl=true
+[preview] 脚本 1773370 B → 单文件 1778955 B（盘上 1778955 B）
+[preview] 输出 dist\preview\dawn-desk.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset ink
+[preview] preset=ink  parts=paper-ink,pixel-post  gl=false
+[preview] 脚本 25499 B → 单文件 26880 B（盘上 26880 B）
+[preview] 输出 dist\preview\ink.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset a2-deepsea
+[preview] preset=a2-deepsea  parts=abyss,bubbles,still-sink,pixel-post  gl=false
+[preview] 脚本 28080 B → 单文件 29480 B（盘上 29480 B）
+[preview] 输出 dist\preview\a2-deepsea.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset a2-nebula
+[preview] preset=a2-nebula  parts=abyss,nebula,pixel-post  gl=true
+[preview] 脚本 518955 B → 单文件 520388 B（盘上 520388 B）
+[preview] 输出 dist\preview\a2-nebula.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset a2-temple
+[preview] preset=a2-temple  parts=temple  gl=true
+[preview] 脚本 4991172 B → 单文件 4992587 B（盘上 4992587 B）
+[preview] 输出 dist\preview\a2-temple.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+=== preset a2-gate
+[preview] preset=a2-gate  parts=temple  gl=true
+[preview] 脚本 4991165 B → 单文件 4992577 B（盘上 4992577 B）
+[preview] 输出 dist\preview\a2-gate.html
+[preview] 打开方式：浏览器直接开这个文件（file://），不需要服务器，不产生任何外部请求
+exit=0
+# exit: loop
+# elapsed: 20832ms

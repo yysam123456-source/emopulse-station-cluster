@@ -1,0 +1,8 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-analytics.mjs
+# start: 2026-11-24 11:03:21
+[verify-analytics] ✅ PASS：58 项断言（两事件口径一致 / scrubPayload 去 PII / 分桶边界 / 落库扁平无 PII / 关闭时零写入）
+[verify-analytics] 说明：T01 范围内尚无 nexus 站，故「8 站口径一致」以「两个事件共用同一 scrubPayload 与同一常量源」实现并断言；站点侧接入在 T02~T05 落地。
+# exit: 0
+# elapsed: 922ms

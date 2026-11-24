@@ -1,0 +1,8 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/verify-esm-parts.mjs
+# start: 2026-11-24 11:03:20
+[verify-esm-parts] 提示：.reference/ 不在版本库（gitignore），跳过与参考原件的逐字节比对
+[verify-esm-parts] ✅ PASS：16 项断言（kit.js 10992 B 原件 → IIFE 2879 B，无 import/export 残留、零外链，fbm/ramp 实调用通过）
+# exit: 0
+# elapsed: 1040ms

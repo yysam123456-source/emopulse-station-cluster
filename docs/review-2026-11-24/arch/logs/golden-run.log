@@ -1,0 +1,19 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/golden-run.mjs
+# start: 2026-11-24 11:03:11
+[golden-run] 黄金值校验（容差默认 1e-6；期望值来自 tests/golden/*.json 的手算 derivation）
+  清单 4 份：ascii-kit.json, blow-input.json, dandelion.json, koi.json
+  覆盖面：10 件已登记零件中，需要 golden 的均有清单
+
+  零件              适配器                    用例  通过  结果
+  ascii-kit         ascii-kit-kit              13    13  ✓
+  blow-input        blow-input-core            19    19  ✓
+  dandelion         dandelion-core             45    45  ✓
+  koi               koi-original-profile       12    12  ✓
+
+[golden-run] 通过率 100.0%（89/89）——门要求必须 = 100%
+
+[golden-run] ✅ PASS：10 项断言（89 条黄金值全部在容差内，derivation 全部可核对）
+# exit: 0
+# elapsed: 2633ms

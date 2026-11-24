@@ -1,0 +1,15 @@
+# cwd: /c/Users/Lenovo/WorkBuddy/2026-11-17-13-04-03/emopulse_station_cluster
+# HEAD: 1fce19c
+# cmd: node tests/site-build.mjs
+# start: 2026-11-24 11:10:48
+站点产物：
+
+  slug      字节      零件                        GL
+  license    48973   paper-ink,pixel-post       no
+  hug       539528   hug-meadow                 yes
+  still     146288   tide-medium,voxel-world,bubbles,still-sink,pixel-post yes
+  koi       607501   paper-ink,koi-pond         yes
+
+site-build: PASS 119/119
+# exit: 0
+# elapsed: 2527ms

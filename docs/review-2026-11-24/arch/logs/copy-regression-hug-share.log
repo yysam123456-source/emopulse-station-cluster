@@ -1,0 +1,23 @@
+# cwd: ISOLATED COPY (git archive 1fce19c, LF; v1 dist/*.html 已在副本内由 build all 生成) /c/Users/Lenovo/AppData/Local/Temp/emo-audit-arch-1fce19c
+# cmd: node tests/regression-hug-share.mjs
+# start: 2026-11-24 11:39:18
+
+[A 异步拒绝(Promise.reject)] PASS
+  stubCheck=ok  status="/hug?from=eyJzaXRlIjoiaHVnIiwidiI6MX0"  期望=status 兜底为 /hug?from=... 链接
+  未处理异常=0  埋点队列 1->2
+
+[B 成功(resolve)] PASS
+  stubCheck=ok  status="Link copied. Send it to someone."  期望=status = Link copied. Send it to someone.
+  未处理异常=0  埋点队列 3->4
+
+[C 同步抛错(throw)] PASS
+  stubCheck=sync-throw  status="/hug?from=eyJzaXRlIjoiaHVnIiwidiI6MX0"  期望=status 兜底为 /hug?from=... 链接
+  未处理异常=0  埋点队列 5->6
+
+=== 汇总 ===
+  A 异步拒绝(Promise.reject): PASS
+  B 成功(resolve): PASS
+  C 同步抛错(throw): PASS
+PASS=3 FAIL=0
+# exit: 0
+# elapsed: 37481ms
