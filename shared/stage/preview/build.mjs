@@ -58,6 +58,10 @@ export const PART_ENTRY = Object.freeze({
   'still-sink': 'shared/parts/still-sink/index.ts',
   'hug-meadow': 'shared/parts/hug-meadow/index.ts',
   'dawn-desk': 'shared/stage/preview/dawn-desk/index.ts',
+  // A2 新增：从 Portal 的 Nebula / 深海 / 寺庙参考抽象出的可复用零件。
+  nebula: 'shared/parts/nebula/index.ts',
+  abyss: 'shared/parts/abyss/index.ts',
+  temple: 'shared/parts/temple/index.ts',
 });
 
 /**
@@ -249,6 +253,57 @@ export const PRESETS = Object.freeze({
     budgetMs: 8,
     glBlend: null,
   },
+  // A2 深海：L0 程序化海沟 + L2 气泡 + L3 沉水渐变 + L4 后处理。
+  // 不装 GL 世界，避免和 `still` 的 voxel 抢同一个 GL 画布。
+  'a2-deepsea': {
+    title: 'A2 deepsea · 深海光柱（abyss 零件栈）',
+    biome: 'tide',
+    seed: 20261123,
+    parts: [
+      { id: 'abyss', opts: { palette: 'abyss', density: 1.1, rays: 0.62, caustics: 0.34 } },
+      'bubbles',
+      'still-sink',
+      { id: 'pixel-post', opts: { grain: 0.035, scanline: 0, vignette: 0.20 } },
+    ],
+    budgetMs: 10,
+    glBlend: null,
+  },
+  // A2 星系：深海底材 + 四旋臂粒子（GL）+ 后处理。单 GL，符合 Stage 约束。
+  'a2-nebula': {
+    title: 'A2 nebula · 四旋臂星系（nebula 零件栈）',
+    biome: 'tide',
+    seed: 20261123,
+    parts: [
+      { id: 'abyss', opts: { palette: 'abyss', density: 0.8, rays: 0.35, caustics: 0.2 } },
+      { id: 'nebula', opts: { palette: 'abyss', density: 1, scale: 1, speed: 0.85, pulse: 0.55 } },
+      { id: 'pixel-post', opts: { grain: 0.03, scanline: 0, vignette: 0.18 } },
+    ],
+    budgetMs: 12,
+    glBlend: null,
+  },
+  // A2 寺庙：写实模块清单装配。GL 零件自带天空与后处理，所以不再叠 abyss / pixel-post。
+  'a2-temple': {
+    title: 'A2 temple · 晨光山门（写实模块装配）',
+    biome: 'room',
+    seed: 20261123,
+    parts: [
+      { id: 'temple', opts: { scene: 'dawn', fog: 1, lanterns: 0.82, orbit: 0.7, torii: true, pines: true } },
+    ],
+    budgetMs: 14,
+    glBlend: null,
+  },
+  // 同一套零件库的第二次装配：去掉主殿，只留山门/石灯/松林/苔庭。
+  // 它证明 temple 不是一个固定整场景，而是 ScenePlan + 模块开关。
+  'a2-gate': {
+    title: 'A2 gate · 独立山门（同一零件库重装）',
+    biome: 'room',
+    seed: 20261123,
+    parts: [
+      { id: 'temple', opts: { scene: 'gate', fog: 1, lanterns: 0.9, orbit: 0.6, hall: false } },
+    ],
+    budgetMs: 12,
+    glBlend: null,
+  },
 });
 
 /** 页面样式。零外部资源：字体只用系统栈，不引任何 URL。 */
@@ -420,7 +475,11 @@ function bootSource(defs, config) {
     //   `ink` 预设声明 dither bayer4，页面里跑的却是缺省快路径（costMs 1.85 而不是 3.17）。
     const opts = config.__opts?.[index];
     if (opts) {
-      lines.push(`  ((__p${index}.makePart ?? __p${index}.makePixelPost)(${JSON.stringify(opts)})),`);
+      // 零件可能没有工厂（paper-ink / still-sink 等）。没有工厂时必须退回 part，
+      // 否则会得到 `(undefined)(opts)` —— 页面停在 booting，错误还不带零件名。
+      lines.push(`  ((__p${index}.makePart ?? __p${index}.makePixelPost)`
+        + ` ? ((__p${index}.makePart ?? __p${index}.makePixelPost)(${JSON.stringify(opts)}))`
+        + ` : (__p${index}.part ?? __p${index}.default)),`);
     } else {
       lines.push(`  (__p${index}.part ?? __p${index}.default),`);
     }

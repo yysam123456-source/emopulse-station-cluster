@@ -20,9 +20,11 @@ import * as THREE from 'three';
 import type { Lod, PartEnv, PartInstance, PartV2, Rect, StageSize, WorldFrame } from '../../stage/contract';
 import { MAXR, makeShared } from '../../parts-library/koi/glsl.js';
 import { makeCausticPass, makeBottom, makeComposite, makeGrade, mulberry32 } from '../../parts-library/koi/pond.js';
-import { Koi, RESIDENTS } from '../../parts-library/koi/koi.js';
-import { Surface, seasonNow } from '../../parts-library/koi/surface.js';
-import { makePaint, glaze } from '../../parts-library/koi/paint.js';
+import { seasonNow } from '../../parts-library/koi/surface.js';
+import { makePaint } from '../../parts-library/koi/paint.js';
+import { FishSchool } from './modules/fish-school';
+import { SurfaceEcology } from './modules/surface-ecology';
+import { CameraRig, FOV } from './modules/camera-rig';
 import { makeInk, NF } from '../../parts-library/koi/ink.js';
 import { makeAudio } from '../../parts-library/koi/audio.js';
 
@@ -34,6 +36,17 @@ type Floor = 'pebble' | 'sky' | 'dark';
 type Rain = 'dry' | 'drizzle' | 'rain';
 type Music = 'off' | 'still' | 'flow';
 
+/** 模板参数：只覆盖站点默认，不改变 `/koi` 现有的 URL query 行为。 */
+export interface KoiOptions {
+  readonly style?: KoiStyle;
+  readonly mode?: TouchMode;
+  readonly cam?: CameraMode;
+  readonly floor?: Floor;
+  readonly rain?: Rain;
+  readonly music?: Music;
+  readonly seed?: number;
+}
+
 const STYLES: readonly KoiStyle[] = ['ink', 'paint', 'real'];
 const MODES: readonly TouchMode[] = ['ripple', 'feed', 'call'];
 const CAMS: readonly CameraMode[] = ['top', 'angle', 'orbit'];
@@ -42,10 +55,6 @@ const RAINS: readonly Rain[] = ['dry', 'drizzle', 'rain'];
 const MUSICS: readonly Music[] = ['off', 'still', 'flow'];
 const FPS_STEPS: readonly number[] = [60, 24, 16, 12, 8, 4, 2, 1, 0.5, 0.25];
 
-const FOV = 30;
-/** 原件 `main.js` 的相机角度：elevation from straight down。 */
-const CAM_EL: Readonly<Record<CameraMode, number>> = { top: 0, angle: 0.62, orbit: 0.62 };
-const EL_MAX = 0.8;
 /** 原件实测：手机 9 条、桌面 11 条；stage low 再降到 7。 */
 const FISH_HIGH = 11;
 const FISH_LOW = 7;
@@ -114,7 +123,7 @@ function next<T>(list: readonly T[], value: T): T {
 }
 
 /** 创建一个完整 koi 池。 */
-function create(env: PartEnv): PartInstance {
+function create(env: PartEnv, opts: KoiOptions = {}): PartInstance {
   if (!env.canvas) throw new Error('koi-pond 需要 GL 画布');
 
   // Node 假 DOM 的 canvas 会禁止 addEventListener；three 构造期必须挂 contextlost。
@@ -143,17 +152,17 @@ function create(env: PartEnv): PartInstance {
   })();
 
   const S: KoiState = {
-    style: pick(STYLES, Q.get('style'), 'ink'),
-    mode: pick(MODES, Q.get('mode'), 'ripple'),
-    cam: pick(CAMS, Q.get('cam'), 'top'),
-    floor: pick(FLOORS, Q.get('floor'), 'pebble'),
-    rain: pick(RAINS, Q.get('rain'), 'dry'),
-    music: pick(MUSICS, Q.get('music'), 'off'),
+    style: pick(STYLES, Q.get('style') ?? opts.style ?? null, 'ink'),
+    mode: pick(MODES, Q.get('mode') ?? opts.mode ?? null, 'ripple'),
+    cam: pick(CAMS, Q.get('cam') ?? opts.cam ?? null, 'top'),
+    floor: pick(FLOORS, Q.get('floor') ?? opts.floor ?? null, 'pebble'),
+    rain: pick(RAINS, Q.get('rain') ?? opts.rain ?? null, 'dry'),
+    music: pick(MUSICS, Q.get('music') ?? opts.music ?? null, 'off'),
     fps: Q.has('fps') ? num('fps', 8) : 8,
     still: Q.has('still') && Q.get('still') !== '0',
     motion: Q.has('motion') && Q.get('motion') !== '0',
   };
-  const SEED = Q.has('seed') ? num('seed', env.seed) : env.seed;
+  const SEED = Q.has('seed') ? num('seed', opts.seed ?? env.seed) : (opts.seed ?? env.seed);
   const rng = mulberry32(SEED);
 
   let w = Math.max(1, env.width);
@@ -236,35 +245,23 @@ function create(env: PartEnv): PartInstance {
   const rt = (width: number, height: number, samples: number): THREE.WebGLRenderTarget =>
     new THREE.WebGLRenderTarget(width, height, { samples: GL2 ? samples : 0, depthBuffer: true });
 
-  // ── 池里的居民 ────────────────────────────────────────────────────────────
-  const fish: any[] = [];
-  const surface: any = new Surface(shared, {
-    season: pick(['spring', 'summer', 'autumn', 'winter'], Q.get('season'), seasonNow() as any) as any,
-    seed: SEED,
+  // ── 池里的居民：鱼群 / 浮萍生态各自一个模块 ─────────────────────────────
+  const fishSchool = new FishSchool({
+    scene: fishScene,
+    shadowScene,
+    shared,
+    rng,
+    count: clamp(Math.round(num('fish', MOBILE ? 9 : 11)), 1, 30),
   });
-  surfScene.add(surface.scene);
-  shadowScene.add(surface.shadow);
-
-  function addFish(n: number): void {
-    for (let i = 0; i < n; i += 1) {
-      const [variety, L, long] = RESIDENTS[fish.length % RESIDENTS.length] as [string, number, boolean?];
-      const k = new Koi({
-        variety,
-        L: L * (0.92 + rng() * 0.16),
-        long,
-        seed: rng() * 1000,
-        // 原件：整池范围 1.2 × 2；保持这个值，鱼不会一出生就挤在中心。
-        x: (rng() * 2 - 1) * 1.2,
-        y: (rng() * 2 - 1) * 2,
-        h: rng() * 6.28,
-        shared,
-      });
-      fish.push(k);
-      fishScene.add(k.body, k.fins);
-      shadowScene.add(k.sBody, k.sFins);
-    }
-  }
-  addFish(clamp(Math.round(num('fish', MOBILE ? 9 : 11)), 1, 30));
+  const fish = fishSchool.fish;
+  const surfaceEcology = new SurfaceEcology({
+    shared,
+    scene: surfScene,
+    shadowScene,
+    seed: SEED,
+    season: pick(['spring', 'summer', 'autumn', 'winter'], Q.get('season'), seasonNow() as any) as any,
+  });
+  const surface = surfaceEcology.surface;
 
   // ── 涟漪 ────────────────────────────────────────────────────────────────
   const ripples: Ripple[] = [];
@@ -288,7 +285,7 @@ function create(env: PartEnv): PartInstance {
     const H = Math.max(2, Math.round(h * view.pr));
     shared.uPaint.value = painted() ? 1 : 0;
     paint.u.uInk.value = inky() ? 1 : 0;
-    for (const k of fish) glaze(k.fins.material, painted());
+    fishSchool.setPainted(painted());
     paint.u.uGrain.value = h / 3.5;
     paint.u.uPx.value = H / 700;
     paint.u.uRes.value.set(W, H);
@@ -318,17 +315,9 @@ function create(env: PartEnv): PartInstance {
     grade.u.uRes.value.set(W, H);
   }
 
-  function reach(): number {
-    placeCamera(EL_MAX, 0);
-    cam.updateProjectionMatrix();
-    let rho = Math.max(view.hx, view.hy);
-    for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]] as const) {
-      const v = new THREE.Vector3(sx, sy, 0.5).unproject(cam).sub(cam.position).normalize();
-      const t = (-D - cam.position.z) / v.z;
-      rho = Math.max(rho, Math.hypot(cam.position.x + v.x * t, cam.position.y + v.y * t));
-    }
-    return Math.min(rho * 1.05, 14);
-  }
+  // ── 镜头：球面轨道独立成 CameraRig ───────────────────────────────────────
+  const rig = new CameraRig({ cam, view, depth: D, mode: S.cam, style: S.style });
+  const VP = new THREE.Matrix4();
 
   function resize(): void {
     if (w <= 0) w = 1;
@@ -346,8 +335,8 @@ function create(env: PartEnv): PartInstance {
     // 池底必须覆盖最斜视角能看到的范围；正上方只需要覆盖当前视口，再留 tilt 余量。
     const k = ((view.H + D) / view.H) * 1.18;
     let r = new THREE.Vector4(-view.hx * k, -view.hy * k, 2 * view.hx * k, 2 * view.hy * k);
-    if (angled()) {
-      const rho = reach();
+    if (rig.angled) {
+      const rho = rig.reach();
       r = new THREE.Vector4(-rho, -rho, 2 * rho, 2 * rho);
     }
     if (!bottomRT || Math.abs(r.z - view.rect.z) > 1e-3 || Math.abs(r.w - view.rect.w) > 1e-3) {
@@ -375,7 +364,7 @@ function create(env: PartEnv): PartInstance {
       causticRT.texture.wrapS = causticRT.texture.wrapT = THREE.ClampToEdgeWrapping;
       shared.uCaustic.value = causticRT.texture;
       shared.uCauRect.value.copy(r);
-      const sl = angled() ? 1024 : 512;
+      const sl = rig.angled ? 1024 : 512;
       const sw = r.z >= r.w ? sl : Math.round(sl * r.z / r.w);
       const sh = r.z >= r.w ? Math.round(sl * r.w / r.z) : sl;
       shadowRT?.dispose();
@@ -383,7 +372,7 @@ function create(env: PartEnv): PartInstance {
       shadowRT.depthBuffer = false;
       comp.u.uShadow.value = shadowRT.texture;
       comp.u.uShadowTexel.value.set(1 / sw, 1 / sh);
-      surface.layout(view.hx, view.hy, halfShort() / 1.5);
+      surfaceEcology.layout(view.hx, view.hy, halfShort() / 1.5);
     }
     const kx = Math.PI / (2 * view.hx * 1.15);
     const ky = Math.PI / (2 * view.hy * 1.15);
@@ -391,41 +380,6 @@ function create(env: PartEnv): PartInstance {
     comp.u.uSlosh.value.w = ky;
     renderer.setSize(w, h, false);
     sizeTargets();
-  }
-
-  // ── 镜头：和原件一样的球面轨道 ──────────────────────────────────────────
-  const camTarget = new THREE.Vector3(0, 0, -D * 0.55);
-  const orbit = { el: CAM_EL[S.cam], az: 0, elT: CAM_EL[S.cam], azT: 0 };
-  const VP = new THREE.Matrix4();
-
-  function angled(): boolean {
-    return S.style === 'real' && S.cam !== 'top';
-  }
-  function camDist(el: number): number {
-    return (view.H - camTarget.z) * (1 - 0.22 * Math.sin(el));
-  }
-  function placeCamera(el: number, az: number, tx = 0, ty = 0): void {
-    const R = camDist(el);
-    const s = Math.sin(el);
-    cam.position.set(
-      camTarget.x - R * s * Math.sin(az) + tx * view.H * 0.09,
-      camTarget.y - R * s * Math.cos(az) + ty * view.H * 0.09,
-      camTarget.z + R * Math.cos(el),
-    );
-    cam.up.set(Math.sin(az), Math.cos(az), 0);
-    cam.lookAt(camTarget);
-    cam.updateMatrixWorld();
-  }
-  function orbitStep(dt: number): void {
-    if (!angled()) {
-      orbit.elT = 0;
-      orbit.azT = Math.round(orbit.azT / 6.2832) * 6.2832;
-    } else if (S.cam === 'orbit' && !fingers.size) {
-      orbit.azT += dt * 0.025;
-    }
-    const e = Math.min(1, dt * 2.5);
-    orbit.el += (orbit.elT - orbit.el) * e;
-    orbit.az += (orbit.azT - orbit.az) * e;
   }
 
   function setFloor(): void {
@@ -448,7 +402,7 @@ function create(env: PartEnv): PartInstance {
   }
   function setCam(nextCam: CameraMode): void {
     S.cam = nextCam;
-    orbit.elT = CAM_EL[nextCam];
+    rig.setMode(nextCam);
     resize();
     dirty = true;
   }
@@ -456,7 +410,8 @@ function create(env: PartEnv): PartInstance {
     S.style = nextStyle;
     if (!painted()) S.still = false;
     // 换风格要让 glaze / target / 相机全部按新路径重建
-    for (const k of fish) glaze(k.fins.material, painted());
+    fishSchool.setPainted(painted());
+    rig.setStyle(nextStyle);
     resize();
     dirty = true;
   }
@@ -489,7 +444,7 @@ function create(env: PartEnv): PartInstance {
   }
 
   function padAt(x: number, y: number): any | null {
-    for (const p of surface.pads as any[]) {
+    for (const p of surfaceEcology.pads) {
       if (Math.hypot(p.x - x, p.y - y) < p.r) return p;
     }
     return null;
@@ -507,7 +462,7 @@ function create(env: PartEnv): PartInstance {
       ripple(x, y, 1);
       audio.plip(0.16);
     } else if (S.mode === 'feed') {
-      surface.dropPellets(x, y, 3 + Math.floor(Math.random() * 3), ripple);
+      surfaceEcology.dropPellets(x, y, 3 + Math.floor(Math.random() * 3), ripple);
       audio.plip(0.08, 900);
     } else {
       ripple(x, y, 0.35);
@@ -521,7 +476,7 @@ function create(env: PartEnv): PartInstance {
       ripple(x, y, 0.4 + Math.min(0.6, moved * 2));
       f.lx = x; f.ly = y;
     } else if (S.mode === 'feed' && (moved > 0.12 || time - f.lt > 0.25) && moved > 0.02) {
-      surface.dropPellets(x, y, 1 + Math.floor(Math.random() * 2), ripple);
+      surfaceEcology.dropPellets(x, y, 1 + Math.floor(Math.random() * 2), ripple);
       f.lx = x; f.ly = y; f.lt = time;
     }
   }
@@ -608,12 +563,12 @@ function create(env: PartEnv): PartInstance {
     const fingersIn = S.mode === 'ripple' && lastPointer.down ? [{ x: toWorld(lastPointer.x * view.w, lastPointer.y * view.h)[0], y: toWorld(lastPointer.x * view.w, lastPointer.y * view.h)[1] }] : [];
 
     const W = {
-      t: time, hx: view.hx, hy: view.hy, fish, pellets: surface.pellets, calls, fingers: fingersIn, startle, ripple,
+      t: time, hx: view.hx, hy: view.hy, fish, pellets: surfaceEcology.pellets, calls, fingers: fingersIn, startle, ripple,
       onEat: (x: number, y: number) => { ripple(x, y, 0.7); audio.gulp(); },
     };
-    for (const k of fish) k.update(dt, W);
+    fishSchool.update(dt, W);
     if (startle && startle.t !== time) startle = null;
-    surface.update({ dt, t: time, hx: view.hx, hy: view.hy, tilt: motion.tilt, ripples, ripple });
+    surfaceEcology.update({ dt, t: time, hx: view.hx, hy: view.hy, tilt: motion.tilt, ripples, ripple });
   }
 
   const _a = new THREE.Vector3();
@@ -641,7 +596,7 @@ function create(env: PartEnv): PartInstance {
   function render(key = true): void {
     uploadRipples();
     const [tx, ty] = motion.tilt;
-    placeCamera(orbit.el, orbit.az, tx, ty);
+    rig.place(rig.el, rig.az, tx, ty);
     VP.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse);
     comp.u.uInvVP.value.copy(VP).invert();
     comp.u.uCam.value.copy(cam.position);
@@ -712,7 +667,7 @@ function create(env: PartEnv): PartInstance {
     return {
       style: S.style, mode: S.mode, cam: S.cam, floor: S.floor, rain: S.rain, music: audio.music,
       fish: fish.length, time, frames, size: { w, h, dpr, lod },
-      volume: { ...view.rect }, orbit: { el: orbit.el, az: orbit.az },
+      volume: { ...view.rect }, orbit: { el: rig.el, az: rig.az },
       sound: audio.on, motion: motion.enabled,
     };
   }
@@ -733,7 +688,7 @@ function create(env: PartEnv): PartInstance {
       frames += 1;
       const dt = clamp(Number.isFinite(frame.dt) ? frame.dt : 0, 0, 0.1);
       if (dt > 0 && !(S.still && painted())) simulate(dt);
-      orbitStep(dt);
+      rig.step(dt, fingers.size > 0);
       if (inky()) inkDt += dt;
 
       lastPointer = { x: frame.pointer.x, y: frame.pointer.y, down: frame.pointer.down };
@@ -783,15 +738,7 @@ function create(env: PartEnv): PartInstance {
     setLod(nextLod: Lod): void {
       if (nextLod === lod) return;
       lod = nextLod;
-      const want = nextLod === 'low' ? FISH_LOW : FISH_HIGH;
-      if (want > fish.length) addFish(want - fish.length);
-      else if (want < fish.length) {
-        for (let i = fish.length - 1; i >= want; i -= 1) {
-          const k = fish.pop();
-          fishScene.remove(k.body, k.fins);
-          shadowScene.remove(k.sBody, k.sFins);
-        }
-      }
+      fishSchool.setCount(nextLod === 'low' ? FISH_LOW : FISH_HIGH);
       resize();
     },
 
@@ -880,6 +827,7 @@ function create(env: PartEnv): PartInstance {
       shadowRT?.dispose(); pigRT?.dispose(); causticRT?.dispose();
       bottomRT = fishRT = sceneRT = shadowRT = pigRT = causticRT = null;
       ink.free?.();
+      fishSchool.dispose();
       renderer.dispose();
     },
 
@@ -907,5 +855,13 @@ export const part: PartV2 = {
   expendable: false,
   create,
 };
+
+/**
+ * 工厂：模板注册表用 `makePart({ style:'ink', cam:'angle' })` 拿到一个固定参数的零件。
+ * 不传 opts 时完全保持 `/koi` 的 URL query 行为。
+ */
+export function makePart(opts: KoiOptions = {}): PartV2 {
+  return { ...part, create: (env) => create(env, opts) };
+}
 
 export default part;

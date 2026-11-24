@@ -12,7 +12,7 @@ const manifest = {
   contract: 'v1',
   claims: [{ resource: 'postprocess', mode: 'chain' }],
   requires: 'webgpu',
-  note: '原件（Jing0715-fer/rainy-night-webgpu-nextjs，4 文件）仅入库对照；本批次未装站，一字未用（D0）。',
+  note: '2026-11-24：完整源码（25 个 rainy-night 模块）已归档 _third_party/2026-11-24/rainy-night-webgpu；库内仍只保留 4 文件做对照，未搬入可分发库（代码无 LICENSE）。',
   provenance: {
     depth: 'D0',
     upstream: {

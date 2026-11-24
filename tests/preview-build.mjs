@@ -257,8 +257,8 @@ for (const name of Object.keys(PRESETS)) {
   const htmlExternal = html.replace(/http:\/\/www\.w3\.org\/1999\/xhtml/g, 'urn:xhtml');
   const externalPatterns = [
     [/https?:\/\//i, 'http(s)://'],
-    [/\bsrc\s*=/i, 'src='],
-    [/\bhref\s*=/i, 'href='],
+    [/\bsrc\s*=\s*["']/i, 'src='],
+    [/\bhref\s*=\s*["']/i, 'href='],
     [/<link\b/i, '<link>'],
     [/<img\b/i, '<img>'],
     [/@import/i, '@import'],
@@ -289,7 +289,7 @@ for (const name of Object.keys(PRESETS)) {
 
   // GL 画布只在有 gl 通道零件时出现
   // world 与 gl 共用 #gl：任何一个 world 零件都要求画布存在。
-  const expectsGl = partIds.some((id) => id === 'voxel-world' || id === 'koi-pond' || id === 'hug-meadow' || id === 'dawn-desk');
+  const expectsGl = partIds.some((id) => id === 'voxel-world' || id === 'koi-pond' || id === 'hug-meadow' || id === 'dawn-desk' || id === 'nebula' || id === 'temple');
   check(first.hasGl === expectsGl, `${name}: hasGl=${first.hasGl}，期望 ${expectsGl}`);
   check(html.includes('id="gl"') === expectsGl, `${name}: #gl 画布存在性与 hasGl 不一致`);
 

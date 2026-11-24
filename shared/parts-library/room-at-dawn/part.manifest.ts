@@ -1,6 +1,6 @@
-// 零件声明（L3 · 契约 v1）：room-at-dawn —— D0（原件在库，一字未用）。
-// 原件是 3D GI 烘焙房间（runBake spp=64 / halton / applyBake），只剩 main.js 且 6 个模块未归集；
-// /license 公文纸纹、/praise 热敏纸纹均为站点自写 Canvas 2D（PRD-REUSE §1.4 / F-R5 实测 D0）。
+// 零件声明（L3 · 契约 v1）：room-at-dawn —— 站点级 D0（内部已拆 9 个 WorldFeature）。
+// 2026-11-24：完整 src 已归集到 upstream/；feature 适配见 features.ts；装配冒烟见
+// docs/THIRD-PARTY-CODE-AUDIT-2026-11-24.md。站点级 PartV2 仍未接 world host。
 import type { PartManifest } from '../../contract/parts-registry';
 
 const manifest = {
@@ -12,7 +12,7 @@ const manifest = {
   contract: 'v1',
   claims: [{ resource: 'paper:texture', mode: 'shared' }],
   requires: 'none',
-  note: '原件（Leonxlnx/room-at-dawn，1/7 文件）仅入库对照；两站纸纹为自写 Canvas 2D，一字未用（D0）。',
+  note: '2026-11-24：完整 src 已归集到 upstream/，并拆出 9 个 WorldFeature（装配冒烟通过）；站点级 PartV2 仍未接 world host / 无槽位，files[] 保留旧入库子集的记录。',
   provenance: {
     depth: 'D0',
     upstream: {
