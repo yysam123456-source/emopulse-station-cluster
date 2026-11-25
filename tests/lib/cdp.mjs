@@ -430,10 +430,18 @@ export async function launch(options = {}) {
   };
 
   session.close = async () => {
+    // 先让浏览器自己收子进程：Browser.close 比只 taskkill 父进程可靠。
+    try { await Promise.race([session.send('Browser.close'), sleep(2000)]); } catch { /* 已关 */ }
     try { ws.close(); } catch { /* 已关 */ }
     // Windows 上 Edge 会再拉一批子进程；只 kill 父进程会留下 msedge.exe 和 profile 锁。
+    // 父进程先退出时 `/T` 会找不到树，所以再按唯一 profile 扫一遍命令行兜底。
     if (process.platform === 'win32' && proc.pid) {
-      try { spawnSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], { stdio: 'ignore' }); } catch { /* 已退出 */ }
+      try { spawnSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], { stdio: 'ignore', timeout: 8000 }); } catch { /* 已退出 */ }
+      try {
+        const needle = profile.replace(/'/g, "''");
+        const ps = `Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -like '*${needle}*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`;
+        spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', ps], { stdio: 'ignore', timeout: 10000 });
+      } catch { /* 没有可扫的 */ }
     } else {
       try { proc.kill(); } catch { /* 已退出 */ }
     }

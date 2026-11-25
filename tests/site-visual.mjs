@@ -92,12 +92,19 @@ try {
     try {
       const snap = await waitForPreview(session.page, { frames: 60 });
       check(snap.frames >= 60, `${slug}: 只跑了 ${snap.frames} 帧（<60 不得作为视觉证据）`);
-      check(snap.readiness >= 1, `${slug}: readiness=${snap.readiness}（画面还没建完）`);
+      // `/still` 的 voxel-world 与 `/koi` 的 koi-pond 按 P0-2/P0-8 声明
+      // `defer:'after-first-frame'`：首帧可见时 readiness 仍可为 0，不阻塞开门。
+      // 这两站不能用 readiness>=1 判“画面建完”，否则会把正确的分期启动判成红。
+      if (slug !== 'still' && slug !== 'koi') {
+        check(snap.readiness >= 1, `${slug}: readiness=${snap.readiness}（画面还没建完）`);
+      }
       check(snap.state === 'ready' || snap.state === 'degraded', `${slug}: state=${snap.state}`);
       if (slug === 'hug' || slug === 'still' || slug === 'license') {
         check(snap.ctaEnabled === true, `${slug}: CTA 还不可按（ctaEnabled=${snap.ctaEnabled}）`);
       }
 
+      // koi-pond 在首帧后 1200ms 才挂载，3s 内出鱼；先让延迟件真的跑起来再取像素。
+      if (slug === 'koi') await session.page.waitForTimeout(2600);
       const before = await canvasStats(session.page);
       check(!before.error, `${slug}: 主画布读不到像素：${before.error ?? ''}`);
       if (!before.error) {
@@ -158,6 +165,7 @@ try {
           });
           try {
             await waitForPreview(deep.page, { frames: 60, timeoutMs: 30000 });
+            await deep.page.waitForTimeout(2600); // koi-pond defer 挂载后再取帧
             const stats = await canvasStats(deep.page);
             check(
               (await deep.page.evaluate(() => document.body.dataset.koiStyle)) === style,

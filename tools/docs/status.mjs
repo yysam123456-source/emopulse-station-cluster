@@ -12,7 +12,7 @@
 //   · 孤儿：不出现在任何 STATIONS / PRESETS / TEMPLATES 的 parts 里。
 //   · README / bench：目录下是否存在 README.md / bench.mjs。
 //
-// 只放结构事实。健康度（帧率、加载时间、阻断数）不在这里，见 `docs/review-2026-11-24/REVIEW-2026-11-24.md`。
+// 只放结构事实。当前健康度与门见 `docs/HANDOFF.md` §0 / `docs/DECISIONS.md`「当前验证门」；评审基线仍见 `docs/review-2026-11-24/REVIEW-2026-11-24.md`。
 //
 // 用法：node tools/docs/status.mjs   （或 npm run docs:status）
 // 零依赖：只 import 仓库自己的构建脚本（它们已依赖 devDependencies 里的 esbuild）。不写 dist/。
@@ -85,7 +85,7 @@ const out = (s = '') => lines.push(s);
 out('# 结构事实表（脚本生成）');
 out();
 out('> **脚本生成，勿手改**；`npm run docs:status` 重新生成（脚本是 `tools/docs/status.mjs`）。');
-out('> 只放结构事实，健康度见评审报告 [`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md)。');
+out('> 只放结构事实；当前健康度与验证门见 [`HANDOFF.md`](./HANDOFF.md) §0 / [`DECISIONS.md`](./DECISIONS.md)「当前验证门」，评审基线见 [`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md)。');
 out();
 out('口径：');
 out();
@@ -209,13 +209,13 @@ out();
 out('## 6. npm script 事实（读 `package.json`）');
 out();
 out(`- 仍指向 v1 构建器 \`${V1_BUILDER}\` 的 script（${v1Scripts.length} 个）：${v1Scripts.map((s) => `\`${s}\``).join(' ')}。产物写 \`dist/<id>.html\`，与新体系不兼容。`);
-out(`- 依赖 \`tests/lib/browser.mjs\` 的 script（${browserScripts.length} 个）：${browserScripts.map((s) => `\`${s}\``).join(' ')}。\`browser.mjs\` 只认 macOS 的 playwright 缓存路径，其它机器上跑不了；\`verify:field\` 在无浏览器时以 exit 2 明确跳过，不再假装通过。`);
+out(`- 依赖 \`tests/lib/browser.mjs\` 的 script（${browserScripts.length} 个）：${browserScripts.map((s) => `\`${s}\``).join(' ')}。2026-11-25 起 \`browser.mjs\` 已换成零依赖 CDP（\`tests/lib/cdp-browser.mjs\`），Windows/macOS/Linux 只要本机有 Edge/Chrome 即可跑；各门 \`launch()\` 只起一个浏览器，\`close()\` 收整棵进程树。`);
 out(`- \`verify:stage\` 会由 \`tests/stage-mutation.mjs\` 原地改写 \`shared/stage/stage.ts\` 后还原；有人并发施工时不要跑。`);
 out();
 
 out('---');
 out();
-out(`健康度与路线依据：[\`review-2026-11-24/REVIEW-2026-11-24.md\`](./review-2026-11-24/REVIEW-2026-11-24.md) · 权威链：[\`README.md\`](./README.md)`);
+out(`当前健康度与路线：[\`HANDOFF.md\`](./HANDOFF.md) §0 · 验证门：[\`DECISIONS.md\`](./DECISIONS.md)「当前验证门」 · 评审基线：[\`review-2026-11-24/REVIEW-2026-11-24.md\`](./review-2026-11-24/REVIEW-2026-11-24.md)`);
 out();
 
 writeFileSync(OUT, `${lines.join('\n')}\n`, 'utf8');

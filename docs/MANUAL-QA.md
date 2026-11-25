@@ -1,12 +1,12 @@
 # MANUAL-QA — 四站手测协议
 
-> 自动化覆盖（2026-11-24 实测口径：Windows 11 + 无头 Edge + 无 playwright，见 [`review-2026-11-24/arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §1）：`preview-build` 811 · `site-build` 119 · `clock` 5 项里 2 项红。`paper-visual` / `field-visual` / `tide-visual` / `site-fingerprint` / `site-dom` / `license-ritual` / `license-stay` / `input` 都依赖 `tests/lib/browser.mjs`，本机不可跑，断言数未经实测。**本文仍负责它们测不到的"这站能不能给人看"**——判据要可执行、可复现、可对照截图，不靠形容词。
+> 自动化覆盖（2026-11-25 当前口径：Windows 11 + 单个无头 Edge + 零依赖 CDP，见 `tests/lib/cdp-browser.mjs`）：`preview-build` 809 · `site-build` 132 · `clock` 5/5 · `site-fingerprint` 4/4；`paper-visual` / `field-visual` / `site-dom` / `license-ritual` / `license-stay` / `input` 与新增的 `license-mobile` / `hug-release` / `entry-mobile` / `menu-mobile` / `still-takeaway` / `koi-keep` / `a2-*` 均在本机跑通。**本文仍负责它们测不到的"这站能不能给人看"**——判据要可执行、可复现、可对照截图，不靠形容词。
 >
 > **总时长：四站 ≤ 40 分钟**（实测预算：前置 2 分钟 + 每站 3 分钟 + 记录 6 分钟 ≈ 20 分钟，留一倍余量）。
 >
 > **判据只有两种形态**：`是/否`，或一个**可量阈值**。**任何"看起来/感觉/差不多"都不合格**，包括"看起来不错"。
 
-### 2026-11-24 实测对照
+### 2026-11-24 实测对照（历史快照，不是当前状态）
 
 [`review-2026-11-24/ux-sites/WALKTHROUGH.md`](./review-2026-11-24/ux-sites/WALKTHROUGH.md) §3/§4 实机走查：**四站没有一站全绿**——`/license` 卡 G1/G7，`/hug` 卡 G7/G8，`/still` 卡 G7/G8，`/koi` 卡 G1/G5/G7。与实现冲突的条目：
 

@@ -49,6 +49,7 @@ export interface PreviewConfig {
 
 /** boot() 的返回值，同时挂到 globalThis.__preview 上供 CDP / bench 驱动。 */
 export interface PreviewHandle {
+  /** 当前舞台；调参重建后仍是同一个句柄，读到的是新舞台。 */
   readonly stage: Stage;
   readonly config: PreviewConfig;
   /** 读一帧快照（不含任何内部对象引用，便于跨进程序列化） */
@@ -66,6 +67,9 @@ export interface PreviewHandle {
   /** 模态 UI（Esc 菜单）开关期间，画布上的指针也不转发（冗余防线，见 pointerdown 注释） */
   setModal(open: boolean): void;
 }
+
+/** 生成器产出的「参数 → 零件实例」工厂；Studio 的消息走这里重建零件，不重载文档。 */
+export type MakeParts = (values?: Record<string, unknown> | null) => readonly PartV2[];
 
 /** 快照结构（与 stage 的只读视图同源，便于测试断言）。 */
 export interface PreviewSnapshot {
@@ -102,7 +106,7 @@ function requireElement<T extends HTMLElement>(id: string): T {
  * @param config 生成期写死的配置
  * @returns 句柄；启动失败返回 null
  */
-export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHandle | null {
+export function boot(parts: readonly PartV2[], config: PreviewConfig, makeParts?: MakeParts): PreviewHandle | null {
   const canvas = requireElement<HTMLCanvasElement>('stage');
   const dbg = requireElement<HTMLElement>('dbg');
   const errBox = document.getElementById('boot-error');
@@ -144,22 +148,28 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
     });
   }
 
+  /**
+   * 建一个舞台。参数重建时不复用旧 stage：零件实例、world 几何、deferred 定时器都绑定在
+   * 旧 stage 上，复用会让「结构参数」变成半新半旧。重建的是舞台，不是整个文档。
+   */
+  const buildStage = (nextParts: readonly PartV2[]): Stage => createStage({
+    canvas,
+    glCanvas,
+    parts: nextParts,
+    biome: config.biome,
+    seed: config.seed,
+    budgetMs: config.budgetMs,
+    // 只声明了 requires 的零件由装配器自己判能力；这里不重复探测
+    glBlend: config.glBlend === null ? undefined : config.glBlend,
+    reducedMotion:
+      typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false,
+  });
+
   let stage: Stage;
   try {
-    stage = createStage({
-      canvas,
-      glCanvas,
-      parts,
-      biome: config.biome,
-      seed: config.seed,
-      budgetMs: config.budgetMs,
-      // 只声明了 requires 的零件由装配器自己判能力；这里不重复探测
-      glBlend: config.glBlend === null ? undefined : config.glBlend,
-      reducedMotion:
-        typeof window.matchMedia === 'function'
-          ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          : false,
-    });
+    stage = buildStage(parts);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (errBox) {
@@ -176,14 +186,36 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
   for (const part of parts) layerOf.set(part.id, part.layer);
 
   // 模板画质：`?quality=low|normal|high`。这是产品页的显式选择，不替代预算 governor；
-  // 预算仍会在此基础上继续降，直到能跑。
+  // 预算仍会在此基础上继续降，直到能跑。重建舞台后要重新应用，否则调参一次就把档位丢了。
+  let quality = 'high';
   try {
-    const quality = new URLSearchParams(location.search).get('quality');
+    quality = new URLSearchParams(location.search).get('quality') ?? 'high';
+  } catch {
+    // 假 DOM 下没有 location.search；保持默认。
+  }
+  const applyQuality = (): void => {
     if (quality === 'low') stage.setRenderScale(0.7);
     else if (quality === 'normal') stage.setRenderScale(0.85);
     else if (quality === 'high') stage.setRenderScale(1);
-  } catch {
-    // 假 DOM 下没有 location.search；保持默认。
+  };
+  applyQuality();
+
+  /**
+   * 用同一块画布重建舞台（不重载 iframe / 文档）。
+   *
+   * 结构参数（scene / style / hall）不是 uniform，旧零件无法热改；先 dispose 旧舞台，
+   * 再用同一套 canvas + 新参数造零件。旧 stage 的 deferred timer 由 dispose 清掉。
+   */
+  function rebuild(nextParts: readonly PartV2[]): void {
+    try {
+      stage.dispose();
+    } catch {
+      // dispose 失败不阻断重建；旧 WebGL 资源最坏情况由新 renderer 的 context 接管。
+    }
+    stage = buildStage(nextParts);
+    applyQuality();
+    stage.setPointer(nx, ny, down);
+    if (errBox) errBox.hidden = true;
   }
 
   // 预览页里的按钮只声明「要对世界说哪个动词」，不把站点业务塞进宿主。
@@ -333,7 +365,7 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
   }
 
   const handle: PreviewHandle = {
-    stage,
+    get stage(): Stage { return stage; },
     config,
     tap(tapX?: number, tapY?: number): void {
       if (typeof tapX === 'number' && Number.isFinite(tapX)) nx = Math.min(1, Math.max(0, tapX));
@@ -368,6 +400,43 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
       };
     },
   };
+
+  // Studio → iframe：参数消息。只接受父窗口；重建舞台，不重载文档。
+  // 这是产品化的关键一条：拖滑块时 iframe 不该整页重载，否则每松一次手都丢一帧画面。
+  if (typeof window !== 'undefined' && makeParts) {
+    window.addEventListener('message', (event: MessageEvent) => {
+      if (event.source !== window.parent) return;
+      const data = event.data as { type?: string; values?: Record<string, unknown>; value?: unknown } | null;
+      if (!data || typeof data !== 'object') return;
+      if (data.type === 'requestHtml') {
+        // file:// 打开 Studio 时 fetch 读不了同目录 HTML；iframe 自己把当前页序列化给父窗口，
+        // Studio 再把参数 shim 注入后下载。只回给父窗口，不向任意 opener 暴露。
+        try {
+          const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+          event.source?.postMessage({ type: 'exportHtml', html }, event.origin === 'null' ? '*' : event.origin);
+        } catch {
+          // 序列化失败时让 Studio 走 fetch 的错误提示。
+        }
+        return;
+      }
+      if (data.type === 'quality' && typeof data.value === 'string') {
+        quality = data.value;
+        applyQuality();
+        return;
+      }
+      if (data.type !== 'params' || !data.values || typeof data.values !== 'object') return;
+      try {
+        rebuild(makeParts(data.values));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (errBox) {
+          errBox.hidden = false;
+          errBox.textContent = `调参重建失败：${message}`;
+        }
+        if (document.body) document.body.dataset.state = 'failed';
+      }
+    });
+  }
 
   // 供 CDP / bench 从页面外部驱动与取证（同时也是测试的注入点）
   (globalThis as unknown as { __preview?: PreviewHandle }).__preview = handle;

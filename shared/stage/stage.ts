@@ -77,6 +77,8 @@ export interface StageStats {
   readonly frameMs: number;
   /** 配置声明的总开销（毫秒） */
   readonly budgetCostMs: number;
+  /** 配置申报的静态总开销（毫秒）—— 与 budgetCostMs 分开，避免把实测当申报 */
+  readonly declaredCostMs: number;
   readonly budgetMs: number;
   /** 最近一帧实际绘制的零件数（含被挂起前） */
   readonly drawn: number;
@@ -384,11 +386,25 @@ export function createStage(options: StageOptions): Stage {
   let fastFrames = 0;
   let lastScaleAt = 0;
 
+  /**
+   * 逐件实测耗时（EWMA）。`def.costMs` 是装配期的静态估算，用来决定「装不装/降不降档」；
+   * 这里回答「装完以后实际是多少」——它是预算红警与后续 governor 的唯一可信口径。
+   * 键是零件 id；同一 id 不允许重复装配，所以不需要按实例分桶。
+   */
+  const measuredMs = new Map<string, number>();
+  const EWMA_ALPHA = 0.2;
+  function recordCost(id: string, sampleMs: number): void {
+    const prev = measuredMs.get(id);
+    const next = prev === undefined ? sampleMs : prev * (1 - EWMA_ALPHA) + sampleMs * EWMA_ALPHA;
+    measuredMs.set(id, next);
+  }
+
   const stats: StageStats = {
     get fps() { return fps; },
     get cpuMs() { return cpuMs; },
     get frameMs() { return frameMs; },
     get budgetCostMs() { return totalCost(); },
+    get declaredCostMs() { return declaredCost(); },
     get budgetMs() { return budgetMs; },
     get drawn() { return drawn; },
     get frames() { return frame; },
@@ -435,9 +451,20 @@ export function createStage(options: StageOptions): Stage {
    *
    * @returns 毫秒
    */
-  function totalCost(): number {
+  function declaredCost(): number {
     let sum = 0;
     for (const m of mounted) sum += m.def.costMs;
+    return sum;
+  }
+
+  function totalCost(): number {
+    let sum = 0;
+    for (const m of mounted) {
+      // 有实测就用实测；还没跑过帧（或假 ctx 计时为 0）的零件退回静态估算，
+      // 否则首帧 dbg 是 0、smoke 的申报告警也会被误读成“没有成本”。
+      const measured = measuredMs.get(m.def.id);
+      sum += measured !== undefined && measured > 0 ? measured : m.def.costMs;
+    }
     return sum;
   }
 
@@ -868,6 +895,7 @@ export function createStage(options: StageOptions): Stage {
       const instance = m.instance;
 
       if (m.channel === 'gl' || m.channel === 'world') {
+        const partStarted = now();
         try {
           instance.update?.(f);
           instance.draw(f);
@@ -877,6 +905,7 @@ export function createStage(options: StageOptions): Stage {
             m.channel === 'world' && m.space === 'subject' ? worldRect : null,
           );
           drawn += 1;
+          recordCost(m.def.id, now() - partStarted);
         } catch (error) {
           m.broken = true;
           degraded.push({
@@ -890,12 +919,14 @@ export function createStage(options: StageOptions): Stage {
       }
 
       try {
+        const partStarted = now();
         instance.update?.(f);
         ctx.save();
         ctx.globalCompositeOperation = m.blend as GlobalCompositeOperation;
         instance.draw(f);
         ctx.restore();
         drawn += 1;
+        recordCost(m.def.id, now() - partStarted);
       } catch (error) {
         // 零件炸了不许拖垮整场：隔离它、记一笔、继续画别的
         try { ctx.restore(); } catch { /* 已经 restore 过 */ }

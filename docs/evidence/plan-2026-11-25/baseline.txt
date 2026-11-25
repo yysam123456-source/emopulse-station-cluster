@@ -1,0 +1,44 @@
+emopulse_station_cluster — 2026-11-25 执行基线
+
+captured_at: 2026-11-25 15:29:42
+branch: p0/2026-11-25
+head: ec96acba9d3f745091650c0563734badf6895e2c
+origin_main: 7f83663ad005c47116e07bbb72207edff98e2282
+node: v22.23.2
+edge: C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
+
+git status --short（前 80 行）:
+ M .github/workflows/ci.yml
+ M README.md
+ M docs/HANDOFF.md
+ M docs/STATUS.md
+ M package.json
+ M shared/parts/hug-meadow/index.ts
+ M shared/product/build-templates.mjs
+ M shared/product/studio.mjs
+ M shared/sites/build.mjs
+ M shared/sites/shell.ts
+ M shared/stage/preview/build.mjs
+ M shared/stage/preview/host.ts
+ M shared/stage/stage.ts
+ M sites/koi/attach.ts
+ M tests/lib/browser.mjs
+ M tests/lib/cdp-browser.mjs
+ M tests/lib/cdp.mjs
+ M tests/license-stay.mjs
+ M tests/preview-build.mjs
+ M tests/site-fingerprint.mjs
+ M tests/site-visual.mjs
+ M tools/docs/status.mjs
+?? docs/evidence/plan-2026-11-25/
+?? tests/a2-export.mjs
+?? tests/a2-studio.mjs
+?? tests/entry-mobile.mjs
+?? tests/hug-release.mjs
+?? tests/koi-keep.mjs
+?? tests/license-mobile.mjs
+?? tests/menu-mobile.mjs
+?? tests/probe-still-resize.mjs
+?? tests/readiness-protocol.mjs
+?? tests/state-source.mjs
+?? tests/still-takeaway.mjs

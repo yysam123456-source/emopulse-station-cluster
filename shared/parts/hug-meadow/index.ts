@@ -55,8 +55,8 @@ const TRAVEL_SECONDS = 10;
 /** 原站固定种子；这里用 env.seed 驱动，同 seed 复现。 */
 const BASE_SEED = 31121;
 
-/** 背景色 / 雾色：深橄榄绿，不是暖黄昏。 */
-const BG = '#172c29';
+/** 背景色 / 雾色：黄昏暖褐，不是冷橄榄绿。 */
+const BG = '#24160d';
 
 /** 种子顶点着色器：与原站同构，只把随机源换成实例属性。 */
 const SEED_VERTEX = `
@@ -127,11 +127,13 @@ const BG_FRAGMENT = `
 varying vec2 vUv;
 uniform float uLong;
 void main() {
-  vec3 c = mix(vec3(0.007, 0.021, 0.018), vec3(0.055, 0.095, 0.065), vUv.y);
+  // 黄昏暖褐：上暗下暖，右下角一团低太阳的橘光。原来的深橄榄绿把全帧拉到 139°，
+  // 与产品规格的 35–55° 相反；颜色是构图的一部分，不是后期滤镜。
+  vec3 c = mix(vec3(0.012, 0.008, 0.004), vec3(0.24, 0.172, 0.064), vUv.y);
   // 40s 后太阳缓慢下落：高光位置左移、整体变暗。只改背景，不碰种子的放飞因果。
   vec2 glowAt = vec2(0.72 - 0.20 * uLong, 0.69 - 0.13 * uLong);
   float glow = exp(-length((vUv - glowAt) * vec2(2.0, 2.5)) * 6.0);
-  c += vec3(0.35, 0.27, 0.1) * glow * (1.0 - 0.38 * uLong);
+  c += vec3(0.55, 0.34, 0.12) * glow * (1.0 - 0.38 * uLong);
   gl_FragColor = vec4(c, 1.0);
   #include <colorspace_fragment>
 }
@@ -292,7 +294,7 @@ function create(env: PartEnv): PartInstance {
   scene.fog = new THREE.FogExp2(BG, 0.046);
 
   const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 80);
-  const hemi = new THREE.HemisphereLight(0xeedab0, 0x152e22, 3);
+  const hemi = new THREE.HemisphereLight(0xffdfb0, 0x24160d, 3);
   scene.add(hemi);
 
   const geometries = new Set<THREE.BufferGeometry>();
@@ -351,10 +353,10 @@ function create(env: PartEnv): PartInstance {
   }
 
   function buildMeadow(): void {
-    const stemMat = material(new THREE.MeshStandardMaterial({ color: '#6d8051', roughness: 1 }));
+    const stemMat = material(new THREE.MeshStandardMaterial({ color: '#6f643a', roughness: 1 }));
     const headMat = material(new THREE.MeshStandardMaterial({ color: '#76664b', roughness: 1 }));
     const leafMat = material(new THREE.MeshStandardMaterial({
-      color: '#334c2a',
+      color: '#4a3f1f',
       side: THREE.DoubleSide,
       roughness: 1,
     }));

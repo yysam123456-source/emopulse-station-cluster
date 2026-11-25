@@ -71,7 +71,7 @@ function render() {
   .badge{font-size:10px;letter-spacing:.08em;color:var(--accent);border:1px solid #2b5f55;border-radius:999px;padding:4px 8px;white-space:nowrap}
   .badge.over{color:#ff8b8b;border-color:#7a2a2a;background:rgba(120,20,20,.18)}
   .badge.warn{color:var(--warm);border-color:#6b4a24}
-  #quality{background:#0a0f16;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:12px ui-monospace,Menlo,monospace}
+  #quality,#platform{background:#0a0f16;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:12px ui-monospace,Menlo,monospace}
   .frame{position:relative;aspect-ratio:16/9;background:#040609;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#040609}
   .controls{padding:12px 18px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
@@ -97,6 +97,11 @@ function render() {
     <div class="meta">${templates.length} 个模板 · 单 HTML · 零外部请求 · 参数走 query</div>
   </div>
   <div class="meta" style="text-align:right">
+    <label for="platform">Platform </label>
+    <select id="platform" aria-label="Platform budget">
+      <option value="toy">Toy · 1 MB</option>
+      <option value="standalone">Standalone · 5 MB</option>
+    </select>
     <label for="quality">Quality </label>
     <select id="quality" aria-label="Quality">
       <option value="high">High</option>
@@ -113,10 +118,16 @@ function render() {
 </footer>
 <script>
 const TEMPLATES = ${payload};
+const INITIAL_PLATFORM = ${JSON.stringify(manifest.platform || 'toy')};
 const grid = document.getElementById('grid');
 const quality = document.getElementById('quality');
+const platform = document.getElementById('platform');
 let qualityValue = quality?.value || 'high';
-const refreshers = [];
+let platformValue = INITIAL_PLATFORM;
+if (platform) platform.value = INITIAL_PLATFORM;
+const LIMITS = { toy: 1048576, standalone: 5 * 1048576 };
+const badgeUpdaters = [];
+const frames = [];
 
 function queryFor(t, values) {
   const q = new URLSearchParams();
@@ -139,8 +150,25 @@ for (const t of TEMPLATES) {
 
   const head = document.createElement('div');
   head.className = 'card-head';
-  const over = Boolean(t.overBudget);
-  head.innerHTML = '<div><h2>' + t.name + '</h2><div class="meta">' + t.id + ' · preset ' + t.preset + ' · ' + (t.bytes / 1024).toFixed(1) + ' KB / gzip ' + (t.gzipBytes / 1024).toFixed(1) + ' KB · limit ' + ((t.budgetLimit || 1048576) / 1024).toFixed(0) + ' KB<br>' + t.parts.join(' + ') + '</div></div><span class="badge ' + (over ? 'over' : '') + '">' + (over ? 'OVER BUDGET · ' : '') + (t.hasGl ? 'GL' : '2D') + ' · READY</span>';
+  const headCopy = document.createElement('div');
+  const title = document.createElement('h2');
+  title.textContent = t.name;
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  headCopy.append(title, meta);
+  const badge = document.createElement('span');
+  badge.className = 'badge';
+  head.append(headCopy, badge);
+
+  const updateBadge = () => {
+    const limit = LIMITS[platformValue] || LIMITS.toy;
+    const over = t.gzipBytes > limit;
+    meta.innerHTML = t.id + ' · preset ' + t.preset + ' · ' + (t.bytes / 1024).toFixed(1) + ' KB / gzip ' + (t.gzipBytes / 1024).toFixed(1) + ' KB · limit ' + (limit / 1024).toFixed(0) + ' KB<br>' + t.parts.join(' + ');
+    badge.className = 'badge ' + (over ? 'over' : '');
+    badge.textContent = (over ? 'OVER BUDGET · ' : '') + (t.hasGl ? 'GL' : '2D') + ' · READY';
+  };
+  updateBadge();
+  badgeUpdaters.push(updateBadge);
 
   const frame = document.createElement('div');
   frame.className = 'frame';
@@ -197,8 +225,9 @@ for (const t of TEMPLATES) {
       input.addEventListener('input', () => {
         values[p.key] = Number(input.value);
         output.textContent = input.value;
-        update();
+        // 拖动只更新读数；change 才提交一次参数，避免每像素都重建零件。
       });
+      input.addEventListener('change', () => { update(); });
       row.append(input, output);
       wrap.appendChild(row);
     }
@@ -224,7 +253,7 @@ for (const t of TEMPLATES) {
   });
   const note = document.createElement('span');
   note.className = 'meta';
-  note.textContent = '参数防抖 180ms；Quality 对全部模板生效';
+  note.textContent = '参数防抖 250ms，postMessage 重建零件；Quality 对全部模板生效';
   actions.append(open, exportBtn, reset, note);
 
   // 导出：把当前参数**写死进单 HTML**，打开时不需要 Studio、也不发任何请求。
@@ -234,9 +263,31 @@ for (const t of TEMPLATES) {
     const original = exportBtn.textContent;
     exportBtn.textContent = '导出中…';
     try {
-      const res = await fetch(t.url + '?' + queryFor(t, values), { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      let html = await res.text();
+      let html;
+      try {
+        const res = await fetch(t.url + '?' + queryFor(t, values), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        html = await res.text();
+      } catch (fetchError) {
+        // file:// 直接打开 Studio 时 fetch 被浏览器拦；向 iframe 要它自己的 outerHTML。
+        // 渲染后的 DOM 会连同 boot 脚本一起回来，参数再由下面的 shim 内嵌。
+        if (!frameReady) throw fetchError;
+        html = await new Promise((resolve, reject) => {
+          const timer = window.setTimeout(() => {
+            window.removeEventListener('message', onHtml);
+            reject(new Error('iframe 序列化超时'));
+          }, 3000);
+          const onHtml = (event) => {
+            if (event.source !== iframe.contentWindow) return;
+            if (!event.data || event.data.type !== 'exportHtml' || typeof event.data.html !== 'string') return;
+            window.clearTimeout(timer);
+            window.removeEventListener('message', onHtml);
+            resolve(event.data.html);
+          };
+          window.addEventListener('message', onHtml);
+          iframe.contentWindow?.postMessage({ type: 'requestHtml' }, '*');
+        });
+      }
       const embedded = Object.assign({}, values, { quality: qualityValue, clean: '1' });
       // 把参数变成「下载文件自己的 query」：预览宿主/零件读 location.search 时，
       // 由这个极小的 URLSearchParams 垫片把 __EMBEDDED_PARAMS__ 合并进去。
@@ -269,25 +320,60 @@ for (const t of TEMPLATES) {
   grid.appendChild(card);
 
   let refreshTimer = 0;
-  const apply = () => {
+  let frameReady = false;
+  const urlFor = () => {
     const q = queryFor(t, values);
-    const url = t.url + (q ? '?' + q : '');
-    iframe.src = url;
+    return t.url + (q ? '?' + q : '');
+  };
+  const sendParams = () => {
+    if (!frameReady) return;
+    try {
+      iframe.contentWindow?.postMessage({ type: 'params', values: { ...values } }, '*');
+    } catch {
+      // 跨源/iframe 已销毁：下一次 load 会重新同步。
+    }
+  };
+  const sendQuality = () => {
+    if (!frameReady) return;
+    try {
+      iframe.contentWindow?.postMessage({ type: 'quality', value: qualityValue }, '*');
+    } catch {
+      // 同上
+    }
+  };
+  iframe.addEventListener('load', () => {
+    frameReady = true;
+    sendParams();
+    sendQuality();
+  });
+  const apply = () => {
+    const url = urlFor();
     open.href = url;
+    if (!frameReady) {
+      // 只有第一次装载写 src；之后参数走 postMessage，不重载整页。
+      iframe.src = url;
+      return;
+    }
+    sendParams();
   };
   update = () => {
-    // 拖动 range 时 250ms 防抖：不会每个 input 事件都重建 iframe。
+    // 拖动 range 时 250ms 防抖：不每个 input 事件都重建零件，松手后最多一次。
     window.clearTimeout(refreshTimer);
     refreshTimer = window.setTimeout(apply, 250);
   };
-  refreshers.push(apply);
+  frames.push({ sendParams, sendQuality });
   apply();
 }
 
 quality?.addEventListener('change', () => {
   qualityValue = quality.value;
-  // 全部模板一起换档；不重载 Studio，只重载各自的 iframe。
-  for (const refresh of refreshers) refresh();
+  // 画质是运行时参数，走 postMessage；不重载 Studio / iframe。
+  for (const frame of frames) frame.sendQuality();
+});
+
+platform?.addEventListener('change', () => {
+  platformValue = platform.value;
+  for (const updateBadge of badgeUpdaters) updateBadge();
 });
 </script>
 </body>

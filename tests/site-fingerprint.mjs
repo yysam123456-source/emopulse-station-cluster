@@ -132,7 +132,7 @@ try {
           state: 'n/a',
         };
       });
-      let grass = null;
+      // `hug/草` 的旧样本来自 field-l0，已撤销（见文件尾注）；这里不再保留死代码。
 
       // ── /koi 专有：网点结构性诊断（**记录项**，不作判定）──
       // 这条判据已撤销为记录项：它的「中间带」是相对 (min,max) 定义的，随字号/字重自我漂移
@@ -186,14 +186,6 @@ try {
         console.log(`  （记录项，不作判定）koi 中间灰阶 ${(dots.midRatio * 100).toFixed(1)}% · 半透明像素 ${dots.translucent}/${dots.total}`);
         rows.push({ slug: 'koi/网点', lstarP50: dots.paper, hue: 0, saturation: dots.midRatio, band: { min: 0, max: 15, why: '中间灰阶%' }, state: 'ready', frames: snapshot.frames, note: `墨 L* ${dots.ink.toFixed(1)}` });
       }
-      if (grass) {
-        const hueDiff = grass.gh - grass.dh;
-        const lightDiff = grass.gl - grass.dl;
-        check(grass.n > 500, `hug: 草像素太少（${grass.n}），运动分割失效 —— 这条断言没有辨别力`);
-        check(hueDiff >= 10, `hug: 草/地色相差 ${hueDiff.toFixed(1)}°（需 ≥10°）—— 同色相时草只靠明度撑形`);
-        check(Math.abs(lightDiff - 20.4) <= 2.5, `hug: 草/地明度差 ${lightDiff.toFixed(1)}（基线 20.4±2.5）—— 产品要求"加色相分离、不加明度对比"`);
-        rows.push({ slug: 'hug/草', lstarP50: grass.gl, hue: grass.gh, saturation: 0, band: { min: 40, max: 48, why: '草体' }, state: 'ready', frames: snapshot.frames, note: `地 ${grass.dh.toFixed(1)}°/L${grass.dl.toFixed(1)} · 差 ${hueDiff.toFixed(1)}°` });
-      }
     } finally {
       await session.close();
     }
@@ -212,69 +204,12 @@ for (const row of rows) {
 console.log('\n  取样约定（MANUAL-QA §8）：frames ≥ 60 之后取，**报告写明帧号**；持续运动的站写死 frames = 60，允许 ±0.05 漂移。');
 console.log('  为什么不写"画面稳定后"：/still 与 /koi 永远不会稳定 —— 写"稳定"等于没约定，下一个人还会取到另一帧。');
 
-// ── /hug 的草/地色相分离：**在只装 L0 的页面上量**（`field-l0`）──
-// 为什么不在站点页量：站点叠了 `pixel-post`，而它的**颗粒是动能颗粒**（24Hz 换相）——
-// 帧差法会把整屏颗粒都算成"草"，草类退化成全帧（实测色相差从 17° 掉到 2.7°）。
-// 这条判据测的是**地形调色板**，不是最终观感，所以样本该是纯 L0。
-const grassPage = path.join(REPO_ROOT, 'dist', 'preview', 'field-l0.html');
-if (existsSync(grassPage)) {
-  const { browser: browser2, close: close2 } = await launch({ headless: true });
-  try {
-    const session = await openFile(browser2, grassPage, { width: 1280, height: 720, dpr: 2 });
-    try {
-      await waitForPreview(session.page, { frames: 60, timeoutMs: 60000 });
-      const g = await session.page.evaluate(async () => {
-        const canvas = document.getElementById('stage');
-        const ctx = canvas.getContext('2d');
-        const { width, height } = canvas;
-        const y0 = Math.floor(height * 0.45);
-        const hh = height - y0;
-        const grab = () => ctx.getImageData(0, y0, width, hh).data;
-        const a = grab();
-        await new Promise((res) => setTimeout(res, 450));
-        const b = grab();
-        const srgb = (v) => { const x = v / 255; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
-        const L = (r2, g2, b2) => { const Y = 0.2126 * srgb(r2) + 0.7152 * srgb(g2) + 0.0722 * srgb(b2); return Y > 216 / 24389 ? 116 * Math.cbrt(Y) - 16 : (24389 / 27) * Y; };
-        const H = (r2, g2, b2) => {
-          const rn = r2 / 255; const gn = g2 / 255; const bn = b2 / 255;
-          const mx = Math.max(rn, gn, bn); const mn = Math.min(rn, gn, bn); const dd = mx - mn;
-          if (dd < 1e-6) return 0;
-          let h;
-          if (mx === rn) h = ((gn - bn) / dd) % 6;
-          else if (mx === gn) h = (bn - rn) / dd + 2;
-          else h = (rn - gn) / dd + 4;
-          h *= 60;
-          return h < 0 ? h + 360 : h;
-        };
-        const gr = []; const gd = [];
-        for (let i = 0; i < a.length; i += 8) {
-          const moved = Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]);
-          const lu = L(b[i], b[i + 1], b[i + 2]);
-          if (lu < 4) continue;
-          const hue = H(b[i], b[i + 1], b[i + 2]);
-          if (moved > 18) gr.push({ h: hue, l: lu });
-          else if (moved === 0) gd.push({ h: hue, l: lu });
-        }
-        const med = (arr, k) => { const v = arr.map((o) => o[k]).sort((p, q) => p - q); return v.length ? v[Math.floor(v.length / 2)] : 0; };
-        return { n: gr.length, gh: med(gr, 'h'), gl: med(gr, 'l'), dh: med(gd, 'h'), dl: med(gd, 'l') };
-      });
-      const hueDiff = g.gh - g.dh;
-      const lightDiff = g.gl - g.dl;
-      checks += 3;
-      if (g.n <= 500) failures.push(`hug: 草像素太少（${g.n}），运动分割失效 —— 这条断言没有辨别力`);
-      if (hueDiff < 10) failures.push(`hug: 草/地色相差 ${hueDiff.toFixed(1)}°（需 ≥10°）`);
-      // ★ 基线从 20.4 改为 **29.6**：样本换了（从"站点页"换成"只装 L0 的 field-l0 页"）——
-      //   因为站点页叠了动能颗粒，帧差法会把颗粒算成草。基线必须与样本同源，否则比的是两件事。
-      //   这条测的是**地形调色板**的相对关系（"加色相分离、不加明度对比"），样本就该是纯 L0。
-      if (Math.abs(lightDiff - 29.6) > 2.5) failures.push(`hug: 草/地明度差 ${lightDiff.toFixed(1)}（基线 29.6±2.5，field-l0 样本）`);
-      console.log(`  hug/草（field-l0 样本）：草 ${g.gh.toFixed(1)}° L${g.gl.toFixed(1)} · 地 ${g.dh.toFixed(1)}° L${g.dl.toFixed(1)} → 色相差 ${hueDiff.toFixed(1)}° / 明度差 ${lightDiff.toFixed(1)}`);
-    } finally {
-      await session.close();
-    }
-  } finally {
-    await close2();
-  }
-}
+// ── 不再用 field-l0 冒充 /hug 的草/地色相门 ──
+// 旧版拿 dist/preview/field-l0.html（field-ground）做样本，断言“草/地色相差 ≥10°、
+// 明度差 29.6±2.5”，却把结论写成 /hug。这两件事没有关系：/hug 的草甸是 hug-meadow，
+// field-l0 只是另一个零件的探针；frame-diff 还会随摆动相位漂。
+// 这个假门已移除；/hug 的真实画面由上面的全帧色相区间（28–65°）覆盖。
+// field-l0 的地形调色板改由 MANUAL-QA §8 目视记录，不再作断言。
 
 if (failures.length === 0) {
   console.log(`\nsite-fingerprint: PASS ${checks}/${checks}`);

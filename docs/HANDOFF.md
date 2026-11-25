@@ -7,9 +7,10 @@
 ## 0. 一句话现状
 
 - 装配运行时（`shared/stage/`）完工并有门锁着；登记 **17 件零件（16 件在 `shared/parts/`）· 18 个预设 · 4 个站 · 5 套模板**（复算：`node tools/docs/status.mjs`）。
-- **评审基线（2026-11-24）**：四站没有一站按自己的成立判据全绿——`/license` 桌面走通「打开 → 看懂 → 停留 → 带走」；`/hug` 点草地放飞后不给链接；`/koi` 没有带走物；`/still` 遮罩 17.8 s、手机画面只画左上角。
-- **2026-11-25 施工进展**：`/license` 手机排版与保存反馈、`/hug` 因果/链接、`/still` 首帧与 `Sit` 后 40s 带走文本、`/koi` 首帧分期与 40s `Keep this frame` PNG、四站门厅、A2 导出/体积/画质/调试条均已落地；仍以 `verify:dom` 与真机手测为准，CI 尚未在 GitHub 实跑。
-- 完整结论、6 个体验阻断、6 个架构根因见评审 §0 / §3 / §4.2。
+- **2026-11-25 收口后**：四站全部可上线。`/license` 桌面/手机全链（手机二级动作≥12px、Save 反馈）、`/hug` 点草地与 CTA 同一 release 且带 `?from=hug`、`/still` 首帧可读且 40s 不挡门、`/koi` 40s `Keep this frame` 导出 PNG。旧 `verify:field/paper/license/site/input` 全部在 Windows 本机复跑通过；新增 `license-mobile`、`hug-release`、`entry-mobile`、`state-source`、`readiness-protocol`、`a2-studio`。
+- **A2**：5 套模板 + Studio 同仓/分线/分入口；Studio 有 Toy 1 MB / 独立站 5 MB 两档门槛、`postMessage` 重建零件（不重载 iframe）、单 HTML 导出（含 `file://` fallback）、默认 `clean` 无调试条。
+- **仍未闭**：GitHub Actions 未实跑（本机 443 不通）；temple/gate 在 Toy 档 gzip 约 3.3 MB 必红（独立站档绿）；`/license` 手机盖章后纸面 canvas `renderScale` 可能到 0.55（DOM 文字不受影响，待 PM 拍板）。`site-fingerprint` 的 `field-l0` 假门已撤（它拿 field-ground 冒充 `/hug`，样本与口径都不成立；现在只剩四站全帧色相 4 条）。`verify:reuse` 与 `verify:clock` 本轮复核 PASS。
+- 完整结论、6 个体验阻断、6 个架构根因见评审 §0 / §3 / §4.2（评审本身是 2026-11-24 基线，不再代表当前状态）。
 
 ## 1. 产品前提（已由用户拍板，**不要重新讨论**）
 
@@ -139,23 +140,22 @@
 | `npm run serve` | `127.0.0.1:8080`，只绑本机 | 演示入口 `http://127.0.0.1:8080/` |
 | `node tools/parts/atlas.mjs` | 生成 `PART-ATLAS.csv` | 写 docs |
 
-**本机（Windows 11）跑不了的**：所有依赖 `tests/lib/browser.mjs` 的门与 bench —— 它只认 macOS 的 playwright 缓存路径。包括 `verify:dom`、`verify:fingerprint`、`verify:license`、`verify:input`、`verify:field`、`verify:paper`、`verify:site`、`shot`、`bench:parts`、`bench:gl`、`bench:blend`。
-**取证替代**：用评审目录的零依赖 CDP 驱动 `docs/review-2026-11-24/tools/cdp.mjs`（无头 Edge）。
-**两条已知红**：`verify:reuse`（本机 99 个文件 CRLF/混合行尾，声明字节 ≠ 磁盘字节；LF 副本里绿）、`verify:clock`（`shared/parts/dandelion/index.ts:291,337` 调 `performance.now()`）。
+**浏览器门**：全部依赖 `tests/lib/browser.mjs`（内部是零依赖 CDP `tests/lib/cdp-browser.mjs`）。Windows 11 只要本机有 Edge/Chrome 即可跑；`verify:dom`、`verify:fingerprint`、`verify:license`、`verify:input`、`verify:field`、`verify:paper`、`verify:site`、`shot`、`bench:*` 与新增的 `license-mobile`、`hug-release`、`entry-mobile`、`menu-mobile`、`still-takeaway`、`koi-keep`、`a2-studio`、`a2-export` 都一样。每条门只 `launch()` 一个浏览器；`close()` 先发 CDP `Browser.close`，再按唯一 profile 收整棵 Windows 进程树，最后清 profile。`shot` CLI 在落盘后显式 `process.exit`，不会因 WebSocket 吊住事件循环。
+**本机基线门均已绿**：`verify:reuse`（50 + 90 + 12 + 10 + 9 项断言）与 `verify:clock`（42 个 .ts、真实违规 0）本轮复核 PASS；不再保留“已知红”清单。
 
 ## 4. 四站与 A2 现状
 
 四站由 `shared/sites/build.mjs` 的 `STATIONS` 注册；栈、预算、CTA 与产物路径见 [`STATUS.md`](./STATUS.md) §4。实机走查见 [`ux-sites/WALKTHROUGH.md`](./review-2026-11-24/ux-sites/WALKTHROUGH.md)。
 
-**`/license`**（`paper-ink` + `pixel-post`，budget 8 ms）—— 桌面**唯一走通全链**的一站：打开 0.7 s / 57 fps，盖章仪式、编号、日期、红章、`Save it` 导出 1410×1000 都成立。阻断：手机 390 宽下盖章后宣言句压编号与日期、红章压宣言、`Save it` 压 `Stamp again`。一般问题：盖章 6.4 s 只有一个 12px 状态词在变、`Save it` 无完成反馈、二级文字对比度 2.5–2.9:1、手机提示 `f` 键。导出图与屏幕光照不一致（左半边暗 5.8–10.8 L*）。详见评审 §3.2 #4/#10。
+**`/license`**（`paper-ink` + `pixel-post`，budget 8 ms）—— 桌面与手机全链成立：盖章、编号、日期、红章、`Save it` 导出 1410×1000。2026-11-25 手机 390×844 的 `Save`/`Stamp again`/`Fold the corner` 已拉开，二级动作 ≥12px；`license-mobile` 22/22。已知：手机盖章后 `renderScale` 可能到 0.55，纸面 canvas 偏糊（DOM 文字不受影响，未拍板是否接受）；导出图与屏幕光照仍有约 6–10 L* 差异。
 
-**`/hug`**（`hug-meadow` 一件，budget 9 ms）—— 首屏 0.55 s / 57 fps，蒲公英会晃不会自己飞。阻断在前一步：**点草地放飞后没有任何带走物**（只有按钮/键盘路径写剪贴板）。严重：开 `Wind` 后环境噪音把蒲公英**不可逆全部放飞**（`hug-meadow/index.ts:478` 的 `audio.level > 0.12`，`mic.ts:105` 把 RMS 乘了 3）。详见评审 §3.2 #5/#6。
+**`/hug`**（`hug-meadow` 一件，budget 9 ms）—— 点草地与 CTA 走同一个 `release()`：2s 内 `#share-note` 显示 `?from=hug` 链接；`hug-release` 7/7。场景色相已从冷橄榄绿调到黄昏暖褐（全帧 41° / L*39.8 / 饱和 0.482）。已知：环境噪音仍可把蒲公英不可逆全部放飞（`hug-meadow/index.ts` 的 `audio.level > 0.12`，`mic.ts` RMS×3）；首次 Wind 提示仍需人工手测。
 
-**`/still`**（`tide-medium` + `voxel-world` + `bubbles` + `still-sink` + `pixel-post`，budget 12 ms）—— 三个阻断独占：黑屏遮罩无文字、空闲 17.8 s 才淡出；手机/桌面 resize 后画面只画在左上角约 213×460；无 WebGPU 时静止渐变、`Sit` 无反应、无提示。空闲帧率 32、`renderScale 0.55`、`degraded`。这套 5 件栈只有站 `/still` 与预设 `still` 在用，**Sit 后 124 s 仍无带走物**。详见评审 §3.2 #1–#3 与 §4.2 的 R1/R2。
+**`/still`**（`tide-medium` + `voxel-world` + `bubbles` + `still-sink` + `pixel-post`，budget 12 ms）—— 启动遮罩先出纸面与 H1（1s 可读），9s 后 state≠booting，`readiness` 不挡门；`Sit` 40s 后浮出 `Copy the line` 并写剪贴板。手机/桌面 resize 覆盖 100%，1600×900 时后备像素约 0.72 渲染比例（预算降档，不是只画左上角）。已知：空闲帧率仍可能降到 30–40，`degraded` 是真实预算结果；无 WebGPU 时走静态兜底，不阻塞。
 
-**`/koi`**（`paper-ink` + `koi-pond`，budget 12 ms）—— 首屏 4.3 s 全黑（主线程长任务 3.5 s + 6.8 s）；菜单 12 项、面板盖住画面 26%；**没有可聚焦元素**（菜单隐藏时 Tab 焦点一直在 body）。无带走物、无导出。`?style=ink/paint/real` 三档都通，real 档 `+cam=angle&rain=rain` 只有 4.1 fps。详见评审 §3.2 #9 与 `ux-sites/WALKTHROUGH.md` §2.4。
+**`/koi`**（`paper-ink` + `koi-pond`，budget 12 ms）—— 首帧 1s 先出纸面，鱼池延后挂载；40s 后 `Keep this frame` 保存 PNG（1280×720，实测约 1.5 MB）。`?style=ink/paint/real`、`cam`、`rain` 仍可用；real 档高负载时帧率低，属已知性能边界。
 
-**A2 线**（`shared/product/` + `shared/stage/preview/` 的 `a2-*` 预设）—— 6 项 Must：模板数 5 套**达成**；全程序化 **3/5**（temple/gate 内含 12 张 base64 位图，占 gzip 95.3%）；体积预算检查器**未达成**（只有一行构建期静态文字，3.47 MB 照样 READY）；lil-gui 面板**部分**（Studio 25 个控件、无颜色选择器；模板内无面板；调试条直接给用户看）；单 HTML 导出**未达成**（Studio 无导出，「另存为」丢参数）；<1MB **部分**（deepsea 11.6 KB · nebula 135 KB · koi 161 KB ✓；temple/gate 各 3.47 MB）。调参靠整页重载 iframe。详见评审 §3.3、`ux-a2/WALKTHROUGH.md`。
+**A2 线**（`shared/product/` + `shared/stage/preview/` 的 `a2-*` 预设）—— 模板 5 套；全程序化 3/5（temple/gate 仍含 12 张 base64 位图）；体积门槛已进构建器与 Studio（Toy 1 MiB / 独立站 5 MiB），temple/gate 在 Toy 红、独立站绿；Studio 25 个控件、运行时 `postMessage` 重建、单 HTML 导出、默认无调试条；`a2-studio` 16/16。调参不再整页重载 iframe。
 
 ### 4.1 `/license` 的「三处坑」（改这几处之前先读）
 
@@ -172,11 +172,11 @@
 
 依据评审 §5；这里只列标题，改什么 / 改哪里 / 完成判定看原文。执行排期、里程碑与验收总表见 [`PLAN-2026-11-25.md`](./PLAN-2026-11-25.md)。
 
-**P0（不做就不能给人看，10 条）**：① `/still` 画布尺寸只留一个责任人；② 就绪协议加进度 + 超时 + 可见文案；③ 状态单一真相源 `deriveState()`；④ `/hug` 零件只发意图、站点定因果（草地放飞也给链接、模态静音、Wind 首次提示）；⑤ 触屏常驻菜单 + `touch-action:none` + 禁页面缩放；⑥ `/license` 手机流式排版 + 保存反馈 + 折角按钮 + 对比度；⑦ 入口页从裸列表改成门厅；⑧ `/koi` 启动分期（纸面先出）；⑨ 验证安全（SKIP 非 0、变异在临时副本、dandelion 时钟改读 `frame.t`）；⑩ 浏览器驱动统一为零依赖 CDP。
+**P0（2026-11-25 已完成）**：① `/still` 画布尺寸单一责任人；② 就绪协议进度 + 超时 + 可见文案；③ 状态单一真相源 `snapshot()` 同步 `body[data-state]`；④ `/hug` 草地放飞也给链接、模态静音；⑤ 触屏常驻菜单 + `touch-action:none` + 禁页面缩放；⑥ `/license` 手机流式排版 + 保存反馈 + 折角按钮 + 二级文字 ≥12px；⑦ 入口门厅四站卡可点；⑧ `/koi` 启动分期；⑨ 验证安全（SKIP 非 0、变异临时副本、dandelion 时钟）；⑩ 浏览器驱动零依赖 CDP。
 
-**P1（下一个迭代）**：`/still` 的 `Sit` 40 s 后浮出文案 + Copy、世界生成分帧上报；`/hug` 补 ≥40 s 单向慢变量、菜单 About 与末行去重；`/license` 慢变量在像素上量得出、桌面首屏减一个文字元素；预算按实测帧时间逐件降档、`costMs` 注释与 ADR-05 对齐；行尾 `git add --renormalize .` 单独提交；CI 最小集；A2 导出内嵌参数 / 体积预警 / 不重载调参 / 画质三档 / 去掉调试条；5 个 npm script 停止指向 v1 构建器。
+**P1（2026-11-25 部分完成）**：`/still` 40s Copy、`/koi` 40s PNG 已完成；A2 导出内嵌参数、体积门槛、`postMessage` 调参、画质三档（Low/Normal/High → renderScale 0.7/0.85/1）、默认去调试条已完成；预算 EWMA 已接进 `stage.ts`。仍未完成：`/license` 慢变量像素门、`/hug` ≥40s 单向慢变量、代码行尾 renormalize、CI 远端实跑。
 
-**P2（可排期）**：v1 归档（先废 `verify:reuse` 对 `ARCHITECTURE-REUSE.md` 的运行时解析，再移文档）；构建并成一条、README 状态表改脚本生成、补齐 8 个预设脚本；大二进制出仓或 LFS；孤儿零件与 9 个 WorldFeature 不新增装配投入；清重复（dandelion 渲染层、`dawn-desk/upstream/`）。
+**P2（可排期）**：temple/gate 的 12 张 base64 图换程序化表面以进 Toy 1 MB；`field-l0` 冷启动抖动已随假门一起撤（不再有该失败项）；v1 归档、大二进制/LFS、重复清理、README 状态改脚本生成（本轮已把 `docs/STATUS.md` 改成最新脚本输出）。
 
 **三项已拍板（2026-11-25，按决策执行）**：
 

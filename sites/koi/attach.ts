@@ -157,22 +157,31 @@ export function attach(handle: SiteHandle): void {
   });
   keep?.addEventListener('click', () => {
     if (!canvas) return;
-    let url = '';
-    try {
-      url = canvas.toDataURL('image/png');
-    } catch {
-      return;
-    }
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `emopulse-koi-${Date.now()}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    // 导出用「一帧原始分辨率」：画面 governor 可能已把 renderScale 降到 0.55，
+    // 直接 toDataURL 会得到 704×396 的糊图。临时升到 1、等 shell 下一帧画完再抓，
+    // 抓完立刻恢复用户当前档位（不改变他正在看的画面）。
+    const previousScale = handle.stage.stats.renderScale;
     keep.textContent = COPY.koiPond.saveNote;
     window.clearTimeout(keepTimer);
-    keepTimer = window.setTimeout(() => {
-      keep.textContent = COPY.koiPond.keepLabel;
-    }, 1800);
+    handle.stage.setRenderScale(1);
+    requestAnimationFrame(() => {
+      let url = '';
+      try {
+        url = canvas.toDataURL('image/png');
+      } catch {
+        handle.stage.setRenderScale(previousScale);
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `emopulse-koi-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      handle.stage.setRenderScale(previousScale);
+      keepTimer = window.setTimeout(() => {
+        keep.textContent = COPY.koiPond.keepLabel;
+      }, 1800);
+    });
   });
 }

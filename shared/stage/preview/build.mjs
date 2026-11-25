@@ -468,26 +468,43 @@ function bootSource(defs, config) {
   defs.forEach((def, index) => {
     lines.push(`import * as __p${index} from ${toSpecifier(path.join(REPO_ROOT, PART_ENTRY[def.id]))};`);
   });
-  lines.push('const __parts = [');
+  // 运行期参数：query 是 Studio 的现场调参，__EMBEDDED_PARAMS__ 是导出文件自带的固化值。
+  // 两者都在零件工厂之前合并，所以 `?palette=` 不是装饰，真的会改零件 opts。
+  lines.push('function __coerce(v){');
+  lines.push('  if (v === "1" || v === "true") return true;');
+  lines.push('  if (v === "0" || v === "false") return false;');
+  lines.push('  if (typeof v === "string" && v !== "" && Number.isFinite(Number(v))) return Number(v);');
+  lines.push('  return v;');
+  lines.push('}');
+  lines.push('function __queryValues(){');
+  lines.push('  const out = {};');
+  lines.push('  try {');
+  lines.push('    for (const [k, v] of new URLSearchParams(location.search)) out[k] = __coerce(v);');
+  lines.push('  } catch { /* file:// 假 DOM 下没有 location.search */ }');
+  lines.push('  return out;');
+  lines.push('}');
+  lines.push('const __initialValues = Object.assign({}, __queryValues(), globalThis.__EMBEDDED_PARAMS__ || {});');
+  lines.push('delete __initialValues.quality; delete __initialValues.clean; delete __initialValues.debug;');
+  lines.push('function __makeParts(values){');
+  lines.push('  const V = Object.assign({}, __initialValues, values || {});');
+  lines.push('  return [');
   defs.forEach((def, index) => {
-    // ★ 必须在这里**也**走工厂：`loadPartDefs`（Node 侧校验用）走了工厂，但浏览器 bundle
-    //   曾经只取 `ns.part`，于是 presets 里的 opts 对产物**完全无效** —— 表现是
-    //   `ink` 预设声明 dither bayer4，页面里跑的却是缺省快路径（costMs 1.85 而不是 3.17）。
-    const opts = config.__opts?.[index];
+    const opts = config.__opts?.[index] ?? null;
+    const factory = `(__p${index}.makePart ?? __p${index}.makePixelPost)`;
     if (opts) {
-      // 零件可能没有工厂（paper-ink / still-sink 等）。没有工厂时必须退回 part，
-      // 否则会得到 `(undefined)(opts)` —— 页面停在 booting，错误还不带零件名。
-      lines.push(`  ((__p${index}.makePart ?? __p${index}.makePixelPost)`
-        + ` ? ((__p${index}.makePart ?? __p${index}.makePixelPost)(${JSON.stringify(opts)}))`
-        + ` : (__p${index}.part ?? __p${index}.default)),`);
+      // 工厂优先；没有工厂时退回 part，不能生成 `(undefined)(opts)`。
+      lines.push(`    (${factory} ? ${factory}(Object.assign({}, ${JSON.stringify(opts)}, V)) : (__p${index}.part ?? __p${index}.default)),`);
     } else {
-      lines.push(`  (__p${index}.part ?? __p${index}.default),`);
+      // 没有 preset opts 的零件也可能有工厂；参数是模板级的，仍应交给它自己忽略未知键。
+      lines.push(`    (${factory} ? ${factory}(V) : (__p${index}.part ?? __p${index}.default)),`);
     }
   });
-  lines.push('];');
+  lines.push('  ];');
+  lines.push('}');
+  lines.push('const __parts = __makeParts(null);');
   const publicConfig = { ...config };
   delete publicConfig.__opts;
-  lines.push(`boot(__parts, ${JSON.stringify(publicConfig)});`);
+  lines.push(`boot(__parts, ${JSON.stringify(publicConfig)}, __makeParts);`);
   return lines.join('\n');
 }
 

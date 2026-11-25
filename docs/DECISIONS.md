@@ -175,27 +175,25 @@
 
 四站的零件栈、预算与 CTA 只在 [`STATUS.md`](./STATUS.md) 维护，本文不再复制这张表。核对命令：`sed -n 30,146p shared/sites/build.mjs`，看 `STATIONS` 里每站的 `parts` / `budgetMs` / `cta`。
 
-## 当前验证门（2026-11-24 实测）
+## 当前验证门（2026-11-25 本机收口）
 
-口径：Windows 11、无 playwright、无头 Edge；评审基线 HEAD `1fce19c`；按 npm script / 命令计 19 条，复合脚本取其中最差的结果。逐命令输出见 [`review-2026-11-24/arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §1。
+口径：Windows 11、零依赖 CDP + 单个无头 Edge；分支 `p0/2026-11-25`。历史 2026-11-24 审计快照见 [`review-2026-11-24/arch/AUDIT.md`](./review-2026-11-24/arch/AUDIT.md) §1（其中“无 playwright 不可跑”的 10 条已全部迁移）。
 
-| 结果 | 数量 | 命令 | 备注 |
-|---|---|---|---|
-| 绿 | 7 | `typecheck` · `verify:stage` · `verify:core` · `verify:nexus` · `verify:nexus:full` · `verify:sites` · `verify:preview` | `verify:stage` = stage-smoke 44/44 + mutation 6/6 + parts-composition 22/22；`verify:sites` 119/119；`verify:preview` 811/811 |
-| 红 | 2 | `verify:reuse` · `verify:clock` | 原因见下 |
-| 本机不可跑 | 10 | `verify:dom` · `verify:fingerprint` · `verify:license` · `verify:input` · `verify:field` · `verify:paper` · `bench:parts` · `bench:gl` · `bench:blend` · `shot` | 全部依赖 `tests/lib/browser.mjs`，它只认 macOS 的 playwright 缓存路径；其中包括全部成品视觉门和 3 条 bench |
+| 结果 | 命令 | 本机断言 |
+|---|---|---|
+| 绿 | `typecheck` · `verify:core` · `verify:nexus` · `verify:nexus:full` · `verify:reuse` · `verify:clock` | 11 个冻结文件；复用 50+90+12+10+9；时钟 42 个 .ts、真实违规 0 |
+| 绿 | `verify:stage` · `verify:sites` · `verify:preview` | stage 44 + 6 变异 + 22；sites 132；preview 809（申报口径 `declaredCostMs`） |
+| 绿 | `verify:field` · `verify:paper` · `verify:input` · `verify:site` · `verify:fingerprint` | 6 / 10 / 23 / 49 / 4 |
+| 绿 | `verify:license` · `verify:mobile` · `verify:state` · `verify:readiness` | license 34+17+22；mobile 22+7+8+20；state 14；readiness 9 |
+| 绿 | `probe:still` · `verify:a2` · `verify:still-takeaway` · `verify:koi-keep` | 7；16+11；7（40s Copy）；6（40s PNG） |
+| 未远端实跑 | GitHub Actions | 本机 `github.com:443` 不通；`ci.yml` 已写门但未在 GitHub 实跑 |
 
-两条红的原因：
+跑之前要知道的四件事：
 
-- **`verify:reuse` —— 行尾，不是声明写错。** 本机工作区有 99 个已跟踪文件是 CRLF / 混合行尾（`git ls-files --eol`：`w/crlf` 85 个、`w/mixed` 14 个），manifest 里声明的字节数等于 git blob，磁盘字节 = blob + 文件内 CR 个数，于是「声明 ≠ 磁盘」。同一份代码在 LF 副本里两个红脚本都是绿的（50 项、90 项断言）。
-- **`verify:clock` —— 与行尾无关。** `shared/parts/dandelion/index.ts:291` 与 `:337` 调 `performance.now()`，与同文件 `:14` 的注释相反，LF 副本同样 `FAIL 2/5`。
-
-跑之前要知道的四件事（同见评审 §4.1）：
-
-1. `npm run verify:stage` 会原地改写 `shared/stage/stage.ts` 6 次（`tests/stage-mutation.mjs:60,71,82`）；有人并发施工时不要在真实工作区跑。
-2. `verify:field` 拿不到浏览器时打印 SKIP 并以 0 退出（`tests/field-visual.mjs:177`），在这台机器上是假绿，所以上表记为「不可跑」。
-3. `verify:site` 不在这 19 条里；它同样依赖 `tests/lib/browser.mjs`，并且会往 `dist/qa/` 写文件。
-4. 没有 CI、没有 lint，所有门靠手动跑。
+1. `npm run verify:stage` 会原地改写 `shared/stage/stage.ts` 6 次（`tests/stage-mutation.mjs`），有人并发施工时不要在真实工作区跑。
+2. 浏览器门每条只 `launch()` 一个 Edge；`close()` 先发 CDP `Browser.close`，再按唯一 profile 收 Windows 进程树并清 `qa-review-*` / `qa-download-*`。实测单条 CLI 跑完 headless Edge 计数 0。
+3. `verify:site` 会往 `dist/qa/` 写文件；`dist` 已被 gitignore，按需重建。
+4. 没有远端 CI 实跑，所有门以本机输出为准；不要把“写了 workflow”说成“CI 已绿”。
 
 ## 待裁决（2026-11-24 评审提出）
 

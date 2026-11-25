@@ -235,8 +235,9 @@ function runProductInShim(html, name) {
     dbg: dbg.textContent,
     bodyState: String(body.dataset.state),
     canvasMode: mainCanvas.mode,
-    // 产物里声明的总成本：用来验证「presets 里的 opts 真的进了产物」
-    declaredCost: handle.stage.stats.budgetCostMs,
+    // 产物里声明的总成本：用来验证「presets 里的 opts 真的进了产物」。
+    // 用 declaredCostMs（申报）而不是 budgetCostMs（EWMA 实测）：两者不是一回事。
+    declaredCost: handle.stage.stats.declaredCostMs,
   };
 }
 

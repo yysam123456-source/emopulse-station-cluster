@@ -187,7 +187,7 @@ try {
       const cb = new OffscreenCanvas(w, h).getContext('2d'); cb.drawImage(ib, 0, 0);
       const da = ca.getImageData(rect.x, rect.y, rect.w, rect.h).data;
       const db = cb.getImageData(rect.x, rect.y, rect.w, rect.h).data;
-      let sum = 0; let max = 0; let over8 = 0; let n = 0;
+      let sum = 0; let max = 0; let over8 = 0; let over26 = 0; let n = 0;
       for (let i = 0; i < da.length; i += 4) {
         const gx = rect.x + ((i / 4) % rect.w);
         const gy = rect.y + Math.floor((i / 4) / rect.w);
@@ -196,10 +196,13 @@ try {
         sum += d; n += 1;
         if (d > max) max = d;
         if (d > 8) over8 += 1;
+        if (d > 26) over26 += 1;
       }
       return {
         mean: +(sum / Math.max(n, 1)).toFixed(2), max: +max.toFixed(1),
-        pctOver8: +(over8 / Math.max(n, 1) * 100).toFixed(2), px: n,
+        pctOver8: +(over8 / Math.max(n, 1) * 100).toFixed(2),
+        // 孤立纸纹颗粒可以单像素跳很大；真正的“折角线划过纸面”是成片的 ≥26。
+        over26, px: n,
       };
     }, { a, b, rect, exclude });
 
@@ -239,8 +242,8 @@ try {
       `折角在纸角**看不出**：角落差异 mean ${foldCorner.mean}，噪声底 ${baseCorner.mean}`,
     );
     check(
-      foldRest.max < 26,
-      `折角把纸的**其他地方**也改了（最大差 ${foldRest.max}）—— 折角只该动那只角；`
+      foldRest.over26 <= 8,
+      `折角把纸的**其他地方**也改了（>26 的像素 ${foldRest.over26} 个，最大差 ${foldRest.max}）—— 折角只该动那只角；`
         + '上一版就是这样：一条 1px 斜线划过整张纸、穿过正文',
     );
 
@@ -255,7 +258,7 @@ try {
     console.log(`  噪声底     整纸 mean ${baseAll.mean} / >8 ${baseAll.pctOver8}% · 纸角 mean ${baseCorner.mean}`);
     const ratio = (v, b) => `${(v / Math.max(b, 0.05)).toFixed(1)}× 噪声`;
     console.log(`  拖光       ${dragSun} · 整纸 mean ${dragAll.mean} / >8 ${dragAll.pctOver8}%（${ratio(dragAll.mean, baseAll.mean)}）`);
-    console.log(`  折角       纸角 mean ${foldCorner.mean}（${ratio(foldCorner.mean, baseCorner.mean)}）· 其他地方 max ${foldRest.max}`);
+    console.log(`  折角       纸角 mean ${foldCorner.mean}（${ratio(foldCorner.mean, baseCorner.mean)}）· 其他地方 max ${foldRest.max} / >26 ${foldRest.over26} 个`);
   } finally {
     await session.close();
   }

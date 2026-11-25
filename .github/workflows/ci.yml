@@ -25,6 +25,38 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build:sites
+      - run: npm run build:templates
+      - run: npm run build:studio
       - run: npm run verify:sites
       - run: npm run verify:stage
       - run: npm run verify:preview
+      # 浏览器门需要本机 Edge/Chromium。GitHub 的 windows-latest 自带 Edge；
+      # ubuntu-latest 没有，所以只在 Windows 跑像素/DOM/体积指纹与站级回归。
+      - if: runner.os == 'Windows'
+        run: npm run verify:site
+      - if: runner.os == 'Windows'
+        run: npm run verify:dom
+      - if: runner.os == 'Windows'
+        run: npm run verify:fingerprint
+      - if: runner.os == 'Windows'
+        run: npm run verify:license
+      - if: runner.os == 'Windows'
+        run: npm run verify:field
+      - if: runner.os == 'Windows'
+        run: npm run verify:paper
+      - if: runner.os == 'Windows'
+        run: npm run verify:input
+      - if: runner.os == 'Windows'
+        run: npm run verify:mobile
+      - if: runner.os == 'Windows'
+        run: npm run verify:state
+      - if: runner.os == 'Windows'
+        run: npm run verify:readiness
+      - if: runner.os == 'Windows'
+        run: npm run probe:still
+      - if: runner.os == 'Windows'
+        run: npm run verify:a2
+      - if: runner.os == 'Windows'
+        run: npm run verify:still-takeaway
+      - if: runner.os == 'Windows'
+        run: npm run verify:koi-keep

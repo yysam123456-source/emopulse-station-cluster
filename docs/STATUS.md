@@ -1,7 +1,7 @@
 # 结构事实表（脚本生成）
 
 > **脚本生成，勿手改**；`npm run docs:status` 重新生成（脚本是 `tools/docs/status.mjs`）。
-> 只放结构事实，健康度见评审报告 [`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md)。
+> 只放结构事实；当前健康度与验证门见 [`HANDOFF.md`](./HANDOFF.md) §0 / [`DECISIONS.md`](./DECISIONS.md)「当前验证门」，评审基线见 [`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md)。
 
 口径：
 
@@ -22,7 +22,7 @@
 |`bubbles`|`L2`|`canvas2d`|0.27|2|192|有|有|站 /still · 预设 a2-deepsea bubbles-probe still · 模板 deepsea||
 |`dandelion`|`L2`|`canvas2d`|2.2|4|407|有|无|无|**是**|
 |`field-ground`|`L0`|`canvas2d`|3.5|7|559|有|有|预设 field field-l0||
-|`hug-meadow`|`L1`|`world`|4|16|532|有|无|站 /hug · 预设 hug||
+|`hug-meadow`|`L1`|`world`|4|16|534|有|无|站 /hug · 预设 hug||
 |`koi-pond`|`L1`|`world`|8.5|52|1083|有|无|站 /koi · 预设 koi koi-nolimit · 模板 koi||
 |`nebula`|`L1`|`gl`|2.4|4|677|有|无|预设 a2-nebula · 模板 nebula||
 |`paper-ink`|`L0`|`canvas2d`|1.3|2|561|有|有|站 /koi /license · 预设 ink koi koi-nolimit room · 模板 koi||
@@ -48,25 +48,25 @@
 | 预设 | 标题 | 零件 | 含 GL / world 零件 | budgetMs | npm script |
 |---|---|---|---|---|---|
 | `a2-deepsea` | A2 deepsea · 深海光柱（abyss 零件栈） | `abyss`（带 opts） `bubbles` `still-sink` `pixel-post`（带 opts） | 否 | 10 | `preview:a2-deepsea` |
-| `a2-gate` | A2 gate · 独立山门（同一零件库重装） | `temple`（带 opts） | 是 | 12 | 无 |
+| `a2-gate` | A2 gate · 独立山门（同一零件库重装） | `temple`（带 opts） | 是 | 12 | `preview:a2-gate` |
 | `a2-nebula` | A2 nebula · 四旋臂星系（nebula 零件栈） | `abyss`（带 opts） `nebula`（带 opts） `pixel-post`（带 opts） | 是 | 12 | `preview:a2-nebula` |
 | `a2-temple` | A2 temple · 晨光山门（写实模块装配） | `temple`（带 opts） | 是 | 14 | `preview:a2-temple` |
-| `bubbles-probe` | probe · bubbles（screen 混合实测） | `tide-medium`（带 opts） `bubbles` | 否 | 8 | 无 |
+| `bubbles-probe` | probe · bubbles（screen 混合实测） | `tide-medium`（带 opts） `bubbles` | 否 | 8 | `preview:bubbles-probe` |
 | `dawn-desk` | dawn-desk · 只装 desk 一组的纸面探针 | `dawn-desk` | 是 | 20 | `preview:dawn-desk` |
 | `empty` | 空场景 · 最小可跑基线 |  | 否 | 8 | `preview:empty` |
 | `field` | field · 黄昏草甸 | `field-ground` `pixel-post`（带 opts） | 否 | 8 | `preview` `preview:field` |
 | `field-l0` | field · 仅 L0（画面门用） | `field-ground` | 否 | 8 | `preview:field-l0` |
 | `hug` | hug · 风的来信（三维蒲公英草甸） | `hug-meadow` | 是 | 9 | `preview:hug` |
 | `ink` | ink · 纸 + 后处理（/koi-pond 的栈，宣纸墨点） | `paper-ink` `pixel-post`（带 opts） | 否 | 8 | `preview:ink` |
-| `koi` | koi · 纸 + 完整锦鲤池（/koi 的栈） | `paper-ink` `koi-pond` | 是 | 12 | 无 |
-| `koi-nolimit` | koi · 锦鲤池不限预算（判形态用，非出厂） | `paper-ink` `koi-pond` | 是 | 100 | 无 |
+| `koi` | koi · 纸 + 完整锦鲤池（/koi 的栈） | `paper-ink` `koi-pond` | 是 | 12 | `preview:koi` |
+| `koi-nolimit` | koi · 锦鲤池不限预算（判形态用，非出厂） | `paper-ink` `koi-pond` | 是 | 100 | `preview:koi-nolimit` |
 | `room` | room · 纸 + 后处理（/license 的栈） | `paper-ink` `pixel-post`（带 opts） | 否 | 8 | `preview:room` |
-| `still` | still · 体素海洋（完整栈，形态探针） | `tide-medium` `voxel-world` `bubbles` `still-sink` `pixel-post`（带 opts） | 是 | 14 | 无 |
-| `tide-a` | tide A · 沉（深蓝 / 圆斑 / 雾上浓下淡） | `tide-medium`（带 opts） | 否 | 8 | 无 |
-| `tide-b` | tide B · 透（青绿 / 光丝 / 雾均匀） | `tide-medium`（带 opts） | 否 | 8 | 无 |
-| `tide-c` | tide C · 减法对照（近灰 / 无焦散 / 四周浓） | `tide-medium`（带 opts） | 否 | 8 | 无 |
+| `still` | still · 体素海洋（完整栈，形态探针） | `tide-medium` `voxel-world` `bubbles` `still-sink` `pixel-post`（带 opts） | 是 | 14 | `preview:still` |
+| `tide-a` | tide A · 沉（深蓝 / 圆斑 / 雾上浓下淡） | `tide-medium`（带 opts） | 否 | 8 | `preview:tide-a` |
+| `tide-b` | tide B · 透（青绿 / 光丝 / 雾均匀） | `tide-medium`（带 opts） | 否 | 8 | `preview:tide-b` |
+| `tide-c` | tide C · 减法对照（近灰 / 无焦散 / 四周浓） | `tide-medium`（带 opts） | 否 | 8 | `preview:tide-c` |
 
-有对应 npm script 的预设 10 个，没有的 8 个：`a2-gate` `bubbles-probe` `koi` `koi-nolimit` `still` `tide-a` `tide-b` `tide-c`（没有专用 script，直接跑 `node shared/stage/preview/build.mjs --preset <名字>`；`npm run preview` 固定是 field，追加 `--preset` 不生效）。
+有对应 npm script 的预设 18 个，没有的 0 个：（没有专用 script，直接跑 `node shared/stage/preview/build.mjs --preset <名字>`；`npm run preview` 固定是 field，追加 `--preset` 不生效）。
 
 ## 4. 站点（`STATIONS`，4 个）
 
@@ -92,10 +92,10 @@ Studio（`npm run build:studio` → `dist/studio/index.html`）读的是 `dist/t
 ## 6. npm script 事实（读 `package.json`）
 
 - 仍指向 v1 构建器 `shared/build/build.mjs` 的 script（2 个）：`build:v1` `build:v1:readable`。产物写 `dist/<id>.html`，与新体系不兼容。
-- 依赖 `tests/lib/browser.mjs` 的 script（10 个）：`bench:blend` `bench:gl` `bench:parts` `shot` `verify:field` `verify:fingerprint` `verify:input` `verify:license` `verify:paper` `verify:site`。`browser.mjs` 只认 macOS 的 playwright 缓存路径，其它机器上跑不了；`verify:field` 在无浏览器时以 exit 2 明确跳过，不再假装通过。
+- 依赖 `tests/lib/browser.mjs` 的 script（17 个）：`bench:blend` `bench:gl` `bench:parts` `probe:still` `shot` `verify:a2` `verify:field` `verify:fingerprint` `verify:input` `verify:koi-keep` `verify:license` `verify:mobile` `verify:paper` `verify:readiness` `verify:site` `verify:state` `verify:still-takeaway`。2026-11-25 起 `browser.mjs` 已换成零依赖 CDP（`tests/lib/cdp-browser.mjs`），Windows/macOS/Linux 只要本机有 Edge/Chrome 即可跑；各门 `launch()` 只起一个浏览器，`close()` 收整棵进程树。
 - `verify:stage` 会由 `tests/stage-mutation.mjs` 原地改写 `shared/stage/stage.ts` 后还原；有人并发施工时不要跑。
 
 ---
 
-健康度与路线依据：[`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) · 权威链：[`README.md`](./README.md)
+当前健康度与路线：[`HANDOFF.md`](./HANDOFF.md) §0 · 验证门：[`DECISIONS.md`](./DECISIONS.md)「当前验证门」 · 评审基线：[`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md)
 

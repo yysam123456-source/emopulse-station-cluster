@@ -488,6 +488,11 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     config,
     snapshot(): SiteSnapshot {
       const stats = stage.stats;
+      const state = deriveState();
+      // 单一真相源不仅要在 paint() 里写：慢帧/首帧延迟时 CDP 可能在两次 paint
+      // 之间读快照，body 还是上一帧的 degraded。读快照时同步一次，保证
+      // `snapshot().state === body[data-state]` 在任何时刻都成立。
+      if (document.body && document.body.dataset.state !== state) document.body.dataset.state = state;
       const degraded = stage.degraded.map((entry) => ({
         id: entry.id,
         layer: entry.layer,
@@ -496,7 +501,7 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
       }));
       return {
         slug: config.slug,
-        state: deriveState(),
+        state,
         lod: currentLod(),
         order: stage.order.slice(),
         drawn: stats.drawn,
