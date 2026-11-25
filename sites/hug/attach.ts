@@ -49,6 +49,14 @@ export function attach(handle: SiteHandle): void {
       });
     });
   }
+  // 打开菜单就关掉麦克风：菜单是「暂停世界」的模态，不能后台还在收音。
+  window.addEventListener('site:modal', (event) => {
+    const open = (event as CustomEvent<{ open?: boolean }>).detail?.open === true;
+    if (!open || !mic.enabled) return;
+    mic.stop();
+    handle.stage.setAudio(null);
+    setWind(false);
+  });
   // 每帧只在开启时读一次；关闭后不再碰 AnalyserNode
   handle.onFrame(() => {
     if (mic.enabled) handle.stage.setAudio(mic.read());
@@ -72,7 +80,16 @@ export function attach(handle: SiteHandle): void {
     }
   }
 
-  window.addEventListener('site:cta', () => {
+  /**
+   * 放走一次，并把链接递出去。
+   *
+   * 因果在站点层，不在零件里：画布上的 pointerdown 与主按钮 click 都走这里；
+   * `released` 保证一次页面里只放走一次（重置只能在测试/深链里发生）。
+   */
+  let released = false;
+  const release = (): void => {
+    if (released) return;
+    released = true;
     handle.stage.cue('release');
 
     // 带走链接：同一路径 + `?from=hug`，零 PII、零外部请求。
@@ -87,7 +104,13 @@ export function attach(handle: SiteHandle): void {
     } else {
       say(url);
     }
-  });
+  };
+
+  // 画布本身就是触发区：点草地/蒲公英与按主按钮是同一个决定。
+  const canvas = document.getElementById('stage');
+  canvas?.addEventListener('pointerdown', release, { passive: true });
+
+  window.addEventListener('site:cta', release);
 }
 
 export default attach;

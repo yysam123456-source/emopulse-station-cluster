@@ -5,8 +5,8 @@
 //   再手写一句 COPY 里不存在的 `NO PURCHASE. NO STRINGS. JUST PERMISSION.`。
 //   于是「保存的卡」和「屏幕上的纸」是两张不同的设计，而测试只验了 PNG 能解码。
 //   现在：**纸面 = 主画布的纸矩形裁切**，文字/章 = 与 CSS 同一组百分比，
-//   光 = 同一个 `sunAngleAt(t_press)`。唯一允许的差异是**不印交互提示**
-//   （`drag to move the light` 是 UI，不属于一张可以带走的许可证）。
+//   光 = 同一个 `stay.angle()` 在按下 Save 那一刻的读数（含用户拖光偏移）。
+//   唯一允许的差异是**不印交互提示**（`drag to move the light` 是 UI，不属于一张可以带走的许可证）。
 import { COPY } from '../../shared/sites/copy.mjs';
 import { LICENSE_COPY } from '../../content/license';
 import type { Rect } from '../../shared/stage/contract';
@@ -22,9 +22,9 @@ export interface LicenseData {
   serial: string;
   date: string;
   /**
-   * 光的方向角（度）—— 必须由调用方传 `sunAngleAt(t_press)`（`./stay.ts`）。
+   * 光的方向角（度）—— 必须由调用方在**导出瞬间**传 `stay.angle()`。
    * **不要在这里自己算**：屏幕上的光与这张卡必须是同一个函数算出来的，
-   * 否则"图里的光 = 你按下去那一刻"这条承诺就是假的。
+   * 否则「图里的光 = 保存那一刻屏上的光」这条承诺就是假的。
    */
   sunAngle?: number;
   /** 主画布 + 纸矩形；没有时退回程序化纸面（单测/无 DOM 环境） */
@@ -83,14 +83,21 @@ export function renderLicense(data: LicenseData): string {
     }
   }
 
-  // ── 光：与屏幕 #sun 的 CSS 渐变**同一角度语义** ──
+  // ── 光：与屏幕 #sun 的 CSS `linear-gradient(<angle>, #fff 0%, #fff 44%, rgba(96,74,50,.48) 100%)` 同一几何 ──
+  // CSS 的 0deg 指向上、90deg 指向右；渐变线长度 = |W·sinθ| + |H·cosθ|。
+  // 之前用 `(angle-90)` + W/H 半径近似，角度与屏幕对不上，纸上左半边暗 5.8–10.8 L*。
   const angle = typeof data.sunAngle === 'number' ? data.sunAngle : -26;
-  const rad = ((angle - 90) * Math.PI) / 180;
-  const dx = Math.cos(rad) * W * 0.5;
-  const dy = Math.sin(rad) * H * 0.5;
+  const rad = (angle * Math.PI) / 180;
+  const ux = Math.sin(rad);
+  const uy = -Math.cos(rad);
+  const span = Math.abs(W * ux) + Math.abs(H * uy);
+  const cx0 = W / 2 - ux * span / 2;
+  const cy0 = H / 2 - uy * span / 2;
+  const cx1 = W / 2 + ux * span / 2;
+  const cy1 = H / 2 + uy * span / 2;
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
-  const lit = ctx.createLinearGradient(W / 2 - dx, H / 2 - dy, W / 2 + dx, H / 2 + dy);
+  const lit = ctx.createLinearGradient(cx0, cy0, cx1, cy1);
   lit.addColorStop(0, 'rgba(255,255,255,1)');
   lit.addColorStop(0.44, 'rgba(255,255,255,1)');
   lit.addColorStop(1, 'rgba(96,74,50,0.48)');

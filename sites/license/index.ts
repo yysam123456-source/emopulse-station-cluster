@@ -4,10 +4,11 @@
 //   · 搬弄：重盖 / 折角（`fold.ts`），**不产生结果**
 // ★ 编号/日期/宣言句在**整个停留期间完全不变** —— 只有画面局部动。
 import { createRitual } from './ritual';
-import { STAY, createStay, sunAngleAt } from './stay';
+import { STAY, createStay } from './stay';
 import { toggleFold } from './fold';
 import { renderLicense } from './export';
 import { LICENSE_COPY, formatDate, makeSerial } from '../../content/license';
+import { COPY } from '../../shared/sites/copy.mjs';
 
 /** 最小可用句柄形状（避免 import 整个 shell 的类型环）。 */
 interface Handle {
@@ -29,7 +30,7 @@ interface Handle {
 export function attach(handle: Handle): void {
   const word = document.getElementById('stage-word');
   const seal = document.getElementById('seal');
-  const save = document.getElementById('save');
+  const save = document.getElementById('save') as HTMLButtonElement | null;
   const playHint = document.getElementById('play-hint');
   const reduced = typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -56,16 +57,21 @@ export function attach(handle: Handle): void {
   let foldOn = false;
   /** 最近一帧的世界时间（不自己记时钟：值来自 frame） */
   let lastT = 0;
-  /** 按下那一刻的光角 —— 导出卡必须用它，而不是"导出时的光角" */
-  let pressAngle = sunAngleAt(0);
 
-  // 盖章与重盖是同一个动作（同一段仪式走第二遍），共用一处逻辑，避免两处各自记光角而漂移。
+  // 盖章与重盖是同一个动作（同一段仪式走第二遍），共用一处逻辑。
   const stamp = (): void => {
-    pressAngle = sunAngleAt(lastT);
     ritual.start();
   };
   document.getElementById('cta')?.addEventListener('click', stamp);
   document.getElementById('again')?.addEventListener('click', stamp);
+
+  const foldButton = document.getElementById('fold');
+  const setFold = (on: boolean): void => {
+    foldOn = on;
+    toggleFold(document.body, foldOn);
+    if (foldButton) foldButton.textContent = foldOn ? 'Unfold the corner' : 'Fold the corner';
+  };
+  foldButton?.addEventListener('click', () => setFold(!foldOn));
 
   // 拖光：只在画布上拖（UI 上的拖动不挪光，这是输入边界的一部分）
   const canvas = document.getElementById('stage');
@@ -86,7 +92,7 @@ export function attach(handle: Handle): void {
     // 带修饰键的组合键不是我们的事（⌘F / Ctrl+F 是浏览器查找，不许被折角抢走）
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
     const key = ev.key.toLowerCase();
-    if (key === 'f') { foldOn = !foldOn; toggleFold(document.body, foldOn); }
+    if (key === 'f') setFold(!foldOn);
     if (key === 's' && ritual.done()) stamp();
   });
 
@@ -104,10 +110,12 @@ export function attach(handle: Handle): void {
     return renderLicense({
       serial,
       date,
-      sunAngle: pressAngle,
+      // 导出必须是「保存那一刻屏幕上的光」，含拖光偏移；业务口径见 docs/PRODUCT-FORM.md §带走物。
+      sunAngle: stay.angle(),
       paper: canvas && rect ? { canvas, rect } : null,
     });
   };
+  let saveTimer = 0;
   save?.addEventListener('click', () => {
     const url = exportCard();
     const a = document.createElement('a');
@@ -116,6 +124,15 @@ export function attach(handle: Handle): void {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    // 按钮原位反馈：下载触发是同步的，但用户看不到文件去哪了，必须给一句「已保存」。
+    const original = COPY.license.saveLabel;
+    save.textContent = COPY.license.saved;
+    save.disabled = true;
+    window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(() => {
+      save.textContent = original;
+      save.disabled = false;
+    }, 2000);
   });
 
   // 测试用：把导出函数挂到站点句柄上（不是产品接口，只用于门）

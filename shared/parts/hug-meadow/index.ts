@@ -125,10 +125,13 @@ void main() {
 /** 背景片元：上暗下亮 + 右上暖光，完全程序化，无外部图。 */
 const BG_FRAGMENT = `
 varying vec2 vUv;
+uniform float uLong;
 void main() {
   vec3 c = mix(vec3(0.007, 0.021, 0.018), vec3(0.055, 0.095, 0.065), vUv.y);
-  float glow = exp(-length((vUv - vec2(0.72, 0.69)) * vec2(2.0, 2.5)) * 6.0);
-  c += vec3(0.35, 0.27, 0.1) * glow;
+  // 40s 后太阳缓慢下落：高光位置左移、整体变暗。只改背景，不碰种子的放飞因果。
+  vec2 glowAt = vec2(0.72 - 0.20 * uLong, 0.69 - 0.13 * uLong);
+  float glow = exp(-length((vUv - glowAt) * vec2(2.0, 2.5)) * 6.0);
+  c += vec3(0.35, 0.27, 0.1) * glow * (1.0 - 0.38 * uLong);
   gl_FragColor = vec4(c, 1.0);
   #include <colorspace_fragment>
 }
@@ -266,7 +269,6 @@ function create(env: PartEnv): PartInstance {
   let phase: Phase = 'ready';
   let time = 0;
   let launchTime = 0;
-  let pointerArmed = true;
   let lastSize: StageSize = { w, h, dpr };
   const releaseRng = mulberry32((env.seed ^ 0x9e3779b9) >>> 0);
 
@@ -310,13 +312,19 @@ function create(env: PartEnv): PartInstance {
     return mesh;
   };
 
+  let bgLong: { value: number } | null = null;
+
   function buildBackground(): void {
     const bgMat = material(new THREE.ShaderMaterial({
       depthWrite: false,
       depthTest: false,
       vertexShader: BG_VERTEX,
       fragmentShader: BG_FRAGMENT,
+      uniforms: {
+        uLong: { value: 0 },
+      },
     }));
+    bgLong = bgMat.uniforms.uLong as { value: number };
     const bg = new THREE.Mesh(owned(new THREE.PlaneGeometry(2, 2)), bgMat);
     bg.frustumCulled = false;
     bg.renderOrder = -100;
@@ -461,21 +469,17 @@ function create(env: PartEnv): PartInstance {
     update(f: WorldFrame): void {
       if (disposed) return;
       time = f.t;
+      // 长停留单向慢变量：40s 后太阳高度/暖光位置开始下降，不会回弹。
+      if (bgLong) bgLong.value = Math.min(1, Math.max(0, (time - 40) / 80));
       const uTime = seed.material.uniforms.uTime;
       if (uTime) uTime.value = time;
       const uMotion = seed.material.uniforms.uMotion;
       if (uMotion) uMotion.value = f.reducedMotion ? 0 : 1;
-      // 整片草甸就是触发区（staged 的 pointerdown 已过滤 Esc 菜单）：
-      // 按一次只放飞一次，抬手才重新上膛，避免按住时反复触发。
-      if (!f.pointer.down) pointerArmed = true;
-      else if (pointerArmed && phase === 'ready') {
-        pointerArmed = false;
-        blow();
-      }
+      // 因果只在站点层（`sites/hug/attach.ts`）：零件不监听 pointer、不因麦克风电平自动放飞。
+      // 上一版在 pointerdown 和 audio.level>0.12 时自己调 blow()，于是「只是想开个风」会把整片蒲公英吹走。
       if (f.audio) {
         const uWind = seed.material.uniforms.uWind;
         if (uWind) uWind.value = Math.max(0.4, Math.min(1, 0.55 + f.audio.level * 0.45));
-        if (phase === 'ready' && f.audio.level > 0.12) blow(Math.max(0.4, f.audio.level));
       }
       if (phase === 'drifting' && time - launchTime >= DETACH_SECONDS + TRAVEL_SECONDS) {
         phase = 'away';

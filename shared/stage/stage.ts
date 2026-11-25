@@ -44,6 +44,13 @@ export interface StageOptions {
   readonly budgetMs?: number;
   readonly maxDpr?: number;
   readonly reducedMotion?: boolean;
+  /** 启动超时（毫秒）。超过后壳应放行首帧可用的 L0 画面并显示一句原因。 */
+  readonly bootTimeoutMs?: number;
+  /**
+   * 是否允许零件申报 `defer`。产品页必须 true（默认）。
+   * Node 假 DOM/组合测试可传 false：那里没有真实 rAF/时钟，延后挂载只会让断言少画一件。
+   */
+  readonly defer?: boolean;
   /**
    * GL 层**合成进主 2D 画布**时用的 `globalCompositeOperation`。
    *
@@ -78,6 +85,16 @@ export interface StageStats {
   readonly renderScale: number;
   /** 所有在画零件的就绪度最小值（0..1） */
   readonly readiness: number;
+  /** 未就绪零件上报的第一句可见文案（没有则空串） */
+  readonly readinessLabel: string;
+  /** 是否有未就绪零件申报「允许挡住启动遮罩」（只有 L1 world 可以） */
+  readonly readinessBlocking: boolean;
+  /** 装配开始时刻（与 StageOptions.now 同源） */
+  readonly bootStartedAt: number;
+  /** 启动超时阈值（毫秒） */
+  readonly bootTimeoutMs: number;
+  /** 是否已超过启动超时 */
+  readonly bootTimedOut: boolean;
 }
 
 /** 几何快照（壳用它来摆 DOM，不再自己抄一套公式）。 */
@@ -124,7 +141,10 @@ interface Mounted {
   readonly channel: PartChannel;
   readonly blend: string;
   readonly space: 'screen' | 'subject';
-  readonly instance: PartInstance | null;
+  /** 延后零件在首帧后才会填；这里不能是 readonly */
+  instance: PartInstance | null;
+  /** 该零件被声明为延后构造；instance 为 null 且 deferred=true 时不是「不可用」 */
+  readonly deferred: boolean;
   lod: Lod;
   suspended: boolean;
   broken: boolean;
@@ -345,6 +365,11 @@ export function createStage(options: StageOptions): Stage {
 
   const degraded: DegradedEntry[] = [];
   const mounted: Mounted[] = [];
+  /** 启动时钟：从装配开始算，不是首帧；超时后壳放行已有底材。 */
+  const bootStartedAt = now();
+  const bootTimeoutMs = options.bootTimeoutMs && options.bootTimeoutMs > 0 ? options.bootTimeoutMs : 8000;
+  const deferEnabled = options.defer !== false;
+  let deferredStarted = false;
   let frame = 0;
   let drawn = 0;
   let cpuMs = 0;
@@ -368,16 +393,42 @@ export function createStage(options: StageOptions): Stage {
     get drawn() { return drawn; },
     get frames() { return frame; },
     get renderScale() { return renderScale; },
-    get readiness() {
-      let min = 1;
-      for (const m of mounted) {
-        if (m.suspended || m.broken || !m.instance) continue;
-        const value = m.instance.readiness?.();
-        if (typeof value === 'number' && Number.isFinite(value)) min = Math.min(min, Math.max(0, value));
-      }
-      return min;
-    },
+    get readiness() { return readinessSnapshot().value; },
+    get readinessLabel() { return readinessSnapshot().label; },
+    get readinessBlocking() { return readinessSnapshot().blocking; },
+    get bootStartedAt() { return bootStartedAt; },
+    get bootTimeoutMs() { return bootTimeoutMs; },
+    get bootTimedOut() { return now() - bootStartedAt > bootTimeoutMs; },
   };
+
+  /**
+   * 聚合所有在画零件的就绪度。
+   *
+   * 规则：
+   *   · 只有未挂载的 deferred 零件不算「不可用」，也不阻塞；
+   *   · 只有 L1 world 可以申报 blocking，L0/L2–L5 的 blocking 一律忽略；
+   *   · label 取第一件未就绪零件上报的文案，供壳直接显示。
+   */
+  function readinessSnapshot(): { value: number; label: string; blocking: boolean } {
+    let value = 1;
+    let label = '';
+    let blocking = false;
+    for (const m of mounted) {
+      if (m.suspended || m.broken || !m.instance) continue;
+      if (m.deferred && !m.instance) continue;
+      const detail = m.instance.readinessInfo?.();
+      const raw = typeof detail?.value === 'number'
+        ? detail.value
+        : m.instance.readiness?.();
+      const v = typeof raw === 'number' && Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : 1;
+      value = Math.min(value, v);
+      if (v < 1) {
+        if (!label && detail?.label) label = detail.label;
+        if (m.def.layer === 'L1' && detail?.blocking === true) blocking = true;
+      }
+    }
+    return { value, label, blocking };
+  }
 
   /**
    * 按声明计算总开销（不受降档影响，反映配置本身）。
@@ -401,7 +452,7 @@ export function createStage(options: StageOptions): Stage {
     // （例如 fake DOM 里 webgl2 探针为真、真实画布事件却不可用）。replan 必须把这类零件
     // 重新记成 unsupported，否则 `degraded` 被清空后它会**静默消失**，而 drawn 又少一件。
     for (const m of mounted) {
-      if (m.instance !== null || m.broken) continue;
+      if (m.instance !== null || m.broken || (m.deferred && !m.broken)) continue;
       m.suspended = true;
       degraded.push({
         id: m.def.id,
@@ -487,6 +538,7 @@ export function createStage(options: StageOptions): Stage {
         blend: def.blend ?? 'source-over',
         space,
         instance: null,
+        deferred: false,
         lod: 'high',
         suspended: true,
         broken: false,
@@ -496,6 +548,28 @@ export function createStage(options: StageOptions): Stage {
         layer: def.layer,
         reason: 'unsupported',
         detail: `缺少能力：${missing.join(',')}`,
+      });
+      continue;
+    }
+
+    // 延后构造：L0 底材必须在首帧前；L1 只有在已有 L0 底材时才允许延后（/koi 的纸面先出）。
+    if (def.defer && deferEnabled && def.layer === 'L0') {
+      throw new StageError('E_PART_THROW', def.id, 'defer 不能用于 L0 底材：首帧没有纸/水会露黑');
+    }
+    if (def.defer && deferEnabled && def.layer === 'L1' && !ordered.some((p) => p.layer === 'L0')) {
+      throw new StageError('E_PART_THROW', def.id, 'L1 defer 需要同场有 L0 底材，否则首帧没有可画内容');
+    }
+    if (def.defer && deferEnabled) {
+      mounted.push({
+        def,
+        channel,
+        blend: def.blend ?? 'source-over',
+        space,
+        instance: null,
+        deferred: true,
+        lod: 'high',
+        suspended: false,
+        broken: false,
       });
       continue;
     }
@@ -545,6 +619,7 @@ export function createStage(options: StageOptions): Stage {
           blend: def.blend ?? 'source-over',
           space,
           instance: null,
+          deferred: false,
           lod: 'high',
           suspended: true,
           broken: false,
@@ -573,6 +648,7 @@ export function createStage(options: StageOptions): Stage {
       blend: def.blend ?? 'source-over',
       space,
       instance,
+      deferred: false,
       lod: 'high',
       suspended: false,
       broken: false,
@@ -582,6 +658,69 @@ export function createStage(options: StageOptions): Stage {
   }
 
   replan();
+
+  /**
+   * 首帧后挂载 defer 零件。
+   *
+   * 为什么必须等首帧：`koi-pond` 的 create() 是同步重活（renderer/shader/pass），
+   * 在首帧前调用会把纸面和文字一起挡黑。先让 L0/L5 出一帧，再在空闲任务里编译。
+   */
+  function mountDeferred(): void {
+    if (deferredStarted || disposed) return;
+    deferredStarted = true;
+    for (const m of mounted) {
+      if (!m.deferred || m.instance || m.broken || m.suspended) continue;
+      const def = m.def;
+      let created = false;
+      const onError = (detail: string): void => {
+        if (disposed || !created || m.broken) return;
+        m.broken = true;
+        m.suspended = true;
+        degraded.push({
+          id: def.id,
+          layer: def.layer,
+          reason: 'suspended',
+          detail: `异步失败：${detail}`,
+        });
+      };
+      try {
+        const isWorld = m.channel === 'world';
+        const instance = def.create({
+          canvas: m.channel === 'canvas2d' ? options.canvas : (glCanvas as HTMLCanvasElement),
+          ctx: m.channel === 'canvas2d' ? ctx : null,
+          width: isWorld ? worldRect.w : width,
+          height: isWorld ? worldRect.h : height,
+          dpr,
+          seed: hashSeed(options.seed, def.id, mounted.indexOf(m)),
+          biome: options.biome,
+          lod: 'high',
+          onError,
+        });
+        if (!instance || typeof instance.draw !== 'function') {
+          throw new StageError('E_PART_THROW', def.id, 'defer create 必须返回带 draw(frame) 的实例');
+        }
+        m.instance = instance;
+        created = true;
+        // 首次尺寸：defer 期间窗口可能已经 resize，必须补一次
+        if (isWorld) instance.resize?.({ w: worldRect.w, h: worldRect.h, dpr });
+        else instance.resize?.({ w: width, h: height, dpr });
+      } catch (error) {
+        const code = (error as { code?: string } | null)?.code;
+        m.broken = true;
+        m.suspended = true;
+        degraded.push({
+          id: def.id,
+          layer: def.layer,
+          reason: code === 'E_UNSUPPORTED' ? 'unsupported' : 'suspended',
+          detail: code === 'E_UNSUPPORTED'
+            ? (error instanceof Error ? error.message : String(error))
+            : `defer create 抛错：${error instanceof Error ? error.message : String(error)}`,
+        });
+      }
+    }
+    replan();
+    notifyResize({ w: width, h: height, dpr: dpr * renderScale });
+  }
 
   /**
    * 尺寸落盘：改画布像素、改 CSS 尺寸、通知零件。
@@ -624,10 +763,11 @@ export function createStage(options: StageOptions): Stage {
     options.canvas.style.height = `${height}px`;
 
     if (glCanvas) {
+      // ★ 画布像素尺寸的唯一责任人是 world/engine（见 `engine.js` 的 resize()）。
+      //   Stage 只负责它在页面上的矩形；如果这里也写 `glCanvas.width/height`，
+      //   engine 的 `pix` 上限与 Stage 的 effDpr 会打架，手机 `/still` 只画左上角。
       const glW = worldRect.w;
       const glH = worldRect.h;
-      glCanvas.width = Math.max(1, Math.round(glW * effDpr));
-      glCanvas.height = Math.max(1, Math.round(glH * effDpr));
       glCanvas.style.left = `${worldRect.x}px`;
       glCanvas.style.top = `${worldRect.y}px`;
       glCanvas.style.width = `${glW}px`;
@@ -771,6 +911,11 @@ export function createStage(options: StageOptions): Stage {
 
     cpuMs = now() - started;
     frame += 1;
+    // 先让纸面/文字真实出一帧，再把 koipond 这类同步重活排到**1.2s 之后**。
+    // 嵌套 rAF 在无头 Edge 上仍可能和首次合成抢在同一帧；给浏览器一个明确的空闲窗口。
+    if (frame === 1 && deferEnabled && mounted.some((m) => m.deferred && !m.instance)) {
+      setTimeout(() => { mountDeferred(); }, 1200);
+    }
     if (dt > 0) {
       const instant = 1 / dt;
       fps = fps === 0 ? instant : fps * 0.9 + instant * 0.1;

@@ -209,7 +209,7 @@ out();
 out('## 6. npm script 事实（读 `package.json`）');
 out();
 out(`- 仍指向 v1 构建器 \`${V1_BUILDER}\` 的 script（${v1Scripts.length} 个）：${v1Scripts.map((s) => `\`${s}\``).join(' ')}。产物写 \`dist/<id>.html\`，与新体系不兼容。`);
-out(`- 依赖 \`tests/lib/browser.mjs\` 的 script（${browserScripts.length} 个）：${browserScripts.map((s) => `\`${s}\``).join(' ')}。\`browser.mjs\` 只认 macOS 的 playwright 缓存路径，其它机器上跑不了；\`verify:field\` 拿不到浏览器时打印 SKIP 并以 0 退出。`);
+out(`- 依赖 \`tests/lib/browser.mjs\` 的 script（${browserScripts.length} 个）：${browserScripts.map((s) => `\`${s}\``).join(' ')}。\`browser.mjs\` 只认 macOS 的 playwright 缓存路径，其它机器上跑不了；\`verify:field\` 在无浏览器时以 exit 2 明确跳过，不再假装通过。`);
 out(`- \`verify:stage\` 会由 \`tests/stage-mutation.mjs\` 原地改写 \`shared/stage/stage.ts\` 后还原；有人并发施工时不要跑。`);
 out();
 

@@ -177,7 +177,8 @@ try {
     console.log('[field-visual] SKIP：本机起不了浏览器，画面未验证。');
     console.log(`  原因：${message.split('\n')[0]}`);
     console.log('  这不是通过，只是「没测」。有浏览器的机器上请务必重跑。');
-    process.exit(0);
+    // SKIP 不是绿：CI 没有浏览器时必须显式失败，否则「没测」会被当成「已通过」。
+    process.exit(2);
   }
   throw error;
 } finally {

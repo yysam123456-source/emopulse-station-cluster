@@ -110,9 +110,13 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
 
   if (document.body) document.body.dataset.state = 'booting';
 
-  // `?clean=1` 只隐藏调试条，给“产品截图”用；不影响装配、成本、快照。
+  // 产品模板默认不显示调试条；只有显式 `?debug=1` 才显示。
+  // `?clean=1` 仍保留（旧深链/截图脚本用它），但不再是默认。
   try {
-    if (new URLSearchParams(location.search).get('clean') === '1') {
+    const Q = new URLSearchParams(location.search);
+    const debug = Q.get('debug') === '1';
+    const clean = Q.get('clean') !== '0' && !debug;
+    if (clean) {
       (document.body?.classList as { add?: (name: string) => void } | undefined)?.add?.('clean');
     }
   } catch {
@@ -170,6 +174,17 @@ export function boot(parts: readonly PartV2[], config: PreviewConfig): PreviewHa
   /** 层查表：一次建好，刷新调试条时不再遍历零件找层。 */
   const layerOf = new Map<string, PartLayer>();
   for (const part of parts) layerOf.set(part.id, part.layer);
+
+  // 模板画质：`?quality=low|normal|high`。这是产品页的显式选择，不替代预算 governor；
+  // 预算仍会在此基础上继续降，直到能跑。
+  try {
+    const quality = new URLSearchParams(location.search).get('quality');
+    if (quality === 'low') stage.setRenderScale(0.7);
+    else if (quality === 'normal') stage.setRenderScale(0.85);
+    else if (quality === 'high') stage.setRenderScale(1);
+  } catch {
+    // 假 DOM 下没有 location.search；保持默认。
+  }
 
   // 预览页里的按钮只声明「要对世界说哪个动词」，不把站点业务塞进宿主。
   // `data-cue` 是预览专用接线：按钮 click → stage.cue(verb)，未知动词由零件静默忽略。

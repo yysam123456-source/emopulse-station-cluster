@@ -114,6 +114,8 @@ export const part: PartV2 = {
   blend: 'source-over',
   // 世界是画面的地基，超预算也只能降档，不能挂起。
   expendable: false,
+  // 体素世界是同步重活（WebGPU adapter + 20M 体素），不要让 L0 静态海面陪着它黑屏。
+  defer: 'after-first-frame',
   // 引擎走 WebGPU（navigator.gpu + adapter + device），不是 WebGL2：
   // 见 shared/core/src/main.js:19 `if (!navigator.gpu) fail(...)`，全篇 getContext('webgpu')。
   requires: ['webgpu'],
@@ -139,6 +141,8 @@ export const part: PartV2 = {
     const SIT_POSE = [-6, -39.2, 44.5, 4, -37, 70] as const;
     let currentPose: number[] = BASE_POSE.slice();
     let glide: { from: number[]; to: number[]; t: number; dur: number } | null = null;
+    // 首帧后挂载期间用户可能已经点了 Sit：先记下，引擎就绪后补放一次。
+    let pendingCue: string | null = null;
 
     telemetry = {
       ready: false,
@@ -152,6 +156,15 @@ export const part: PartV2 = {
       progress: '',
     };
     lastProgress = '';
+
+    /** 把 Sit/Stand 的镜头意图落到当前状态；引擎未就绪时由 pendingCue 承接。 */
+    const applyCue = (verb: string): void => {
+      if (verb === 'sit') {
+        glide = { from: currentPose.slice(), to: SIT_POSE.slice(), t: 0, dur: 2.4 };
+      } else if (verb === 'stand' || verb === 'reset') {
+        glide = { from: currentPose.slice(), to: BASE_POSE.slice(), t: 0, dur: 2.4 };
+      }
+    };
 
     /** 把当前 size + LOD 落到引擎上；引擎未就绪时是空调用。 */
     const applyLayout = (): void => {
@@ -192,6 +205,10 @@ export const part: PartV2 = {
         }
         engine = api;
         applyLayout();
+        if (pendingCue) {
+          applyCue(pendingCue);
+          pendingCue = null;
+        }
         telemetry = {
           ...telemetry,
           ready: true,
@@ -278,16 +295,29 @@ export const part: PartV2 = {
 
       cue(verb: string): void {
         if (disposed) return;
-        if (verb === 'sit') {
-          glide = { from: currentPose.slice(), to: SIT_POSE.slice(), t: 0, dur: 2.4 };
-        } else if (verb === 'stand' || verb === 'reset') {
-          glide = { from: currentPose.slice(), to: BASE_POSE.slice(), t: 0, dur: 2.4 };
+        if (!engine) {
+          // 首帧后挂载、引擎还在建：Sit 不能丢，等引擎第一次 ready 时补放。
+          pendingCue = verb;
+          return;
         }
+        applyCue(verb);
       },
 
       readiness(): number {
         // 未就绪=0（壳保持 boot 遮罩）；失败=1（让 tide 底材露出来，不能让用户看黑屏）
         return engine ? 1 : (error ? 1 : 0);
+      },
+
+      readinessInfo(): { value: number; label?: string; blocking?: boolean } {
+        if (engine) return { value: 1, blocking: false };
+        if (error) return { value: 1, label: error, blocking: false };
+        return {
+          value: 0,
+          label: lastProgress || 'world',
+          // 世界是 L1 底件，但它前面已经有 L0 静态海面：慢不该把整页遮成黑屏。
+          // 失败/超时由壳的 degraded 如实记录，页面保持可读。
+          blocking: false,
+        };
       },
 
       dispose(): void {

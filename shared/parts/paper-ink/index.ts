@@ -50,7 +50,9 @@ export function sheetRect(width: number, height: number, biome?: BiomeId): Rect 
   const h = height > 0 ? height : 1;
   let sheetH = Math.round(h * 0.90);
   let sheetW = Math.round(sheetH * SHEET_ASPECT);
-  const maxW = Math.round(w * 0.82);
+  // 手机上 82% 宽只留下 226px 高的纸，许可证正文会挤成三层重叠；
+  // 95% 宽让纸多出约 35px 高，同时仍留出边缘阴影。
+  const maxW = Math.round(w * (w <= 600 ? 0.95 : 0.82));
   if (sheetW > maxW) {
     sheetW = maxW;
     sheetH = Math.round(sheetW / SHEET_ASPECT);
@@ -65,6 +67,9 @@ export function sheetRect(width: number, height: number, biome?: BiomeId): Rect 
 
 /** 纸面场生成分辨率上限（CSS px）。超过就按比例缩，避免大屏上一次性烘焙过久。 */
 const FIELD_MAX_SIDE = 1024;
+// ink 是整屏铺纸：1024² 的逐像素噪声在无头机上要 7s，首帧直接黑。
+// 水彩纹理放大后本来就会软，512² 足够；这是启动性能与质感的折中。
+const INK_FIELD_MAX_SIDE = 512;
 
 /** 噪声层：斑块 / 中频 / 竖纤维（都在 CSS px 上定义，与 dpr 无关）。 */
 const BLOTCH_CELLS = 3;
@@ -246,8 +251,15 @@ function clamp255(value: number): number {
  * @param seed 种子
  * @param palette 配色
  */
-function bakePaperField(target: Canvas2DLike, wCss: number, hCss: number, seed: number, palette: Palette): void {
-  const scale = Math.min(1, FIELD_MAX_SIDE / Math.max(wCss, hCss, 1));
+function bakePaperField(
+  target: Canvas2DLike,
+  wCss: number,
+  hCss: number,
+  seed: number,
+  palette: Palette,
+  maxSide: number = FIELD_MAX_SIDE,
+): void {
+  const scale = Math.min(1, maxSide / Math.max(wCss, hCss, 1));
   const pxW = Math.max(2, Math.round(wCss * scale));
   const pxH = Math.max(2, Math.round(hCss * scale));
   target.width = pxW;
@@ -355,7 +367,7 @@ export function create(env: PartEnv): PartInstance {
     //   第一版对所有 biome 都沿用 room 的内缩纸+台面 → 截图上出现一圈深色桌面，
     //   PM 把它看成了"灰不透明方块"。这不是渲染 bug，是**纸张角色**没分开。
     if (env.biome === 'ink') {
-      bakePaperField(field, w, h, env.seed, palette);
+      bakePaperField(field, w, h, env.seed, palette, INK_FIELD_MAX_SIDE);
       g.drawImage(field as unknown as CanvasImageSource, 0, 0, pxW, pxH);
       g.imageSmoothingEnabled = false;
       return;

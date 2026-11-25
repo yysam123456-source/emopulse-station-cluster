@@ -92,6 +92,7 @@ async function main() {
       const html = readFileSync(outPath, 'utf8');
       const bytes = statSync(outPath).size;
       const gzipBytes = gzipSync(Buffer.from(html), { level: 9 }).length;
+      const budgetLimit = 1048576;
       const external = hasExternalRequest(html);
       const placeholder = html.includes('__PREVIEW_');
       const entry = {
@@ -107,6 +108,10 @@ async function main() {
         url: `../templates/${t.id}/index.html`,
         bytes,
         gzipBytes,
+        // 1 MiB 是 Toy 渠道的传输上限；temple/gate 现在远超，仍要红着报警而不是假装没超。
+        budgetLimit,
+        // 门槛按 gzip 字节算（产品传输口径），不是磁盘原始字节。
+        overBudget: gzipBytes > budgetLimit,
         hasGl: result.hasGl,
         order: result.order,
         external,

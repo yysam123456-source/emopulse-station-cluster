@@ -94,8 +94,6 @@ const ALPHA_BUCKETS = 8;
 const MAX_DT = 0.1;
 const SWAY_X = 0.9;
 const SWAY_Y = 0.6;
-const SLOW_FRAME_MS = 13;
-const FAST_FRAME_MS = 8;
 
 const STEM_COLOR = 'rgba(109,122,84,0.55)';
 const ACHENE_COLOR = '#b4864f';
@@ -141,7 +139,6 @@ function create(env: PartEnv): PartInstance {
   let cacheValid = false;
 
   let quality = lod === 'low' ? 0.6 : 1;
-  let drawCost = 0;
 
   const frame: SeedFrame = { travel: 0, flying: 0, alpha: 0 };
   const axis: Vec3Out = { x: 0, y: 0, z: 0 };
@@ -288,7 +285,6 @@ function create(env: PartEnv): PartInstance {
     g.globalAlpha = 1;
     drawStems(g, view());
 
-    const started = typeof performance !== 'undefined' ? performance.now() : 0;
     for (const bucket of buckets) {
       bucket.stem = makePath();
       bucket.hair = makePath();
@@ -332,13 +328,6 @@ function create(env: PartEnv): PartInstance {
     }
     g.globalAlpha = 1;
     ctx.drawImage(flightCanvas as unknown as CanvasImageSource, 0, 0, w, h);
-
-    if (started > 0) {
-      const cost = performance.now() - started;
-      drawCost = drawCost === 0 ? cost : drawCost * 0.9 + cost * 0.1;
-      if (drawCost > SLOW_FRAME_MS) quality = Math.max(0.5, quality - 0.08);
-      else if (drawCost < FAST_FRAME_MS) quality = Math.min(1, quality + 0.02);
-    }
   };
 
   return {

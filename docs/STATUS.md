@@ -20,18 +20,18 @@
 |`ascii-field`|`L2`|`canvas2d`|0.48|3|472|有|有|无|**是**|
 |`boids`|`L2`|`canvas2d`|0.7|2|246|有|无|无|**是**|
 |`bubbles`|`L2`|`canvas2d`|0.27|2|192|有|有|站 /still · 预设 a2-deepsea bubbles-probe still · 模板 deepsea||
-|`dandelion`|`L2`|`canvas2d`|2.2|4|418|有|无|无|**是**|
+|`dandelion`|`L2`|`canvas2d`|2.2|4|407|有|无|无|**是**|
 |`field-ground`|`L0`|`canvas2d`|3.5|7|559|有|有|预设 field field-l0||
-|`hug-meadow`|`L1`|`world`|4|16|528|有|无|站 /hug · 预设 hug||
-|`koi-pond`|`L1`|`world`|8.5|52|1075|有|无|站 /koi · 预设 koi koi-nolimit · 模板 koi||
+|`hug-meadow`|`L1`|`world`|4|16|532|有|无|站 /hug · 预设 hug||
+|`koi-pond`|`L1`|`world`|8.5|52|1083|有|无|站 /koi · 预设 koi koi-nolimit · 模板 koi||
 |`nebula`|`L1`|`gl`|2.4|4|677|有|无|预设 a2-nebula · 模板 nebula||
-|`paper-ink`|`L0`|`canvas2d`|1.3|2|549|有|有|站 /koi /license · 预设 ink koi koi-nolimit room · 模板 koi||
+|`paper-ink`|`L0`|`canvas2d`|1.3|2|561|有|有|站 /koi /license · 预设 ink koi koi-nolimit room · 模板 koi||
 |`pixel-post`|`L4`|`canvas2d`|1.85|2|363|有|有|站 /license /still · 预设 a2-deepsea a2-nebula field ink room still · 模板 deepsea nebula||
 |`still-sink`|`L3`|`canvas2d`|0.6|1|76|有|无|站 /still · 预设 a2-deepsea still · 模板 deepsea||
 |`sun`|`L3`|`canvas2d`|0.3|1|98|有|无|无|**是**|
 |`temple`|`L1`|`gl`|7.5|18|443|有|无|预设 a2-gate a2-temple · 模板 temple gate||
 |`tide-medium`|`L0`|`canvas2d`|1.8|3|452|有|有|站 /still · 预设 bubbles-probe still tide-a tide-b tide-c||
-|`voxel-world`|`L1`|`gl`|9|0|2633|有|有|站 /still · 预设 still||
+|`voxel-world`|`L1`|`gl`|9|0|2663|有|有|站 /still · 预设 still||
 
 孤儿 4 件：`ascii-field` `boids` `dandelion` `sun`。有 README.md 的 16 / 16，有 bench.mjs 的 7 / 16。
 
@@ -91,8 +91,8 @@ Studio（`npm run build:studio` → `dist/studio/index.html`）读的是 `dist/t
 
 ## 6. npm script 事实（读 `package.json`）
 
-- 仍指向 v1 构建器 `shared/build/build.mjs` 的 script（5 个）：`build` `build:all` `build:nexus` `build:readable` `dev`。产物写 `dist/<id>.html`，与新体系不兼容。
-- 依赖 `tests/lib/browser.mjs` 的 script（11 个）：`bench:blend` `bench:gl` `bench:parts` `shot` `verify:dom` `verify:field` `verify:fingerprint` `verify:input` `verify:license` `verify:paper` `verify:site`。`browser.mjs` 只认 macOS 的 playwright 缓存路径，其它机器上跑不了；`verify:field` 拿不到浏览器时打印 SKIP 并以 0 退出。
+- 仍指向 v1 构建器 `shared/build/build.mjs` 的 script（2 个）：`build:v1` `build:v1:readable`。产物写 `dist/<id>.html`，与新体系不兼容。
+- 依赖 `tests/lib/browser.mjs` 的 script（10 个）：`bench:blend` `bench:gl` `bench:parts` `shot` `verify:field` `verify:fingerprint` `verify:input` `verify:license` `verify:paper` `verify:site`。`browser.mjs` 只认 macOS 的 playwright 缓存路径，其它机器上跑不了；`verify:field` 在无浏览器时以 exit 2 明确跳过，不再假装通过。
 - `verify:stage` 会由 `tests/stage-mutation.mjs` 原地改写 `shared/stage/stage.ts` 后还原；有人并发施工时不要跑。
 
 ---

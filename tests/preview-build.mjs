@@ -198,6 +198,10 @@ function runProductInShim(html, name) {
     },
     requestAnimationFrame(callback) { rafQueue.push(callback); return rafQueue.length; },
     cancelAnimationFrame() {},
+    // 假 DOM 里没有真实时钟：不执行延时回调，避免把测试变成异步；
+    // 组合测试用 `defer:false` 立即装配，不依赖这里。
+    setTimeout() { return 0; },
+    clearTimeout() {},
     matchMedia() { return { matches: false }; },
     addEventListener() {},
     performance: { now: () => Date.now() },
@@ -208,7 +212,9 @@ function runProductInShim(html, name) {
   sandbox.self = sandbox;
 
   vm.createContext(sandbox);
-  vm.runInContext(script, sandbox, { timeout: 10000, filename: `${name}-preview.js` });
+  // 纸面烘焙在假 canvas 上是纯 JS 逐像素：`room` 的 1024² 场在慢机上会超过 10s。
+  // 这是测试宿主的时间上限，不是产品启动时限；产品侧有 bootTimeoutMs 管。
+  vm.runInContext(script, sandbox, { timeout: 30000, filename: `${name}-preview.js` });
 
   const handle = vm.runInContext('globalThis.__preview', sandbox);
   if (!handle) {
@@ -290,6 +296,11 @@ for (const name of Object.keys(PRESETS)) {
   // GL 画布只在有 gl 通道零件时出现
   // world 与 gl 共用 #gl：任何一个 world 零件都要求画布存在。
   const expectsGl = partIds.some((id) => id === 'voxel-world' || id === 'koi-pond' || id === 'hug-meadow' || id === 'dawn-desk' || id === 'nebula' || id === 'temple');
+  // 假 canvas 提供 webgl2，但没有 WebGPU：只有声明 webgpu 的零件才必须记 unsupported。
+  // koi-pond 只要求 webgl2，假 GL 已满足，不能拿它当 unsupported 证据。
+  const expectsUnsupported = partIds.some(
+    (id) => id === 'voxel-world' || id === 'hug-meadow' || id === 'dawn-desk' || id === 'nebula' || id === 'temple',
+  );
   check(first.hasGl === expectsGl, `${name}: hasGl=${first.hasGl}，期望 ${expectsGl}`);
   check(html.includes('id="gl"') === expectsGl, `${name}: #gl 画布存在性与 hasGl 不一致`);
 
@@ -353,6 +364,7 @@ for (const name of Object.keys(PRESETS)) {
       biome: preset.biome,
       seed: preset.seed,
       budgetMs: 100, // 给足预算：这一条测「装得起来」，降档行为归 stage-smoke 管
+      defer: false, // 假 DOM 没有真实 rAF/时钟：组合测试要立即看到所有零件
       now: () => clock,
     });
     clock += 16;
@@ -401,7 +413,7 @@ for (const name of Object.keys(PRESETS)) {
     // 之前这里写的是「非 GL 站必须 ready」——那会逼着我把 ink 的成本报低才不红，方向反了。
     const reasons = snap.degraded.map((entry) => entry.reason);
     check(!reasons.includes('suspended'), `${name}: 出现运行期抛错隔离：${JSON.stringify(snap.degraded)}`);
-    if (expectsGl) {
+    if (expectsUnsupported) {
       check(
         reasons.includes('unsupported'),
         `${name}: 无 WebGPU 时应记 unsupported，实得 ${JSON.stringify(snap.degraded)}`,
@@ -425,7 +437,7 @@ for (const name of Object.keys(PRESETS)) {
       Math.abs(shim.declaredCost - expectedCost) < 0.02,
       `${name}: 产物内 costMs 合计 ${shim.declaredCost.toFixed(2)} ≠ 构建器算出的 ${expectedCost.toFixed(2)}（opts 没进产物？）`,
     );
-    if (expectsGl) {
+    if (expectsUnsupported) {
       const hit = snap.degraded.some((entry) => entry.reason === 'unsupported');
       check(hit, `${name}: 无 GL 时 world/gl 零件应记 unsupported，实得 ${JSON.stringify(snap.degraded)}`);
     }

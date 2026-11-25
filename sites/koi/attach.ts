@@ -5,6 +5,9 @@
 // Ripple / Feed / Call 三种触摸、Top / 2.5D / Orbit 三个相机、三种池底、三档雨。
 // 这些不该被"藏掉"，只能被收进二级菜单。
 import type { SiteHandle } from '../../shared/sites/shell';
+import { COPY } from '../../shared/sites/copy.mjs';
+
+const KEEP_SECONDS = 40;
 
 type Look = 'ink' | 'paint' | 'real';
 type Touch = 'ripple' | 'feed' | 'call';
@@ -139,5 +142,37 @@ export function attach(handle: SiteHandle): void {
       music = mode;
       setMenu('menu-music', MUSIC_LABEL[mode]);
     }
+  });
+
+  // ── 带走物：停留 40s 后才出现，保存的是**当前这一帧** ──
+  // 不设主 CTA、不进 Esc；这一站先让人看，再给一个「把此刻带走」的出口。
+  const keep = document.getElementById('keep');
+  const canvas = document.getElementById('stage') as HTMLCanvasElement | null;
+  let keepShown = false;
+  let keepTimer = 0;
+  handle.onFrame((t) => {
+    if (keepShown || !keep || t < KEEP_SECONDS) return;
+    keepShown = true;
+    keep.hidden = false;
+  });
+  keep?.addEventListener('click', () => {
+    if (!canvas) return;
+    let url = '';
+    try {
+      url = canvas.toDataURL('image/png');
+    } catch {
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `emopulse-koi-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    keep.textContent = COPY.koiPond.saveNote;
+    window.clearTimeout(keepTimer);
+    keepTimer = window.setTimeout(() => {
+      keep.textContent = COPY.koiPond.keepLabel;
+    }, 1800);
   });
 }

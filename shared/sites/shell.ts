@@ -23,6 +23,7 @@ import {
   type Stage,
 } from '../stage/index';
 import { createAmbience, type Ambience } from './audio';
+import { COPY } from './copy.mjs';
 
 /** 站点配置（生成期写死进 HTML）。 */
 export interface SiteConfig {
@@ -50,7 +51,11 @@ export interface SiteConfig {
 /** 站点快照（供 CDP / 测试读取）。 */
 export interface SiteSnapshot {
   readonly slug: string;
-  readonly state: 'ready' | 'degraded';
+  /**
+   * 单一真相源：与 `body.dataset.state` 由同一个 `deriveState()` 计算。
+   * `booting` 只在首帧前且未超时；超时后降到 degraded，但页面仍可看。
+   */
+  readonly state: 'booting' | 'ready' | 'degraded';
   readonly lod: Lod;
   readonly order: readonly string[];
   readonly drawn: number;
@@ -60,6 +65,8 @@ export interface SiteSnapshot {
   readonly frameMs: number;
   readonly readiness: number;
   readonly renderScale: number;
+  /** 渲染分辨率被预算压到 0.75 以下；不是错，但要在调试条上说明画面为什么软 */
+  readonly resolutionStarved: boolean;
   readonly degraded: readonly { id: string; layer: PartLayer; reason: string; detail: string }[];
   /** 主按钮是否已经可以按（L5 的显示时机由壳决定，先暴露成数据） */
   readonly ctaEnabled: boolean;
@@ -109,8 +116,10 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
   const glCanvas = config.hasGl ? requireElement<HTMLCanvasElement>('gl') : null;
   const dbg = requireElement<HTMLElement>('dbg');
   const errBox = document.getElementById('boot-error');
+  const bootNote = document.getElementById('boot-note');
   const cta = document.getElementById('cta');
   const menu = document.getElementById('menu');
+  const menuOpen = document.getElementById('menu-open');
   const menuNote = document.getElementById('menu-note');
   const ambience: Ambience | null = config.ambience === false ? null : createAmbience(config.biome);
 
@@ -121,8 +130,19 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     // 调试条只在 `?debug` 时出现：它是开发工具，默认不该出现在产品画面里
     document.body.dataset.debug = /(?:^|[?&])debug\b/.test(window.location.search) ? 'on' : 'off';
   }
+  // favicon 走 data URI，不产生任何网络请求；也避免构建期在 markup 里写 <link> 触发零请求断言。
+  if (!document.querySelector('link[rel="icon"]')) {
+    const icon = document.createElement('link');
+    icon.rel = 'icon';
+    icon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230a0c10'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23e8eef5'/%3E%3C/svg%3E";
+    document.head.appendChild(icon);
+  }
 
   let stage: Stage;
+  if (bootNote) {
+    bootNote.textContent = COPY.boot.preparing;
+    bootNote.hidden = false;
+  }
   try {
     stage = createStage({
       canvas,
@@ -197,9 +217,14 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
   }
 
   function setModal(open: boolean): void {
-    uiModalOpen = open === true;
+    const next = open === true;
+    if (next === uiModalOpen) return;
+    uiModalOpen = next;
     if (menu) menu.hidden = !uiModalOpen;
+    if (menuOpen) menuOpen.hidden = uiModalOpen;
     if (document.body) document.body.dataset.modal = uiModalOpen ? 'open' : 'closed';
+    // 站点副作用：/hug 在菜单打开时关掉麦克风/风，避免「菜单里还开着录音」。
+    window.dispatchEvent(new CustomEvent('site:modal', { detail: { open: uiModalOpen } }));
     if (uiModalOpen) {
       down = false;
       pushPointer();
@@ -286,6 +311,9 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
   document.getElementById('menu-close')?.addEventListener('click', () => {
     setModal(false);
   });
+  menuOpen?.addEventListener('click', () => {
+    setModal(true);
+  });
 
   // 主按钮：**绑 click**（覆盖鼠标 / 触屏 / 键盘回车与空格）—— 键盘用户唯一的路径
   // 主按钮的通道由 `data-channel` 决定：
@@ -360,20 +388,68 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     return 'high';
   };
 
+  /**
+   * 站点状态的**唯一**计算处。
+   *
+   * 从前 `paint()` 用 readiness 算 state，`snapshot()` 只用 degraded.length ——
+   * 于是调试条写着 booting、CDP 读到 ready，两边都「有测试」。现在两边调用它。
+   */
+  function deriveState(): 'booting' | 'ready' | 'degraded' {
+    const stats = stage.stats;
+    if (stats.frames === 0 && !stats.bootTimedOut) return 'booting';
+    // 超时只在「一帧都没出」时算异常；站点跑过 8s 后还叫 degraded 会把所有长寿站点永久标红。
+    if (stats.frames === 0) return 'degraded';
+    // 只有 L1 世界可以申报 blocking；非阻塞零件（koi 水面、纸下世界）慢不该把站点标红。
+    if (stats.readiness < 1 && stats.readinessBlocking) return 'degraded';
+    if (stage.degraded.length > 0) return 'degraded';
+    return 'ready';
+  }
+
+  function updateBootNote(state: 'booting' | 'ready' | 'degraded'): void {
+    if (!bootNote) return;
+    const stats = stage.stats;
+    const unsupported = stage.degraded.some((entry) => entry.reason === 'unsupported');
+    let text = '';
+    let mode: 'on' | 'slow' = 'on';
+    if (state === 'booting') text = COPY.boot.preparing;
+    else if (unsupported) text = COPY.boot.unsupported;
+    else if (stats.readiness < 1 && stats.readinessBlocking) {
+      // 没到超时前只说「正在准备」；到了 bootTimeoutMs 才承认慢。
+      // 否则第一帧就把「用得更久」甩给用户，哪怕只等了 1s。
+      const waited = (typeof performance !== 'undefined' ? performance.now() : 0) - stats.bootStartedAt;
+      if (waited >= stats.bootTimeoutMs) {
+        text = COPY.boot.slow;
+        mode = 'slow';
+      } else {
+        text = COPY.boot.preparing;
+      }
+    }
+    if (!text) {
+      bootNote.hidden = true;
+      bootNote.textContent = '';
+      if (document.body) document.body.dataset.boot = 'off';
+      return;
+    }
+    if (bootNote.textContent !== text) bootNote.textContent = text;
+    bootNote.hidden = false;
+    if (document.body) document.body.dataset.boot = mode;
+  }
+
   function paint(ts: number): void {
     if (ts - lastPaint < DEBUG_INTERVAL_MS) return;
     lastPaint = ts;
     const stats = stage.stats;
     const degraded = stage.degraded;
-    const ready = stats.readiness >= 1;
-    const state = !ready ? 'booting' : (degraded.length === 0 ? 'ready' : 'degraded');
+    const state = deriveState();
     const lines: string[] = [];
     lines.push(
       `state ${state}   lod ${currentLod()}   fps ${stats.fps.toFixed(0)}`
       + `   frame ${stats.frameMs.toFixed(1)}ms   cpu ${stats.cpuMs.toFixed(2)}ms`
       + `   scale ${stats.renderScale.toFixed(2)}   ready ${stats.readiness.toFixed(2)}`
+      + `   boot ${Math.round((stats.bootStartedAt + stats.bootTimeoutMs - performance.now()) / 1000)}s`
       + `   drawn ${stats.drawn}/${parts.length}   budget ${stats.budgetMs.toFixed(1)}ms`,
     );
+    if (stats.renderScale < 0.75) lines.push(`resolution-starved scale ${stats.renderScale.toFixed(2)}（预算压分辨率，不是画错）`);
     lines.push(`order ${orderLabel}`);
     for (let i = 0; i < degraded.length; i += 1) {
       const entry = degraded[i];
@@ -381,7 +457,14 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
     }
     dbg.textContent = lines.join('\n');
     if (document.body) document.body.dataset.state = state;
+    updateBootNote(state);
   }
+
+  // 站内 UI 的时间轴：用 rAF 的真实时间，不用 `world.dt`。
+  // `world.dt` 被 MAX_DT_SECONDS 夹到 0.1s 是给物理/水波用的；慢机上盖章的
+  // 6.4s 仪式会被它拉长到 9s 以上，用户看到"stamping 卡住"。UI 计时必须是墙钟。
+  let hookStartTs = -1;
+  let lastHookTs = -1;
 
   function tick(ts: number): void {
     // 注入的按下：frame 前置 true、frame 后立刻释放 —— 零件看到恰好一个上升沿
@@ -391,9 +474,11 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
       pendingTap = false;
       stage.setPointer(nx, ny, false);
     }
-    // 站内每帧回调：时间与 dt 都取自世界帧，**不是自持时钟**
-    const world = stage.world.frame;
-    for (let i = 0; i < frameHooks.length; i += 1) frameHooks[i](world.t, world.dt);
+    if (hookStartTs < 0) hookStartTs = ts;
+    const realT = (ts - hookStartTs) / 1000;
+    const realDt = lastHookTs < 0 ? 0 : (ts - lastHookTs) / 1000;
+    lastHookTs = ts;
+    for (let i = 0; i < frameHooks.length; i += 1) frameHooks[i](realT, realDt);
     paint(ts);
     requestAnimationFrame(tick);
   }
@@ -411,7 +496,7 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
       }));
       return {
         slug: config.slug,
-        state: degraded.length === 0 ? 'ready' : 'degraded',
+        state: deriveState(),
         lod: currentLod(),
         order: stage.order.slice(),
         drawn: stats.drawn,
@@ -421,6 +506,7 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
         frameMs: stats.frameMs,
         readiness: stats.readiness,
         renderScale: stats.renderScale,
+        resolutionStarved: stats.renderScale < 0.75,
         degraded,
         ctaEnabled: config.cta !== null,
         tapped,

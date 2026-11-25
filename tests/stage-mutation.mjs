@@ -1,12 +1,19 @@
 // 变异探针：证明 stage-smoke 的断言真能抓住这些回归。
 // 每条变异只改一处，跑一次测试，然后还原源码（从内存回写，不依赖备份文件）。
-import { readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const TARGET = path.join(ROOT, 'shared', 'stage', 'stage.ts');
+const SOURCE_DIR = path.join(ROOT, 'shared', 'stage');
+// 变异只改**副本**：真实源码在施工/CI 并行时不能被这个探针原地改 6 次。
+const TEMP_DIR = mkdtempSync(path.join(os.tmpdir(), 'emopulse-stage-mutation-'));
+const STAGE_DIR = path.join(TEMP_DIR, 'stage');
+cpSync(SOURCE_DIR, STAGE_DIR, { recursive: true });
+const TARGET = path.join(STAGE_DIR, 'stage.ts');
+const INDEX = path.join(STAGE_DIR, 'index.ts');
 const TEST = path.join(ROOT, 'tests', 'stage-smoke.mjs');
 const original = readFileSync(TARGET, 'utf8');
 
@@ -63,6 +70,7 @@ for (const mutation of mutations) {
   try {
     output = execFileSync(process.execPath, [TEST], {
       cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, STAGE_INDEX: INDEX },
     });
   } catch (error) {
     failed = true;
@@ -79,7 +87,7 @@ for (const mutation of mutations) {
   });
 }
 
-writeFileSync(TARGET, original);
+rmSync(TEMP_DIR, { recursive: true, force: true });
 let allCaught = true;
 for (const r of results) {
   if (!r.ok) allCaught = false;

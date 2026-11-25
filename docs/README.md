@@ -13,6 +13,12 @@
 | 5 | [`COPY-SITES.md`](./COPY-SITES.md) | 文案单一来源；`shared/sites/copy.mjs` 逐字照抄，`site-build` 断言命中。改字先改本文 |
 | 6 | [`MANUAL-QA.md`](./MANUAL-QA.md) | 手测协议与度量口径（含 §8：饱和度一律 HSV S） |
 
+## 执行计划
+
+| 文档 | 什么时候读 |
+|---|---|
+| [`PLAN-2026-11-25.md`](./PLAN-2026-11-25.md) | 把 P0/P1/P2 落成排期、验收门与拍板项时；它是 HANDOFF §5 的执行化，不覆盖权威口径 |
+
 ## 专题文档
 
 | 文档 | 什么时候读 |

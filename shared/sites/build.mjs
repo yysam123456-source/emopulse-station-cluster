@@ -34,6 +34,8 @@ export const STATIONS = Object.freeze({
     slug: 'license',
     title: COPY.license.h1,
     lead: COPY.license.hook,
+    /** 入口门厅只列 live 的站；四站都不撤，所以四张卡都在。 */
+    status: 'live',
     cta: COPY.license.ctaCopy,   // 'Stamp it'：盖章是站点作用域的因果（不是世界注入）
     ctaChannel: 'ui',
     /** 站内接线模块（只有 /license 有） */
@@ -69,6 +71,7 @@ export const STATIONS = Object.freeze({
       //    它宣传的两个动作当时几乎没有可见效果 —— "文字在，效果不在"。
       '<div id="play-hint" hidden>',
       '<button id="again" type="button" data-channel="ui">__AGAIN_LABEL__</button>',
+      '<button id="fold" type="button" data-channel="ui">__FOLD_LABEL__</button>',
       '<span class="play-note">__PLAY_NOTE__</span>',
       '</div>',
       '<button id="save" type="button" data-channel="ui" hidden>__SAVE_LABEL__</button>',
@@ -96,6 +99,7 @@ export const STATIONS = Object.freeze({
     slug: 'hug',
     title: COPY.hug.h1,
     lead: COPY.hug.hook,
+    status: 'live',
     // /hug 的唯一 CTA：点它 = 放走（世界收到**一次**按下，由壳注入）
     cta: COPY.hug.cta,
     ctaChannel: 'world-inject',
@@ -113,6 +117,7 @@ export const STATIONS = Object.freeze({
     slug: 'still',
     title: COPY.still.h1,
     lead: COPY.still.hook,
+    status: 'live',
     // 定稿 CTA 'Sit'：坐下 = 把体素世界的视角沉到近景（cue('sit')）
     cta: COPY.still.cta,
     ctaChannel: 'ui',
@@ -120,6 +125,8 @@ export const STATIONS = Object.freeze({
     biome: 'tide',
     seed: 20260901,
     budgetMs: 12,
+    /** Sit 之后 40s 才出现的带走入口；不抢首屏。 */
+    extra: '<button id="copy-line" type="button" data-channel="ui" hidden>__STILL_COPY__</button>',
     parts: ['tide-medium', 'voxel-world', 'bubbles', 'still-sink',
       { id: 'pixel-post', opts: { grain: 0.03, scanline: 0, vignette: 0.18 } },
     ],
@@ -128,6 +135,7 @@ export const STATIONS = Object.freeze({
     slug: 'koi',
     title: COPY.koiPond.h1,
     lead: COPY.koiPond.hook,
+    status: 'live',
     cta: null,
     attach: 'sites/koi/attach.ts',
     ambience: false,
@@ -138,6 +146,8 @@ export const STATIONS = Object.freeze({
     budgetMs: 12,
     // 原件自带纸/水彩/胶片 finish，不再叠 pixel-post：多一层暗角会把 real 压暗、把 ink 压冷。
     paperSheet: false,
+    /** 停留 40s 后才出现的带走物；不是主 CTA，也不进 Esc 菜单。 */
+    extra: '<button id="keep" type="button" data-channel="ui" hidden>__KOI_KEEP__</button>',
     parts: [
       'paper-ink',
       'koi-pond',
@@ -149,8 +159,9 @@ export const STATIONS = Object.freeze({
 const STYLE = [
   ':root{--veil:#0a0c10;--ink:#e8eef5;--dim:#9aa7b8}',
   'html,body{margin:0;padding:0;height:100%;background:var(--veil);overflow:hidden}',
-  'body{color:var(--ink);font:14px/1.6 ui-serif,Georgia,"Songti SC",serif}',
-  '#stage,#gl{position:fixed;left:0;top:0;width:100%;height:100%;display:block}',
+  // 触屏：画布上的拖动不能被浏览器抢去滚动/缩放；按钮仍可点。
+  'body{touch-action:none;color:var(--ink);font:14px/1.6 ui-serif,Georgia,"Songti SC",serif}',
+  '#stage,#gl{position:fixed;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}',
   '#gl{z-index:-1;pointer-events:none}',
   // 主按钮是页面上唯一"像按钮"的东西：草地本身不得有任何可点外观
   // 主按钮必须是页面上**唯一能被找到**的可点物：草地本身不得有任何可点外观。
@@ -190,6 +201,8 @@ const STYLE = [
   // 手机上大字号会压到花球，保留标题下的小注脚。
   '@media (max-width:600px){body[data-slug=hug] #lead{top:calc(8.5vh + 62px + 16px);',
   'max-width:26ch;font-size:14px;line-height:1.6;color:rgba(232,238,226,.78)}}',
+  // 手机 CTA 在底部居中，复制成功的提示必须再往上让一格，不能压在按钮上。
+  '@media (max-width:600px){body[data-slug=hug] #share-note{bottom:20vh}}',
   // 桌面上按钮让开主花茎，落到右下角，和左上标题形成对角；窄屏仍居中，拇指够得着。
   '@media (min-width:601px){body[data-slug=hug] #cta{left:auto;right:5vw;transform:none;bottom:9vh}}',
   '@media (min-width:601px){body[data-slug=hug] #share-note{left:auto;right:5vw;transform:none;text-align:right;bottom:15vh;max-width:26ch}}',
@@ -216,9 +229,41 @@ const STYLE = [
   '#cta[hidden]{display:none}',
   '#cta:hover{border-color:var(--ink)}',
   '#cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}',
+  // /koi 的带走物：40s 后出现在右下，不与左下 hook 抢位置；手机居中。
+  '#keep{position:fixed;right:5vw;bottom:9vh;z-index:3;background:rgba(10,12,16,.42);',
+  'border:1px solid rgba(232,238,245,.64);border-radius:999px;color:var(--ink);',
+  'font:inherit;font-size:13px;letter-spacing:.06em;padding:.6em 1.4em;cursor:pointer;',
+  'box-shadow:0 2px 16px rgba(0,0,0,.28)}',
+  '#keep[hidden]{display:none}',
+  '#keep:focus-visible{outline:2px solid var(--ink);outline-offset:3px}',
+  '@media (max-width:600px){#keep{left:50%;right:auto;transform:translateX(-50%);bottom:8vh;min-height:44px}}',
+  // 带走入口在 Sit 上方：不能和常驻 CTA 叠在同一底线。
+  '#copy-line{position:fixed;left:50%;bottom:17vh;transform:translateX(-50%);z-index:3;',
+  'background:rgba(10,12,16,.44);border:1px solid rgba(232,238,245,.62);border-radius:999px;',
+  'color:var(--ink);font:inherit;font-size:13px;letter-spacing:.06em;padding:.6em 1.4em;cursor:pointer}',
+  '#copy-line[hidden]{display:none}',
+  '#copy-line:focus-visible{outline:2px solid var(--ink);outline-offset:3px}',
+  // /still 的停留提示要同时在 Copy the line 之上，不能三条底栏叠在一起。
+  'body[data-slug=still] #share-note{bottom:24vh}',
+  '@media (max-width:600px){#copy-line{min-height:44px;bottom:18vh}}',
   '#menu{position:fixed;right:2vw;top:2vh;z-index:4;padding:14px 18px;border-radius:6px;',
-  'background:rgba(10,12,16,.88);border:1px solid rgba(232,238,245,.18);font-size:13px}',
+  'background:rgba(10,12,16,.88);border:1px solid rgba(232,238,245,.18);font-size:13px;',
+  'max-height:88vh;overflow:auto;touch-action:manipulation}',
   '#menu[hidden]{display:none}',
+  // 模态打开时，页面底栏不能从菜单半透明底下面露出来；世界也暂停，UI 一起退场。
+  'body[data-modal=open] #lead,body[data-modal=open] #cta,body[data-modal=open] #share-note,',
+  'body[data-modal=open] #copy-line,body[data-modal=open] #keep,body[data-modal=open] #save,',
+  'body[data-modal=open] #play-hint,body[data-modal=open] #cert-seal-sub{visibility:hidden}',
+  // 触屏没有 Esc：给一个 44px 的常驻菜单入口。桌面不显示它，首屏仍然只有 H1/hook/CTA 三个可点物。
+  '#menu-open{display:none;position:fixed;right:2.4vw;top:2.4vh;z-index:8;',
+  'min-width:44px;min-height:44px;padding:0 .7em;border-radius:999px;',
+  'background:rgba(10,12,16,.58);border:1px solid rgba(232,238,245,.38);color:var(--ink);',
+  'font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;cursor:pointer;touch-action:manipulation}',
+  '@media (hover:none),(pointer:coarse){#menu-open{display:block}}',
+  '@media (hover:none),(pointer:coarse){#menu{left:0;right:0;top:auto;bottom:0;border-radius:12px 12px 0 0;',
+  'max-height:72vh;padding:16px 18px 22px}',
+  '.menu-item{min-height:44px;padding:10px 0}}',
+  '#menu-open:focus-visible{outline:2px solid var(--ink);outline-offset:3px}',
   // 调试条是**开发工具**，默认不显示：它第一版会压住站点文案（截图发现），而且它不该属于产品。
   // 需要时加 `?debug` 打开。
   '#dbg{display:none;position:fixed;left:8px;bottom:8px;z-index:2;max-width:min(94vw,760px);',
@@ -266,7 +311,7 @@ const STYLE = [
   '#cert{position:fixed;z-index:3;pointer-events:none;',
   'left:calc(var(--sheet-x) + var(--sheet-w)*0.075);width:calc(var(--sheet-w)*0.85);color:rgba(52,42,32,.86)}',
   '#cert-title{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.30);',
-  'font:600 13px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.24em;color:rgba(74,59,44,.75)}',
+  'font:600 13px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.24em;color:rgba(74,59,44,.88)}',
   // 页眉线：1px 深墨、22% 不透明度 —— 只做版式分隔，不抢宣言句。
   '#cert-rule{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.345);left:0;right:0;',
   'height:1px;background:rgba(74,59,44,.22)}',
@@ -280,7 +325,7 @@ const STYLE = [
   'user-select:text;-webkit-user-select:text;color:rgba(52,42,32,.92)}',
   '.cert-label{opacity:.6}.cert-value{letter-spacing:.08em}',
   '#cert-date{position:absolute;top:calc(var(--sheet-y) + var(--sheet-h)*0.65);',
-  'font:400 13px/1.4 ui-monospace,Menlo,monospace;color:rgba(74,59,44,.72)}',
+  'font:400 13px/1.4 ui-monospace,Menlo,monospace;color:rgba(74,59,44,.86)}',
   // 章下副行贴着红章（章在纸右下），不能放在纸底中央 —— 那里有 hook、纸角提示、Save，会叠成一团。
   // 宽度只到 86%：纸角那 128px 是折角的地盘（折起来会盖住纸角），
   // 章下副行探进去就会被盖掉半截 —— 折角后截图上确实发生了。
@@ -289,7 +334,7 @@ const STYLE = [
   // #cert 本身从 7.5% 起、宽 85%，所以这里的百分比是**相对 #cert** 算的；
   // 直接用 sheet 宽折算：left .648w + width .18w → 中心 .738w，再加 #cert 的 .075 = .813。
   'left:calc(var(--sheet-w)*0.648);width:calc(var(--sheet-w)*0.18);text-align:center;',
-  'font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(163,52,44,.72)}',
+  'font:500 11px/1.4 ui-monospace,Menlo,monospace;letter-spacing:.1em;color:rgba(163,52,44,.86)}',
   // 只有章下副行跟着章走；编号/日期是纸自带的，不随 approved 变化。
   '#cert-seal-sub[hidden]{display:none}',
   '#stage-word{position:fixed;z-index:4;left:50%;transform:translateX(-50%);',
@@ -313,21 +358,57 @@ const STYLE = [
   // 纸角二级提示：定稿要求低对比、在纸上、不是按钮样式。仅盖章完成后出现。
   '#play-hint{position:fixed;z-index:4;left:calc(var(--sheet-x) + var(--sheet-w)*0.075);',
   'top:calc(var(--sheet-y) + var(--sheet-h)*0.86);max-width:calc(var(--sheet-w)*0.85);',
-  'font:11px/1.7 ui-serif,Georgia,serif;color:rgba(64,52,40,.52);letter-spacing:.02em}',
+  'font:11px/1.7 ui-serif,Georgia,serif;color:rgba(64,52,40,.70);letter-spacing:.02em}',
   '#play-hint[hidden]{display:none}',
-  '#again{background:none;border:0;padding:0;margin:0 0 2px;cursor:pointer;',
+  '#again,#fold{background:none;border:0;padding:0;margin:0 12px 2px 0;cursor:pointer;',
   'font:inherit;color:inherit;letter-spacing:.06em;text-decoration:underline;',
   'text-underline-offset:3px;text-decoration-color:rgba(64,52,40,.25)}',
-  '#again:hover{color:rgba(64,52,40,.78)}',
+  '#again:hover,#fold:hover{color:rgba(64,52,40,.78)}',
   '.play-note{display:block;opacity:.85}',
   // 启动遮罩：不是装饰，是「世界还没就绪」的唯一诚实表达（/still 的体素要 2–4s）。
   // 无文字（文案只能来自 COPY），只有一层与 --veil 同色的渐变；就绪后淡出。
-  '#veil{position:fixed;inset:0;z-index:6;background:radial-gradient(120% 90% at 50% 42%,#141922 0%,#07090c 72%);',
+  '#veil{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;',
+  'padding:24px;background:radial-gradient(120% 90% at 50% 42%,#141922 0%,#07090c 72%);',
   'opacity:1;transition:opacity 1.4s ease;pointer-events:none}',
   'body[data-state=ready] #veil,body[data-state=degraded] #veil,body[data-state=failed] #veil{opacity:0}',
+  // 有启动说明时，遮罩必须留着；否则「正在准备」的字会浮在已经出现的画面上。
+  'body[data-boot=on] #veil{opacity:1}',
+  // 超时后世界还没来：放 L0 底材进来，遮罩只留一层很薄的暗和一句说明。
+  // 这不是「假装就绪」—— state 仍是 degraded，调试条仍报 readiness=0。
+  'body[data-boot=slow] #veil{opacity:1;background:rgba(7,9,12,.28)}',
+  // 启动遮罩上唯一允许的字：进度/超时/不支持，全部来自 COPY.boot。不是营销文案。
+  '#boot-note{margin:0;max-width:38ch;text-align:center;font:400 13px/1.6 ui-serif,Georgia,serif;',
+  'letter-spacing:.02em;color:rgba(232,238,245,.72);text-shadow:0 1px 3px rgba(0,0,0,.5)}',
+  '#boot-note[hidden]{display:none}',
   '#boot-error{position:fixed;left:8px;top:8px;z-index:7;max-width:92vw;padding:8px 10px;',
   'background:rgba(80,12,16,.92);border:1px solid rgba(255,120,120,.45);border-radius:4px;',
   'font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap;color:#ffd7d7}',
+  // ── /license 手机排版：390×844 时纸约 370×262，桌面百分比会把正文挤成重叠 ──
+  '@media (max-width:600px){',
+  'body[data-sheet=on] #h1{left:calc(var(--sheet-x) + var(--sheet-w)*0.07);',
+  'top:calc(var(--sheet-y) + var(--sheet-h)*0.10);font-size:clamp(18px,6vw,24px)}',
+  'body[data-sheet=on] #lead{left:calc(var(--sheet-x) + var(--sheet-w)*0.07);',
+  'top:calc(var(--sheet-y) + var(--sheet-h)*0.20);max-width:calc(var(--sheet-w)*0.82);',
+  'font-size:11px;line-height:1.45}',
+  '#cert{width:calc(var(--sheet-w)*0.86)}',
+  '#cert-title{top:calc(var(--sheet-y) + var(--sheet-h)*0.35);font-size:10px;letter-spacing:.16em}',
+  '#cert-rule{top:calc(var(--sheet-y) + var(--sheet-h)*0.385)}',
+  '#cert-declaration{top:calc(var(--sheet-y) + var(--sheet-h)*0.41);',
+  'max-width:calc(var(--sheet-w)*0.78);font-size:11px;line-height:1.45}',
+  '#cert-serial{top:calc(var(--sheet-y) + var(--sheet-h)*0.64);font-size:11px}',
+  '#cert-date{top:calc(var(--sheet-y) + var(--sheet-h)*0.69);font-size:10.5px}',
+  '#cert-seal-sub{top:calc(var(--sheet-y) + var(--sheet-h)*0.825);font-size:9px}',
+  '#seal{width:64px;height:64px;border-width:2px;font-size:10px}',
+  '#save{bottom:calc((100vh - var(--sheet-h)) / 2 - 54px);',
+  'font-size:11px;padding:.45em 1em}',
+  // 手机把二级动作与 Save 移到纸下方：纸内底部同时站着 approved、章下副行和章，放不下第三排。
+  '#play-hint{top:calc((100vh - var(--sheet-h)) / 2 + var(--sheet-h) + 10px);',
+  'left:calc(var(--sheet-x) + var(--sheet-w)*0.07);max-width:calc(var(--sheet-w)*0.9);',
+  'font-size:10px;line-height:1.5;color:rgba(232,238,245,.82)}',
+  '#again,#fold{color:rgba(232,238,245,.82);text-decoration-color:rgba(232,238,245,.32)}',
+  '#stage-word{bottom:calc((100vh - var(--sheet-h)) / 2 + var(--sheet-h)*0.10);font-size:10px}',
+  '.play-note{display:none}',
+  '}',
   // /koi 的 real 是深色水面：ink 站默认的深墨标题会沉进水里。
   // 只改这一种 look 的文字角色，不动站点骨架；paint/ink 仍是浅纸深墨。
   'body[data-koi-style=real] #h1{color:rgba(246,242,232,.96);',
@@ -358,7 +439,9 @@ const TEMPLATE = [
   // 它不是第二个 CTA —— 不接收点击，只报告一次已发生的动作。
   '<p id="share-note" role="status" hidden></p>',
   '__SITE_EXTRA__',
-  '<div id="veil" aria-hidden="true"></div>',
+  '<div id="veil" aria-hidden="true"><p id="boot-note">__BOOT_NOTE__</p></div>',
+  // 触屏入口在 CSS 里只对 coarse pointer 显示；桌面首屏仍恰好三个可点/可见文字。
+  '<button id="menu-open" type="button" data-channel="ui" aria-label="__SITE_MENU_TITLE__">__SITE_MENU_TITLE__</button>',
   '<div id="menu" role="dialog" aria-label="__SITE_MENU_TITLE__" hidden>',
   '<div class="menu-title">__SITE_MENU_TITLE__</div>',
   '__SITE_MENU_ITEMS__',
@@ -505,6 +588,7 @@ export async function buildSite(options) {
     // ⚠️ 必须 replaceAll：模板里 `__SITE_MENU_TITLE__` 出现两次（aria-label 与可见标题），
     //   `String.replace` 只换第一处 → 可见标题直接显示占位符（截图抓到过）。
     .replaceAll('__SITE_MENU_TITLE__', escapeHtml(UI.menuTitle))
+    .replace('__BOOT_NOTE__', () => escapeHtml(COPY.boot.preparing))
     .replace('__SITE_MENU_ITEMS__', () => UI.items
       .filter((item) => (item.only ? item.only === station.slug : true)
         && (item.id !== 'menu-wind' || station.slug === 'hug'))
@@ -530,6 +614,9 @@ export async function buildSite(options) {
     .replace('__SAVE_LABEL__', () => escapeHtml(COPY.license.saveLabel))
     .replace('__SEAL_TEXT__', () => escapeHtml(COPY.license.sealText))
     .replace('__AGAIN_LABEL__', () => escapeHtml(COPY.license.againLabel))
+    .replace('__FOLD_LABEL__', () => escapeHtml(COPY.license.foldLabel))
+    .replace('__KOI_KEEP__', () => escapeHtml(COPY.koiPond.keepLabel))
+    .replace('__STILL_COPY__', () => escapeHtml(COPY.still.copyLine))
     .replace('__SITE_BOOT__', () => script);
 
   let outPath = null;
@@ -569,19 +656,49 @@ export async function buildAllSites() {
   for (const slug of Object.keys(STATIONS)) {
     results.push(await buildSite({ slug }));
   }
-  // 索引页：单域名下按路径分站，这里给一个最小的入口列表
-  const links = Object.values(STATIONS)
-    .map((station) => `<li><a href="${station.slug}/">${station.title}</a> — ${station.lead}</li>`)
-    .join('');
+  // 索引页：不是裸 `<ul>`，是门厅 —— 四张卡、每张有编号/名字/一句/状态。
+  // 用户已拍板四站都不撤，所以这里只列 live，且四张都在。
+  const live = Object.values(STATIONS).filter((station) => station.status === 'live');
+  const cards = live.map((station, index) => [
+    `<a class="card" href="${station.slug}/">`,
+    `<span class="card-no">${String(index + 1).padStart(2, '0')}</span>`,
+    `<span class="card-title">${station.title}</span>`,
+    `<span class="card-lead">${station.lead}</span>`,
+    '<span class="card-state">Open</span>',
+    '</a>',
+  ].join('')).join('');
   const indexHtml = [
     '<!DOCTYPE html>',
     '<html lang="en"><head><meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Stations</title>',
-    `<style>${STYLE}</style>`,
-    '</head><body style="overflow:auto;padding:12vh 10vw">',
-    '<h1 style="font-weight:400">Stations</h1>',
-    `<ul style="line-height:2">${links}</ul>`,
+    '<title>Emopulse · Stations</title>',
+    '<style>',
+    ':root{--ink:#e8eef5;--dim:#9aa7b8;--veil:#0a0c10}',
+    '*{box-sizing:border-box}',
+    'html,body{margin:0;min-height:100%;background:radial-gradient(120% 90% at 50% 0%,#151b24 0%,#07090c 70%);color:var(--ink)}',
+    'body{font:15px/1.6 ui-serif,Georgia,"Songti SC",serif;padding:9vh 6vw 7vh}',
+    '.wrap{max-width:1120px;margin:0 auto}',
+    '.kicker{margin:0 0 18px;font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.22em;color:var(--dim);text-transform:uppercase}',
+    'h1{margin:0;font-weight:400;font-size:clamp(34px,6vw,72px);line-height:.96;letter-spacing:-.02em}',
+    '.sub{margin:22px 0 46px;max-width:42ch;color:var(--dim);font-size:16px}',
+    '.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}',
+    '.card{position:relative;display:flex;flex-direction:column;min-height:210px;padding:20px 20px 18px;',
+    'border:1px solid rgba(232,238,245,.18);border-radius:10px;background:rgba(255,255,255,.025);',
+    'color:inherit;text-decoration:none;transition:border-color .2s ease,background .2s ease,transform .2s ease}',
+    '.card:hover,.card:focus-visible{border-color:rgba(232,238,245,.55);background:rgba(255,255,255,.055);transform:translateY(-2px);outline:none}',
+    '.card-no{font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;color:var(--dim)}',
+    '.card-title{margin-top:auto;font-size:clamp(24px,2.4vw,34px);line-height:1.05;font-weight:400}',
+    '.card-lead{margin-top:10px;color:var(--dim);font-size:13px;line-height:1.55;max-width:26ch}',
+    '.card-state{margin-top:18px;font:10px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;color:rgba(190,220,190,.86);text-transform:uppercase}',
+    '@media (max-width:600px){body{padding:7vh 5vw}.sub{margin-bottom:30px}.card{min-height:180px}}',
+    '</style>',
+    '</head><body>',
+    '<main class="wrap">',
+    '<p class="kicker">Four rooms · one house</p>',
+    '<h1>Stations</h1>',
+    '<p class="sub">Small places to stop, look, and take one thing with you. No account. No feed.</p>',
+    `<div class="grid">${cards}</div>`,
+    '</main>',
     '</body></html>',
   ].join('\n');
   const indexPath = path.join(DIST_DIR, 'index.html');

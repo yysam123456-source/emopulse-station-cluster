@@ -69,6 +69,9 @@ function render() {
   .card h2{margin:0;font:400 22px/1.25 Georgia,"Times New Roman",serif}
   .meta{color:var(--muted);font-size:11px;line-height:1.6;margin-top:5px}
   .badge{font-size:10px;letter-spacing:.08em;color:var(--accent);border:1px solid #2b5f55;border-radius:999px;padding:4px 8px;white-space:nowrap}
+  .badge.over{color:#ff8b8b;border-color:#7a2a2a;background:rgba(120,20,20,.18)}
+  .badge.warn{color:var(--warm);border-color:#6b4a24}
+  #quality{background:#0a0f16;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font:12px ui-monospace,Menlo,monospace}
   .frame{position:relative;aspect-ratio:16/9;background:#040609;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#040609}
   .controls{padding:12px 18px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
@@ -93,7 +96,15 @@ function render() {
     <h1>Stage Templates · Studio</h1>
     <div class="meta">${templates.length} 个模板 · 单 HTML · 零外部请求 · 参数走 query</div>
   </div>
-  <p>第一层：templates.mjs 注册 / 第二层：build-templates.mjs 构建与体积门 / 第三层：这个 Studio。生成于 ${generatedAt}</p>
+  <div class="meta" style="text-align:right">
+    <label for="quality">Quality </label>
+    <select id="quality" aria-label="Quality">
+      <option value="high">High</option>
+      <option value="normal">Normal</option>
+      <option value="low">Low</option>
+    </select>
+    <p style="margin:8px 0 0">第一层：templates.mjs 注册 / 第二层：build-templates.mjs 构建与体积门 / 第三层：这个 Studio。生成于 ${generatedAt}</p>
+  </div>
 </header>
 <main class="grid" id="grid"></main>
 <footer>
@@ -103,6 +114,9 @@ function render() {
 <script>
 const TEMPLATES = ${payload};
 const grid = document.getElementById('grid');
+const quality = document.getElementById('quality');
+let qualityValue = quality?.value || 'high';
+const refreshers = [];
 
 function queryFor(t, values) {
   const q = new URLSearchParams();
@@ -112,6 +126,9 @@ function queryFor(t, values) {
     if (p.type === 'boolean') q.set(p.key, v ? '1' : '0');
     else q.set(p.key, String(v));
   }
+  // 产品模板默认隐藏调试条；画质是 Studio 的全局选择。
+  q.set('clean', '1');
+  q.set('quality', qualityValue);
   return q.toString();
 }
 
@@ -122,7 +139,8 @@ for (const t of TEMPLATES) {
 
   const head = document.createElement('div');
   head.className = 'card-head';
-  head.innerHTML = '<div><h2>' + t.name + '</h2><div class="meta">' + t.id + ' · preset ' + t.preset + ' · ' + (t.bytes / 1024).toFixed(1) + ' KB / gzip ' + (t.gzipBytes / 1024).toFixed(1) + ' KB<br>' + t.parts.join(' + ') + '</div></div><span class="badge">' + (t.hasGl ? 'GL' : '2D') + ' · READY</span>';
+  const over = Boolean(t.overBudget);
+  head.innerHTML = '<div><h2>' + t.name + '</h2><div class="meta">' + t.id + ' · preset ' + t.preset + ' · ' + (t.bytes / 1024).toFixed(1) + ' KB / gzip ' + (t.gzipBytes / 1024).toFixed(1) + ' KB · limit ' + ((t.budgetLimit || 1048576) / 1024).toFixed(0) + ' KB<br>' + t.parts.join(' + ') + '</div></div><span class="badge ' + (over ? 'over' : '') + '">' + (over ? 'OVER BUDGET · ' : '') + (t.hasGl ? 'GL' : '2D') + ' · READY</span>';
 
   const frame = document.createElement('div');
   frame.className = 'frame';
@@ -193,6 +211,9 @@ for (const t of TEMPLATES) {
   open.textContent = '打开独立页';
   open.target = '_blank';
   open.rel = 'noopener';
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'btn';
+  exportBtn.textContent = '导出单 HTML';
   const reset = document.createElement('button');
   reset.className = 'btn';
   reset.textContent = '重置参数';
@@ -203,20 +224,71 @@ for (const t of TEMPLATES) {
   });
   const note = document.createElement('span');
   note.className = 'meta';
-  note.textContent = '参数写进 query，iframe 即时刷新';
-  actions.append(open, reset, note);
+  note.textContent = '参数防抖 180ms；Quality 对全部模板生效';
+  actions.append(open, exportBtn, reset, note);
+
+  // 导出：把当前参数**写死进单 HTML**，打开时不需要 Studio、也不发任何请求。
+  // 不用 data: URL，因为 >2 MB 的 temple/gate 在部分浏览器会被截断；用 Blob 下载。
+  exportBtn.addEventListener('click', async () => {
+    exportBtn.disabled = true;
+    const original = exportBtn.textContent;
+    exportBtn.textContent = '导出中…';
+    try {
+      const res = await fetch(t.url + '?' + queryFor(t, values), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      let html = await res.text();
+      const embedded = Object.assign({}, values, { quality: qualityValue, clean: '1' });
+      // 把参数变成「下载文件自己的 query」：预览宿主/零件读 location.search 时，
+      // 由这个极小的 URLSearchParams 垫片把 __EMBEDDED_PARAMS__ 合并进去。
+      const shim = '(function(){var E=' + JSON.stringify(embedded).replace(/</g, '\\\\u003c') + ';'
+        + 'window.__EMBEDDED_PARAMS__=E;var N=window.URLSearchParams;'
+        + 'function P(init){var q=new N(init===undefined?"":init);'
+        + 'if(typeof init==="string"&&(init===location.search||init===location.search.slice(1))){'
+        + 'for(var k in E){if(!q.has(k))q.set(k,String(E[k]));}}return q;}'
+        + 'P.prototype=N.prototype;window.URLSearchParams=P;})();';
+      html = html.replace('</head>', '<script>' + shim + '</scr' + 'ipt></head>');
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'emopulse-' + t.id + '.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      note.textContent = '已导出 ' + (html.length / 1024).toFixed(1) + ' KB · 参数已内嵌';
+    } catch (error) {
+      note.textContent = '导出失败：' + (error && error.message ? error.message : String(error)) + '（用本地服务打开 Studio 再试）';
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = original;
+    }
+  });
 
   card.append(head, frame, controls, actions);
   grid.appendChild(card);
 
-  update = () => {
+  let refreshTimer = 0;
+  const apply = () => {
     const q = queryFor(t, values);
     const url = t.url + (q ? '?' + q : '');
     iframe.src = url;
     open.href = url;
   };
-  update();
+  update = () => {
+    // 拖动 range 时 250ms 防抖：不会每个 input 事件都重建 iframe。
+    window.clearTimeout(refreshTimer);
+    refreshTimer = window.setTimeout(apply, 250);
+  };
+  refreshers.push(apply);
+  apply();
 }
+
+quality?.addEventListener('change', () => {
+  qualityValue = quality.value;
+  // 全部模板一起换档；不重载 Studio，只重载各自的 iframe。
+  for (const refresh of refreshers) refresh();
+});
 </script>
 </body>
 </html>`;

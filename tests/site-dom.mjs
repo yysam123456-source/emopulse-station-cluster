@@ -13,7 +13,8 @@
 //   6. 有纸的站：`#h1` 与 `#lead` 的矩形必须**落在纸内**（文案跑到桌面上是本次最直观的缺陷）
 //
 // 用法：node tests/site-dom.mjs
-import { launch, openFile, waitForPreview, REPO_ROOT } from './lib/browser.mjs';
+// 0 依赖：Playwright 缺失时也能跑（tests/lib/browser.mjs 只认 macOS 缓存，本机 Windows 跑不了）。
+import { launch, openFile, waitForPreview, REPO_ROOT } from './lib/cdp-browser.mjs';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { COPY, UI } from '../shared/sites/copy.mjs';

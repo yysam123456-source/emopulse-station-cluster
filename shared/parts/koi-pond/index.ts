@@ -814,6 +814,12 @@ function create(env: PartEnv, opts: KoiOptions = {}): PartInstance {
       return ready ? 1 : 0.85;
     },
 
+    readinessInfo(): { value: number; label?: string; blocking?: boolean } {
+      return ready
+        ? { value: 1, blocking: false }
+        : { value: 0.85, label: 'water', blocking: false };
+    },
+
     describe(): { sheet: Rect | null } {
       return { sheet: null };
     },
@@ -853,6 +859,8 @@ export const part: PartV2 = {
   channel: 'world',
   requires: ['webgl2'],
   expendable: false,
+  /** 纸面先出、鱼后到：首帧后再同步编译 koi 的 renderer/shader。 */
+  defer: 'after-first-frame',
   create,
 };
 

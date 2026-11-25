@@ -147,7 +147,9 @@ function build(stageMod, parts, extra = {}) {
   return { stage, log, canvas, advance(ms) { clock += ms; stage.frame(clock); } };
 }
 
-const stageMod = await loadTsModule(path.join(REPO_ROOT, 'shared', 'stage', 'index.ts'));
+const stageMod = await loadTsModule(
+  process.env.STAGE_INDEX || path.join(REPO_ROOT, 'shared', 'stage', 'index.ts'),
+);
 
 // ---------------------------------------------------------------- 1. 层序与 z
 {

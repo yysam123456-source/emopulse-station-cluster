@@ -7,7 +7,7 @@
 > **praise = 冻结 legacy**：仓库有 `sites/praise/`（源码完整、仍在注册表），但**无构建产物、不进 `copy.mjs`、不接入本期产品口径**。本文 §5/§6 里所有 `praise.ts` 行都是**历史句式规范**（给将来复用者看），**不是本站待办**。四站口径仍是 `/license` `/hug` `/still` `/koi`。
 >
 
-> **2026-11-20 现状（优先于本文历史迁移段）**：路由是 `/koi`（不是 `/koi-pond`），承载 zz85 完整锦鲤池的 ink / paint / real 三种 look。`/koi` 没有主按钮，也没有「Keep this frame」；Look / Touch / Camera / Water / Weather / Music 是 Esc 菜单里的二级控制，`?style=` 是正式深链接。§6.4 中「风格切换器不存在、只做 pond 一条路由」是旧 ASCII 方案的迁移记录，已作废；保留它只为解释历史，不再作为施工口径。
+> **2026-11-25 现状（优先于本文历史迁移段）**：路由是 `/koi`（不是 `/koi-pond`），承载 zz85 完整锦鲤池的 ink / paint / real 三种 look。`/koi` 没有主按钮；停留 ≥40s 后出现 `Keep this frame`（保存当前帧 PNG），Look / Touch / Camera / Water / Weather / Music 仍只在 Esc 菜单里，`?style=` 是正式深链接。
 
 > 三条铁律（每句都过了一遍）：**不声称任何健康/疗愈效果** · **不编造社交证据**（不出现"有人回赠""已送达""有人在等你"——零服务端不可能知道） · **不出现**消费引导、外部链接、注册入口、连续天数、打卡、进度成就、"你今天完成了"。
 >
@@ -122,9 +122,9 @@ Microphone on. Nothing is recorded. Wind only.
 | `/license` | `Stamp again` | 纯 UI + 站点内时序 | **在纸上，不在 Esc 菜单**——把一次仪式动作藏进菜单，它就不是仪式了 |
 | `/license` | `Save it` / 复制编号 | 纯 UI（导出是裁切当前帧） | 纸下方 |
 | `/still` | `Sit` | 纯 UI + 站点内状态切换 | 首屏 |
-| `/still` | `Copy the line` | 纯 UI（**未实现**） | 停留 ≥60s 后；见 §开放项 |
+| `/still` | `Copy the line` | 纯 UI（已实现） | 停留 ≥40s 后；见 §开放项 |
 | `/koi` | **无主按钮** | — | 首屏——连续场，读位置不读"决定"；`cta=null` |
-| `/koi` | — | — | 不设带走入口；看鱼本身就是目的 |
+| `/koi` | — | 纯 UI（保存当前帧 PNG） | 停留 ≥40s 后出现 `Keep this frame`；不设主按钮，看鱼仍是主体验 |
 
 **审计结论**：全四站 **1 处世界注入**（`/hug` 的 `Let it go`），且它不在任何菜单里。四站里三站完全不需要注入——**这个比例说明「站点是翻译层」是对的：默认不翻译，只在 UI 真的驱动世界时翻译一次。** 若将来算出多于一处，那不是文案问题，是有地方把 UI 当成了世界入口，要先改设计。
 
@@ -142,6 +142,7 @@ Microphone on. Nothing is recorded. Wind only.
 | 审批完成后的唯一按钮 | `Save it` | 纸下方 |
 | 审批完成后（低对比，二级） | `Stamp again` | 纸角 |
 | 审批完成后（低对比，二级） | `drag to move the light · f to fold the corner` | 纸角，`Stamp again` 下一行 |
+| 折角按钮（纸角，可点） | `Fold the corner` / `Unfold the corner` | 纸角，与 `Stamp again` 同一行 |
 | 保存完成 | `Saved.` | 按钮原位，2s 后回退为 `Save it` |
 
 > **2026-11-19 A1 裁决**：三段状态机**不画进度条、不列三步**；只允许一个极小的状态词（`approved`）落在纸面底部，作为「章已落下」的回声。完整三段只在 Esc 的 About 里说明。
@@ -163,7 +164,7 @@ Microphone on. Nothing is recorded. Wind only.
 | 触发 | 英文 |
 |---|---|
 | 按下 `Sit` 后 10s | `Stay as long as you like.` |
-| 停留 ≥ 60s 出现入口 | `Copy the line` |
+| 停留 ≥ 40s 出现入口 | `Copy the line` |
 | 复制完成 | `Copied.` |
 
 五档由**光的状态**决定的句子（这就是带走物的正文，见 §4）：
@@ -182,12 +183,20 @@ Microphone on. Nothing is recorded. Wind only.
 
 | 触发 | 英文 |
 |---|---|
-| 停留 ≥ 60s 出现入口 | `Keep this frame` |
+| 停留 ≥ 40s 出现入口 | `Keep this frame` |
 | 保存完成 | `Saved.` |
-| 一级下的二级入口 | `Copy the seed link` |
-| 复制完成 | `Copied.` |
 
 > 除此之外**没有状态文案**。这一站刻意不给任何提示语——"看就够了"是它的全部内容，一句提示都会把它变成需要回应的东西。
+
+### 启动遮罩（四站共用）
+
+| 触发 | 英文 |
+|---|---|
+| 首帧前且未超时 | `Preparing the world…` |
+| 首帧已出但 readiness < 1，或超时 | `The world is taking longer than it should. The page is still usable.` |
+| L1 世界申报 unsupported（如本机无 WebGPU） | `This browser cannot draw the world. Paper and text remain.` |
+
+> 启动遮罩上的字只允许这三句；没有营销句、没有进度百分比。状态变为 `ready` 或只剩预算降档时，遮罩与这句一起消失。
 
 ---
 
@@ -238,7 +247,7 @@ No reply needed. None expected.
 |---|---|
 | 图 | PNG，一帧池面。**无边框、无标题、无水印、无任何文字**（含站名与编号） |
 | 深链接 | `https://<host>/koi?style=ink|paint|real`；另有 `mode/cam/floor/rain/music` 可组合 |
-| 链接说明 | 无。由 `Copy the seed link` 的按钮标签自解释，不加提示语 |
+| 链接说明 | 无。`Keep this frame` 按钮标签自解释；不另加提示语，也不做第二级“复制链接” |
 
 ---
 

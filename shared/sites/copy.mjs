@@ -35,6 +35,11 @@ export const COPY = Object.freeze({
     /** 终态唯一按钮（COPY-SITES §3:130「审批完成后的唯一按钮 | Save it」）。
      *  此前模板里手写着 `Save this card`，与定稿不一致 —— 属于"代码自己编文案"的同一个洞。 */
     saveLabel: 'Save it',
+    /** 保存完成后的原位反馈（COPY-SITES §3）；2s 后回退。 */
+    saved: 'Saved.',
+    /** 折角按钮；纸上可点，不是菜单里的死项。 */
+    foldLabel: 'Fold the corner',
+    unfoldLabel: 'Unfold the corner',
     /** 章面文字（COPY-SITES §3:127）。此前写在模板里，属于"屏幕上的字不都来自 COPY"。 */
     sealText: 'APPROVED',
     /** 纸角二级按钮（COPY-SITES §3:131）。同上。 */
@@ -44,6 +49,8 @@ export const COPY = Object.freeze({
     h1: 'Hug',
     hook: 'Send a little warmth as a link.',
     cta: 'Let it go',
+    copyLink: 'Copy the link',
+    copied: 'Copied.',
   },
   still: {
     h1: 'Still',
@@ -51,6 +58,17 @@ export const COPY = Object.freeze({
     /** 定稿 CTA 是 'Sit' —— 现在真的把世界视角沉下去（cue('sit')）。 */
     cta: 'Sit',
     ctaCopy: 'Sit',
+    copyLine: 'Copy the line',
+    copied: 'Copied.',
+    stayHint: 'Stay as long as you like.',
+    /** 五档由光的状态决定；第 5 句是落点，不要改。 */
+    lines: [
+      'The light is still on the water.',
+      'The light is leaving the surface.',
+      'The light is thinner than when you sat down.',
+      'The light is almost under.',
+      'The light is gone. The water is still here.',
+    ],
   },
   // 注意：文档里这一项的 key 是 `koiPond`，站点 slug 是 `koi`
   koiPond: {
@@ -59,6 +77,14 @@ export const COPY = Object.freeze({
     /** 定稿 CTA 是 'Watch' —— 没有实现，先不挂。 */
     cta: null,
     ctaCopy: 'Watch',
+    keepLabel: 'Keep this frame',
+    saveNote: 'Saved.',
+  },
+  /** 启动遮罩与失败提示；只在状态真的需要时出现。 */
+  boot: {
+    preparing: 'Preparing the world…',
+    slow: 'The world is taking longer than it should. The page is still usable.',
+    unsupported: 'This browser cannot draw the world. Paper and text remain.',
   },
 });
 

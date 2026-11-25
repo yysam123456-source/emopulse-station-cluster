@@ -86,6 +86,23 @@ export const BLEND_MODES: readonly BlendMode[] = [
 /** 画质档位。装配器在超预算时把零件降到 low，而不是不画。 */
 export type Lod = 'low' | 'high';
 
+/**
+ * 就绪详情。`readiness()` 只给一个数，壳无法知道「卡在哪一步、要不要挡住开门」。
+ * 这个可选接口把进度文案与阻塞资格一起上报；不实现的零件仍按 readiness() 的单一数字处理。
+ */
+export interface PartReadiness {
+  /** 0..1 */
+  readonly value: number;
+  /** 给用户看的一句话；只在未就绪时使用 */
+  readonly label?: string;
+  /**
+   * 是否允许在首帧出现前继续挡住启动遮罩。
+   * 只有 L1 world 可以申报 true；L0/L2–L5 一律不得阻塞（否则纸面先出的站会被水挡住）。
+   */
+  readonly blocking?: boolean;
+}
+
+
 /** biome —— 决定默认调色与后处理倾向，零件可读。 */
 export type BiomeId = 'tide' | 'field' | 'room' | 'ink';
 
@@ -186,6 +203,8 @@ export interface PartInstance {
   cue?(verb: string): void;
   /** 首帧/资源就绪度 0..1；不实现视为 1。壳据此决定是否收起 boot 遮罩。 */
   readiness?(): number;
+  /** 就绪详情（进度文案 + 是否阻塞开门）；不实现时退回 readiness() 的单一数字。 */
+  readinessInfo?(): PartReadiness;
   /** 当前几何（纸矩形等）；只在 L0 底材需要实现。 */
   describe?(): PartGeometry | null;
   dispose?(): void;
@@ -227,6 +246,12 @@ export interface PartV2 {
   readonly expendable?: boolean;
   /** 该零件依赖的浏览器能力，装配器据此跳过不支持的零件并记入 degraded */
   readonly requires?: readonly ('webgl2' | 'webgpu' | 'mic' | 'pointer')[];
+  /**
+   * 延后构造：只在首帧出现后/空闲时调用 create()。
+   * 用于 `/koi` 这种「纸面 + 文字必须先出，重 shader 编译再排队」的站；
+   * 不能用于 L0/L1 底件（首帧没有底件会露黑）。
+   */
+  readonly defer?: 'after-first-frame' | 'idle';
   /** 仅 L0 底材实现：在给定尺寸下先算出纸矩形，供 world 通道在 create 前就知道画在哪 */
   readonly describe?: (size: StageSize, biome: BiomeId) => PartGeometry | null;
   readonly create: (env: PartEnv) => PartInstance;
