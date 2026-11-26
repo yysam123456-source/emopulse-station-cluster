@@ -67,18 +67,22 @@ ScenePlan（构图 / 光照 / 雾 / 后处理 / 地形）
 
 还没拆、也没有排期的：`koi` 的渲染链（拆之前要先定 RT 所有权和 pass 顺序，见 [`INTERNAL-SCENE-PARTS.md`](./INTERNAL-SCENE-PARTS.md) §7）。
 
-## 5. 写实资产
+## 5. 写实资产（2026-11-26 起为程序化表面）
 
-全部贴图是 `shared/realism/assets.ts` 里的 base64 内联常量，共 15 张（12 张 JPEG + 3 张 PNG；口径：文件内 `export const` 的个数）。该文件头注释写明：由 AI 生成（seedream 5.5）并压缩的写实表面贴图。本文只转述这条注释，不断言图片的实际来源。
+**现行实现**：temple/gate 的材质不再依赖 `shared/realism/assets.ts` 的 base64 贴图；`materials.ts` 用 Canvas2D  painter 生成 `CanvasTexture`：
 
-| 用途 | 常量 | 尺寸（解码图片头读出） | 怎么用（`shared/realism/materials.ts`） |
-|---|---|---|---|
-| 屋顶板瓦 | `ROOF_JPG` | 1024×1024 | 世界坐标 UV，瓦垄沿坡面竖直（`shared/realism/roof.ts`）；板瓦材质 roughness 0.78、metalness 0、clearcoat 0 |
-| 苔庭地表 | `GRASS_JPG` | 1024×1024 | 重复 20×20，同时作 bumpMap |
-| 天空 | `SKY2_JPG` | 1536×768（2:1） | 等距柱状贴图，作为天空球，并复用为场景环境光（`shared/realism/modules/atmosphere.ts`、`shared/realism/scene.ts`） |
-| 植被卡片 | `PINE_CUT_PNG` / `GRASS_CUT_PNG` / `SHRUB_CUT_PNG` | 512×512 | 带 alpha 的 PNG，`alphaTest` 0.42 / 0.4 / 0.4，法线朝上 |
-| 其他表面 | `CEDAR_JPG` `RED_JPG` `PLASTER_JPG` `STONE_JPG` `GRAVEL_JPG` `MOSS_JPG` | 1024×1024 | 杉木 / 朱漆 / 灰泥 / 花岗岩 / 碎石 / 苔 |
-| 有常量、没有使用方 | `ROOF2_JPG` `SKY_JPG` `PINE_JPG` | 1024×1024 / 1536×768 / 1024×1024 | `shared/realism/materials.ts` 只 import、不引用；它们不在 temple / gate 产物里 |
+| 用途 | painter | 用法 |
+|---|---|---|
+| 杉木 / 深木 / 立柱 | `paintCedar` | `cedar` / `cedarVertical` / `darkWood`，重复 1.2–2.2× |
+| 朱漆 | `paintRedLacquer` | 鸟居、柱、门窗框，重复 2.1× |
+| 灰泥 | `paintPlaster` | 墙面，map + bump 各一份，重复 2.6×2.2 |
+| 板瓦 | `paintSlate` | 屋顶，map + bump，旋转 -45°，重复 3×1.55 |
+| 花岗岩 / 碎石 / 苔 / 草 | `paintStone` / `paintGravel` / `paintMoss` / `paintGrass` | 石基、砾石路、苔庭、草地；草与苔重复 18–20× |
+| 树皮 | `paintBark` | 松树干，重复 2.2×5.5 |
+| 植被剪影 | `paintNeedleAlpha` / `paintGrassClumpAlpha` / `paintShrubAlpha` | 松针 / 草丛 / 灌木卡片，带 alpha，`alphaTest` 0.4–0.42 |
+| 天空 | `paintSky` | 1024×512 等矩形全景，`EquirectangularReflectionMapping`，天空球 |
+
+历史对照：旧版 `shared/realism/assets.ts` 有 15 个 `data:image` 常量（12 JPEG + 3 PNG），文件头自述由 AI 生成（seedream 5.5）并压缩；本次已从 `materials.ts` / `atmosphere.ts` 的 import 图里移除，产物 `data:image` 计数为 0。该文件保留在仓库作历史对照，不再参与 temple/gate 构建。
 
 ## 6. 实时预览与摄影模式
 
@@ -94,10 +98,10 @@ ScenePlan（构图 / 光照 / 雾 / 后处理 / 地形）
 - GPU 截图下方向光阴影正常（SwiftShader 下阴影缺失是环境限制，不是代码问题）。
 - `tsc --noEmit` 0 error（2026-11-24 实跑，见 [`STATUS.md`](./STATUS.md)）；`dist/templates` 5 个模板 + `manifest.json` + Studio 已重建。
 
-未达成（2026-11-24 实测，取证见 [`review-2026-11-24/ux-a2/WALKTHROUGH.md`](./review-2026-11-24/ux-a2/WALKTHROUGH.md) U-02、U-08、U-09）：
-- 实时 WebGL 画面仍是“高精度游戏资产”级，不是照片级；屋顶、松针、草地细节在近景仍能看出卡片/重复纹理。
+未达成（2026-11-24 实测，取证见 [`review-2026-11-24/ux-a2/WALKTHROUGH.md`](./review-2026-11-24/ux-a2/WALKTHROUGH.md) U-02、U-08、U-09；2026-11-26 已部分收口）：
+- 实时 WebGL 画面仍是“高精度游戏资产”级，不是照片级；屋顶、松针、草地细节在近景仍能看出卡片/重复纹理。程序化表面替代照片贴图后，近景细节进一步简化，换来体积可分发。
 - 路径追踪摄影模式仍有采样噪声，96 samples / 0.65 renderScale 下需要后续接 OIDN 或提高采样。
-- 体积超标：`temple` 单文件 4,992,587 B、gzip 3,473,188 B，`gate` 4,992,577 B / 3,473,186 B（口径：`gzip -9 -c dist/templates/temple/index.html | wc -c`），是 A2 入口 ≤ 1 MB 线的 3.4 倍。Studio 只显示这个数字，不预警（U-03）。
-- “全程序化”只对 deepsea / nebula / koi 成立：temple / gate 产物内含 12 张 base64 位图，占原始字节 87.79%、gzip 的 95.3%。
-- 加载期暗屏：主线程解析内联脚本期间无法出图，桌面约 5–12 s 才见完整画面（U-09）。
-- 体积怎么降（纹理分级 512/1024、按方案按需打包、位图外置）尚未裁决；评审把它列在 A2 的 P1（体积 > 1 MB 红色预警），见 [`review-2026-11-24/REVIEW-2026-11-24.md`](./review-2026-11-24/REVIEW-2026-11-24.md) §5.2。
+- **已闭**：temple 606.0 KB / gzip 160.7 KB，gate 605.9 KB / gzip 160.8 KB，均 ≤1 MB（2026-11-26 `build:templates` 实测）；Studio 已显示 Toy / 独立站门槛并红色预警。
+- **已闭**：“全程序化”5/5 成立：temple/gate 产物 `data:image` 0 个；12 张 base64 贴图已换成 Canvas painter。
+- **已显著缓解**：加载期暗屏从 4.99 MB 单文件降到 606 KB，桌面完整画面时间不再以 5–12 s 计；仍受主线程解析内联脚本影响。
+- 体积怎么继续降（纹理分级 512/1024、按方案按需打包）已不再是 Toy 门槛的阻塞项；后续只在需要更高质量时再评估。

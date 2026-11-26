@@ -36,6 +36,8 @@ export interface SiteConfig {
   readonly biome: BiomeId;
   readonly seed: number;
   readonly budgetMs: number;
+  /** 自动降分辨率下限；纸面站用它保清晰度（0.55–1，缺省 0.55）。 */
+  readonly minRenderScale?: number;
   readonly glBlend: BlendMode | null;
   /** 站内自持声音时关掉壳的通用环境声（/koi 的原作水声/音乐）。 */
   readonly ambience?: boolean;
@@ -151,6 +153,7 @@ export function boot(parts: readonly PartV2[], config: SiteConfig): SiteHandle |
       biome: config.biome,
       seed: config.seed,
       budgetMs: config.budgetMs,
+      minRenderScale: config.minRenderScale,
       glBlend: config.glBlend === null ? undefined : config.glBlend,
       reducedMotion: typeof window.matchMedia === 'function'
         ? window.matchMedia('(prefers-reduced-motion: reduce)').matches

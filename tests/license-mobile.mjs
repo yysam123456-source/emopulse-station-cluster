@@ -72,6 +72,14 @@ try {
   const viewport = await page.evaluate(() => document.querySelector('meta[name="viewport"]')?.content ?? '');
   check(/user-scalable=no/i.test(viewport) && /maximum-scale=1/i.test(viewport), `/license: viewport 未禁页面缩放：${viewport}`);
 
+  // 纸面清晰度下限：自动降档不能把 390 宽的纸压成 0.55 糊图。
+  const scaleFloor = await page.evaluate(() => {
+    globalThis.__site.stage.setRenderScale(0.4);
+    return globalThis.__site.snapshot().renderScale;
+  });
+  check(scaleFloor >= 0.8, `/license: 手机 renderScale 被压到 ${scaleFloor}（需 ≥0.8，纸面会糊）`);
+  await page.evaluate(() => globalThis.__site.stage.setRenderScale(1));
+
   await screenshot(page, path.join(evidence, 'license-mobile-approved.png'));
 
   // 保存反馈：按钮原位变成 Saved.，并且不是只改 aria。

@@ -7,9 +7,9 @@ export const STAY: { drift: boolean; dragLight: boolean; restamp: boolean; fold:
 };
 
 const SUN_START = -26;   // 起始光角（度），负 = 光从左上斜切进来
-// 4 分钟单调下移 30°。6° 那版在 40s/80s 的像素差落在世界噪声里（G7 看不出单调）；
-// 30° 仍慢，但 40s 已有可测的 5°，且不会在首屏就明显偏。
-const SUN_DRIFT = 30;
+// 4 分钟单调下移 60°。30° 版 40s 只有 5°、整纸最大像素差 2.8 L*（G7 仍不可测）；
+// 60° 版 40s 有 10°，光带边界扫过纸面的位移足够落到像素上，又不至于首屏就明显偏。
+const SUN_DRIFT = 60;
 export const STAY_SECONDS = 240;
 
 /**

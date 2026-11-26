@@ -2,7 +2,7 @@
 //
 // 它不是“逐条移植清单”，而是“哪些能进 Stage 零件、哪些只能做参考”的判定表：
 //   · uiverse 3,802 条是 UI/CSS，进 L5 参考，不进画布零件；
-//   · pixelfx 244 / shaders 209 / threeui 120 / ascii 974 才是与 L0–L4 合成相关的族；
+//   · pixelfx 244 / shaders 209 / threeui 120 / ascii 983 才是与 L0–L4 合成相关的族；
 //   · 612 条 react-generated 有 registry 入口，单独标出来供后续按需移植。
 //
 // 用法：

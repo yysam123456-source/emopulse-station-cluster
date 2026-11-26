@@ -1,5 +1,5 @@
 // L3 零件 · koi 三风格（写实 / 水墨 / 水彩）。
-// 原件已整段归集于 shared/parts-library/koi/（zz85/random-sketches @ gh-pages，13 文件 166 KB）。
+// 原件已整段归集于 shared/parts-library/koi/（zz85/random-sketches @ gh-pages，28 文件；上游 26 项 + v1 壳）。
 // 站点产物受"单 HTML + 零外部资源"约束，这里按原件三着色器的视觉参数移植为 Canvas 2D 实现；
 // 原件文件未被改写，也不参与 core 的 6 文件拼接。
 import { KOI_STYLES, type KoiStyle } from '../../../content/koi';

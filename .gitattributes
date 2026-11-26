@@ -12,11 +12,12 @@
 #   git -C <clone> show HEAD:source/src/main.js | sha256sum
 #   → aac0fa8d0f90b1ba0f5240e62dacfcc77e713a990616072f220f95b273c03632
 * text=auto eol=lf
-
 # 冻结核：强制 LF 检出，且不做任何内容转换。
 shared/core/** text eol=lf
 shared/core/BASELINE.sha256 text eol=lf
-
 # 哈希清单：内容即数据，行尾一变整份清单失效。
 tests/*.sha256 text eol=lf
 tests/*.pin text eol=lf
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text

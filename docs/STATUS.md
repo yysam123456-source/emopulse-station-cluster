@@ -39,7 +39,7 @@
 
 | 零件 | 层 | 通道 | costMs（申报） | kb（申报） | 源码行 | README.md | bench.mjs | 使用方 | 孤儿 |
 |---|---|---|---|---|---|---|---|---|---|
-|`dawn-desk`|`L1`|`world`|1.6|1738|11452|无|无|预设 dawn-desk||
+|`dawn-desk`|`L1`|`world`|1.6|1738|5511|无|无|预设 dawn-desk||
 
 入口：`shared/stage/preview/dawn-desk/index.ts`。
 
@@ -92,7 +92,7 @@ Studio（`npm run build:studio` → `dist/studio/index.html`）读的是 `dist/t
 ## 6. npm script 事实（读 `package.json`）
 
 - 仍指向 v1 构建器 `shared/build/build.mjs` 的 script（2 个）：`build:v1` `build:v1:readable`。产物写 `dist/<id>.html`，与新体系不兼容。
-- 依赖 `tests/lib/browser.mjs` 的 script（17 个）：`bench:blend` `bench:gl` `bench:parts` `probe:still` `shot` `verify:a2` `verify:field` `verify:fingerprint` `verify:input` `verify:koi-keep` `verify:license` `verify:mobile` `verify:paper` `verify:readiness` `verify:site` `verify:state` `verify:still-takeaway`。2026-11-25 起 `browser.mjs` 已换成零依赖 CDP（`tests/lib/cdp-browser.mjs`），Windows/macOS/Linux 只要本机有 Edge/Chrome 即可跑；各门 `launch()` 只起一个浏览器，`close()` 收整棵进程树。
+- 依赖 `tests/lib/browser.mjs` 的 script（20 个）：`bench:blend` `bench:gl` `bench:parts` `probe:still` `shot` `verify:a2` `verify:field` `verify:fingerprint` `verify:hug-long` `verify:input` `verify:koi-keep` `verify:license` `verify:license-long` `verify:long-stay` `verify:mobile` `verify:paper` `verify:readiness` `verify:site` `verify:state` `verify:still-takeaway`。2026-11-25 起 `browser.mjs` 已换成零依赖 CDP（`tests/lib/cdp-browser.mjs`），Windows/macOS/Linux 只要本机有 Edge/Chrome 即可跑；各门 `launch()` 只起一个浏览器，`close()` 收整棵进程树。
 - `verify:stage` 会由 `tests/stage-mutation.mjs` 原地改写 `shared/stage/stage.ts` 后还原；有人并发施工时不要跑。
 
 ---

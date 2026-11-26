@@ -64,6 +64,9 @@
     "probe:still": "node tests/probe-still-resize.mjs",
     "verify:still-takeaway": "node tests/still-takeaway.mjs",
     "verify:koi-keep": "node tests/koi-keep.mjs",
+    "verify:license-long": "node tests/license-long-stay.mjs",
+    "verify:hug-long": "node tests/hug-long-stay.mjs",
+    "verify:long-stay": "node tests/license-long-stay.mjs && node tests/hug-long-stay.mjs",
     "verify:a2": "node tests/a2-studio.mjs && node tests/a2-export.mjs",
     "docs:status": "node tools/docs/status.mjs"
   },

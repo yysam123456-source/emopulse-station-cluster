@@ -9,7 +9,7 @@
 - 装配运行时（`shared/stage/`）完工并有门锁着；登记 **17 件零件（16 件在 `shared/parts/`）· 18 个预设 · 4 个站 · 5 套模板**（复算：`node tools/docs/status.mjs`）。
 - **2026-11-25 收口后**：四站全部可上线。`/license` 桌面/手机全链（手机二级动作≥12px、Save 反馈）、`/hug` 点草地与 CTA 同一 release 且带 `?from=hug`、`/still` 首帧可读且 40s 不挡门、`/koi` 40s `Keep this frame` 导出 PNG。旧 `verify:field/paper/license/site/input` 全部在 Windows 本机复跑通过；新增 `license-mobile`、`hug-release`、`entry-mobile`、`state-source`、`readiness-protocol`、`a2-studio`。
 - **A2**：5 套模板 + Studio 同仓/分线/分入口；Studio 有 Toy 1 MB / 独立站 5 MB 两档门槛、`postMessage` 重建零件（不重载 iframe）、单 HTML 导出（含 `file://` fallback）、默认 `clean` 无调试条。
-- **仍未闭**：GitHub Actions 未实跑（本机 443 不通）；temple/gate 在 Toy 档 gzip 约 3.3 MB 必红（独立站档绿）；`/license` 手机盖章后纸面 canvas `renderScale` 可能到 0.55（DOM 文字不受影响，待 PM 拍板）。`site-fingerprint` 的 `field-l0` 假门已撤（它拿 field-ground 冒充 `/hug`，样本与口径都不成立；现在只剩四站全帧色相 4 条）。`verify:reuse` 与 `verify:clock` 本轮复核 PASS。
+- **仍未闭**：GitHub Actions 未实跑（本机 443 不通）。**已闭**：temple/gate 已改程序化表面，Toy 档 606 KB / gzip 161 KB，1 MB 门槛绿；`/license` 手机纸面 `renderScale` 已设 0.8 下限；`/license` 与 `/hug` 的 40s 慢变量像素门已并入 `verify:long-stay`。`site-fingerprint` 的 `field-l0` 假门已撤（它拿 field-ground 冒充 `/hug`，样本与口径都不成立；现在只剩四站全帧色相 4 条）。`verify:reuse` 与 `verify:clock` 本轮复核 PASS。
 - 完整结论、6 个体验阻断、6 个架构根因见评审 §0 / §3 / §4.2（评审本身是 2026-11-24 基线，不再代表当前状态）。
 
 ## 1. 产品前提（已由用户拍板，**不要重新讨论**）
@@ -101,7 +101,7 @@
 
 | 结构 | 为什么会腐化 | 触发条件 |
 |---|---|---|
-| `tests/preview-build.mjs` 的断言数 ≈ 5 × 预设数（现 18 个预设 → 811 条） | 每个预设跑同一组 5 类断言，一次失败刷一屏 | **预设 ≥20** 时改成「按预设分组汇总 + 失败只列组名与首条」（已写进 `shared/stage/preview/build.mjs:23-27`） |
+| `tests/preview-build.mjs` 的断言数 ≈ 5 × 预设数（现 18 个预设 → 809 条，2026-11-26 实测） | 每个预设跑同一组 5 类断言，一次失败刷一屏 | **预设 ≥20** 时改成「按预设分组汇总 + 失败只列组名与首条」（已写进 `shared/stage/preview/build.mjs:23-27`） |
 | `tests/lib/browser.mjs` 的 `waitForPreview` 只认 `__preview` / `__site` 两个句柄 | 加第三个宿主时会又只认前两个 | **出现第三个宿主**时改成注册式（`registerSnapshotProvider(name, fn)`） |
 | 假 ctx（`tests/lib/fake-ctx.mjs`） | 真 ctx 多一个方法就可能漏（已连发三次：`clip`/`strokeRect`/`rect`） | 已用 `guardCtx` 的 Proxy 兜底（§2.9）；再漏就是新问题 |
 
@@ -130,7 +130,7 @@
 | `npm install` | 装依赖（`three` + `esbuild` / `tsx` / `typescript`） | 唯一需要联网的一步 |
 | `npx tsc --noEmit` | 类型检查 | 应 0 error |
 | `npm run verify:stage` | 44 断言 + 6 变异 + 22 接合 | ⚠️ `tests/stage-mutation.mjs` **原地改写** `shared/stage/stage.ts` 6 次后还原；有人并发施工时不要跑 |
-| `npm run verify:preview` | 811 断言（逐预设） | 只读，不写 `dist/` |
+| `npm run verify:preview` | 809 断言（逐预设，2026-11-26 实测） | 只读，不写 `dist/` |
 | `npm run verify:sites` | 119 断言（屏幕文字必须在 COPY/UI 里） | 只读 |
 | `npm run verify:core` | 11 个基线文件零改动 | 只读 |
 | `npm run verify:nexus` / `verify:nexus:full` | 注册表 / 零写入 / 组合 / 降级 / ESM / analytics | 只读 |
@@ -147,9 +147,9 @@
 
 四站由 `shared/sites/build.mjs` 的 `STATIONS` 注册；栈、预算、CTA 与产物路径见 [`STATUS.md`](./STATUS.md) §4。实机走查见 [`ux-sites/WALKTHROUGH.md`](./review-2026-11-24/ux-sites/WALKTHROUGH.md)。
 
-**`/license`**（`paper-ink` + `pixel-post`，budget 8 ms）—— 桌面与手机全链成立：盖章、编号、日期、红章、`Save it` 导出 1410×1000。2026-11-25 手机 390×844 的 `Save`/`Stamp again`/`Fold the corner` 已拉开，二级动作 ≥12px；`license-mobile` 22/22。已知：手机盖章后 `renderScale` 可能到 0.55，纸面 canvas 偏糊（DOM 文字不受影响，未拍板是否接受）；导出图与屏幕光照仍有约 6–10 L* 差异。
+**`/license`**（`paper-ink` + `pixel-post`，budget 8 ms）—— 桌面与手机全链成立：盖章、编号、日期、红章、`Save it` 导出 1410×1000。2026-11-25 手机 390×844 的 `Save`/`Stamp again`/`Fold the corner` 已拉开，二级动作 ≥12px；`license-mobile` 22/22。手机纸面 `renderScale` 已设 0.8 下限（`StageOptions.minRenderScale`），不再掉到 0.55；`license-long-stay` 40s 光角 Δ10.1°、纸面 ≥3 L* 像素 10.2%，PASS。导出图与屏幕光照仍有约 6–10 L* 差异。
 
-**`/hug`**（`hug-meadow` 一件，budget 9 ms）—— 点草地与 CTA 走同一个 `release()`：2s 内 `#share-note` 显示 `?from=hug` 链接；`hug-release` 7/7。场景色相已从冷橄榄绿调到黄昏暖褐（全帧 41° / L*39.8 / 饱和 0.482）。已知：环境噪音仍可把蒲公英不可逆全部放飞（`hug-meadow/index.ts` 的 `audio.level > 0.12`，`mic.ts` RMS×3）；首次 Wind 提示仍需人工手测。
+**`/hug`**（`hug-meadow` 一件，budget 9 ms）—— 点草地与 CTA 走同一个 `release()`：2s 内 `#share-note` 显示 `?from=hug` 链接；`hug-release` 7/7。场景色相已从冷橄榄绿调到黄昏暖褐（全帧 41° / L*39.8 / 饱和 0.482）。`update()` 已不再因 `audio.level` 自动 `blow()`，只有站点层 `cue('release')` 会放飞；`hug-long-stay` 62s 顶部右侧 12 格最大 |ΔL*| 5.38，慢变量门 PASS。首次 Wind 提示仍需人工手测。
 
 **`/still`**（`tide-medium` + `voxel-world` + `bubbles` + `still-sink` + `pixel-post`，budget 12 ms）—— 启动遮罩先出纸面与 H1（1s 可读），9s 后 state≠booting，`readiness` 不挡门；`Sit` 40s 后浮出 `Copy the line` 并写剪贴板。手机/桌面 resize 覆盖 100%，1600×900 时后备像素约 0.72 渲染比例（预算降档，不是只画左上角）。已知：空闲帧率仍可能降到 30–40，`degraded` 是真实预算结果；无 WebGPU 时走静态兜底，不阻塞。
 
@@ -174,7 +174,7 @@
 
 **P0（2026-11-25 已完成）**：① `/still` 画布尺寸单一责任人；② 就绪协议进度 + 超时 + 可见文案；③ 状态单一真相源 `snapshot()` 同步 `body[data-state]`；④ `/hug` 草地放飞也给链接、模态静音；⑤ 触屏常驻菜单 + `touch-action:none` + 禁页面缩放；⑥ `/license` 手机流式排版 + 保存反馈 + 折角按钮 + 二级文字 ≥12px；⑦ 入口门厅四站卡可点；⑧ `/koi` 启动分期；⑨ 验证安全（SKIP 非 0、变异临时副本、dandelion 时钟）；⑩ 浏览器驱动零依赖 CDP。
 
-**P1（2026-11-25 部分完成）**：`/still` 40s Copy、`/koi` 40s PNG 已完成；A2 导出内嵌参数、体积门槛、`postMessage` 调参、画质三档（Low/Normal/High → renderScale 0.7/0.85/1）、默认去调试条已完成；预算 EWMA 已接进 `stage.ts`。仍未完成：`/license` 慢变量像素门、`/hug` ≥40s 单向慢变量、代码行尾 renormalize、CI 远端实跑。
+**P1（2026-11-26 完成）**：`/still` 40s Copy、`/koi` 40s PNG 已完成；A2 导出内嵌参数、体积门槛、`postMessage` 调参、画质三档（Low/Normal/High → renderScale 0.7/0.85/1）、默认去调试条已完成；预算 EWMA 已接进 `stage.ts`。`/license` 慢变量像素门、`/hug` ≥40s 单向慢变量、`/license` 手机 `renderScale` 下限、temple/gate 程序化表面均已完成。仍未完成：CI 远端实跑（本机 443 阻断）。
 
 **P2（可排期）**：temple/gate 的 12 张 base64 图换程序化表面以进 Toy 1 MB；`field-l0` 冷启动抖动已随假门一起撤（不再有该失败项）；v1 归档、大二进制/LFS、重复清理、README 状态改脚本生成（本轮已把 `docs/STATUS.md` 改成最新脚本输出）。
 

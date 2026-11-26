@@ -18,6 +18,7 @@
 | 文档 | 什么时候读 |
 |---|---|
 | [`PLAN-2026-11-25.md`](./PLAN-2026-11-25.md) | 把 P0/P1/P2 落成排期、验收门与拍板项时；它是 HANDOFF §5 的执行化，不覆盖权威口径 |
+| [`CONTRADICTIONS-RESOLVED-2026-11-26.md`](./CONTRADICTIONS-RESOLVED-2026-11-26.md) | 11-24 审计 27 条文档矛盾的逐条处置；读旧评审前先看它 |
 
 ## 专题文档
 
@@ -75,6 +76,7 @@
 | 路径 | 内容 |
 |---|---|
 | [`archive/2026-11-24/`](./archive/2026-11-24/) | 上一版交接书 `HANDOFF-2026-11-22.md`（历史细节与已作废口径） |
+| [`archive/v1/`](./archive/v1/README.md) | v1 死副本 `dawn-desk-upstream/` 与 v1 冻结清单（`shared/build` / `shared/contract` / `parts-library` / `sites/praise` 为什么没移） |
 | [`archive/2026-11-pre-pivot/`](./archive/2026-11-pre-pivot/) | 站群架构 v2.1、12 站矩阵 PRD、旧团队 SOP、四张 mermaid 图、旧 `system_design.md` |
 | [`archive/`](./archive/) 根目录 | `ARCHITECTURE-v1.1-superseded.md`、`PRD-v1.0-superseded.md`、`PRD-NEXUS-v1.0-superseded.md`、`QA-REPORT-v1.1-历史证据.md` |
 

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import type { ModuleContext, SceneModule } from '../types';
 import { mesh, mulberry } from '../primitives';
-import { SKY2_JPG } from '../assets';
 
 const SKY_VERT = /* glsl */ `
   varying vec3 vDir;
@@ -147,7 +146,7 @@ export const atmosphereModule: SceneModule = {
     const { plan, quality } = ctx;
     const g = new THREE.Group();
     // 天空用真实晨空全景，而不是手搓渐变；地平线自带远山，场景只保留一层薄雾。
-    const skyTex = ctx.lab.skyPhoto(SKY2_JPG);
+    const skyTex = ctx.lab.sky();
     const sky = mesh(new THREE.SphereGeometry(78, 64, 34), new THREE.MeshBasicMaterial({
       map: skyTex,
       side: THREE.BackSide,

@@ -136,6 +136,8 @@
 
 ## 6. 文档与代码矛盾
 
+> **历史快照（2026-11-24）**。27 条的逐条处置与现行口径见 [`../../CONTRADICTIONS-RESOLVED-2026-11-26.md`](../../CONTRADICTIONS-RESOLVED-2026-11-26.md)；本表保留原始证据，不再直接据此施工。
+
 | # | 文档 A 位置 + 原文 | 文档 / 代码 B 位置 + 原文 | 以代码为准的结论 |
 |---|---|---|---|
 | 1 | `docs/INTERNAL-SCENE-PARTS.md:87`「`rainy-night-webgpu` / `crimson-loong` 只完成边界与许可审计，未搬进可分发库」 | `git ls-files shared/parts-library` 列出 `rain-webgpu/` 6 文件、`crimson-loong/` 5 文件；`cmp` 证实其中 4 个 .ts / 3 个 .js 与 `_third_party` 逐字节一致 | **已搬**，且是 11-17 首个提交 `30847cb` 就入库的（`git log --diff-filter=A`）。搬的是上游原件的子集（rain 4/25、crimson 3/18），加一个 v1 壳。manifest 自己的写法更准：「库内仍只保留 N 文件做对照」（`rain-webgpu/part.manifest.ts:15`、`crimson-loong/part.manifest.ts:3`） |

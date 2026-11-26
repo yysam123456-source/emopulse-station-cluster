@@ -10,6 +10,13 @@
 
 2026-11-25 的 P0 收口后，四站全部可上线：`/license` 桌面与手机全链、`/hug` 点草地/CTA 同一 release、`/still` 首帧可读且 40s 不挡门、`/koi` 40s 后 `Keep this frame` 保存 PNG。A2 五套模板与 Studio 同仓、分线、分入口；Studio 支持 Toy / 独立站两档体积门槛、运行时 `postMessage` 调参与单 HTML 导出。
 
+<!-- STATUS:BEGIN -->
+<!-- 由 npm run docs:status 生成，勿手改；详见 docs/STATUS.md -->
+- 登记零件 **17 件**（`shared/parts/` 16 件，孤儿 4 件）· 预设 **18 个**（有专用 npm script 18 / 18）· 站 **4 个** · 模板 **5 套**。
+- 仍指向 v1 构建器的 npm script：`build:v1` `build:v1:readable`；浏览器门 20 条，统一走零依赖 CDP。
+- 完整结构表、孤儿/README/bench 覆盖、预设与模板对照见 [`docs/STATUS.md`](./docs/STATUS.md)。
+<!-- STATUS:END -->
+
 > 接手先读 [`docs/HANDOFF.md`](./docs/HANDOFF.md)；文档权威链见 [`docs/README.md`](./docs/README.md)。
 > 本机浏览器门已全部换成零依赖 CDP（`tests/lib/cdp-browser.mjs`），不再依赖 Playwright / macOS 缓存；调试只启动一个 Edge，跑完由测试 `close()` 收进程。
 
@@ -47,6 +54,7 @@ npm run verify:input      # 四站输入边界
 npm run verify:mobile     # 手机 390×844：license/hug/entry/menu
 npm run verify:still-takeaway # /still Sit 40s 后 Copy（真等 40s）
 npm run verify:koi-keep   # /koi 40s 后 Keep PNG（真等 40s）
+npm run verify:long-stay  # /license、/hug 40s 慢变量像素门
 npm run verify:a2         # A2 运行时参数 / Studio 双门槛
 npm run verify:core       # 11 个冻结基线文件零改动
 npm run verify:nexus      # 注册表 + 冻结基线零写入
@@ -86,9 +94,10 @@ dist/                产物（gitignore，按需重建）
 
 评审依据：[`docs/review-2026-11-24/REVIEW-2026-11-24.md`](./docs/review-2026-11-24/REVIEW-2026-11-24.md)。
 
-- **A2 体积**：temple/gate gzip 约 3.3 MB，Toy 1 MB 档必红；独立站 5 MB 档已绿。要进 Toy 需把 12 张 base64 图换成程序化表面，属 P2，不是本轮门禁失败。
+- **A2 体积**：temple / gate 已把 12 张 base64 贴图换成程序化表面，单文件 606 KB、gzip 161 KB，Toy 1 MB 档通过；独立站 5 MB 档继续保留。
+- **慢变量门**：`/license` 与 `/hug` 的 40s 像素门已并入 `verify:long-stay`；`/license` 手机纸面 `renderScale` 下限 0.8。
 - **指纹门的假样本已撤**：旧 `site-fingerprint` 用 `field-l0`（field-ground）去断言 `/hug` 的草/地色相，样本与结论不同源、还会随摆动相位漂；现在只保留四站全帧色相/饱和 4 条，`field-l0` 调色板回到 MANUAL-QA §8 目视。
-- CI 已补 `build:templates` / `build:studio` / `verify:site` / `verify:dom` / `verify:fingerprint` / `verify:license` / `verify:input` / `verify:mobile` / `verify:state` / `verify:readiness` / `probe:still` / `verify:a2` / `verify:still-takeaway` / `verify:koi-keep`；本机 `github.com:443` 不通，**尚未在 GitHub Actions 实跑**。`ci.yml` 的浏览器门只在 `windows-latest` 跑，`ubuntu-latest` 跑构建与 Node 门。
+- CI 已补 `build:templates` / `build:studio` / `verify:site` / `verify:dom` / `verify:fingerprint` / `verify:license` / `verify:input` / `verify:mobile` / `verify:state` / `verify:readiness` / `probe:still` / `verify:a2` / `verify:still-takeaway` / `verify:koi-keep` / `verify:long-stay`；本机 `github.com:443` 不通，**尚未在 GitHub Actions 实跑**。`ci.yml` 的浏览器门只在 `windows-latest` 跑，`ubuntu-latest` 跑构建与 Node 门。
 
 ## 旧方向
 

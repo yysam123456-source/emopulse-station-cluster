@@ -1,6 +1,5 @@
-// 零件声明（L3 · 契约 v1）：koi —— 观感参考（D1）。
-// 三站产物是自写 Canvas 2D（9 条椭圆鱼 + 3 组自选色 + 同心椭圆涟漪），
-// 原件 bodyGeometry/frame/koiColour/VARIETIES 等算法均未进入产物（PRD-REUSE §1.4 / F-R6）。
+// 零件声明（L3 · 契约 v1）：koi —— v1 壳的接线深度 D1；
+// 上游 26 项已整段归集在 shared/parts-library/koi/（28 文件）；产品渲染由 shared/parts/koi-pond 完整移植。
 import type { PartManifest } from '../../contract/parts-registry';
 
 const manifest = {
@@ -12,7 +11,7 @@ const manifest = {
   contract: 'v1',
   claims: [{ resource: 'canvas:stage', mode: 'exclusive' }],
   requires: 'none',
-  note: '观感参考：鱼群与涟漪观感参考 zz85/random-sketches（gh-pages vibes/koi）；三站为自写 Canvas 2D（D1）。',
+  note: '上游原件（26 项 / 28 文件）整段归集于 shared/parts-library/koi；产品渲染在 shared/parts/koi-pond 按上游 main.js 帧结构还原，本 manifest 的 depth D1 只描述 v1 壳的接线深度，不是产品渲染深度。',
   provenance: {
     depth: 'D1',
     upstream: {

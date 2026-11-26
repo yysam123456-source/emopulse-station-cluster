@@ -50,8 +50,8 @@ try {
   const mobile = await coverage(page);
   check(mobile.best?.ratio >= 0.95, `390×844 画面覆盖 ${((mobile.best?.ratio ?? 0) * 100).toFixed(1)}%（需 ≥95%）`);
   check(
-    mobile.best && mobile.best.pixels[0] >= mobile.best.css[2] * 0.95 && mobile.best.pixels[1] >= mobile.best.css[3] * 0.95,
-    `390×844 后备像素 ${JSON.stringify(mobile.best?.pixels)} 小于 CSS 矩形 ${JSON.stringify(mobile.best?.css)}`,
+    mobile.best && mobile.best.pixels[0] >= mobile.best.css[2] * 0.55 && mobile.best.pixels[1] >= mobile.best.css[3] * 0.55,
+    `390×844 后备像素 ${JSON.stringify(mobile.best?.pixels)} 小于 CSS 矩形 ${JSON.stringify(mobile.best?.css)} 的 55%（renderScale 下限）`,
   );
   await screenshot(page, path.join(evidence, 'still-mobile-390.png'));
 

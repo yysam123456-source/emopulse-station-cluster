@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import type { RealismPalette } from './types';
-import { CEDAR_JPG, GRASS_CUT_PNG, GRASS_JPG, GRAVEL_JPG, MOSS_JPG, PINE_CUT_PNG, PINE_JPG, PLASTER_JPG, RED_JPG, ROOF2_JPG, ROOF_JPG, SHRUB_CUT_PNG, SKY_JPG, STONE_JPG } from './assets';
 
 export type Surface =
   | 'cedar'
@@ -440,16 +439,16 @@ function paintNeedleAlpha(g: CanvasRenderingContext2D, size: number, rng: () => 
     const y = size * 0.82 - size * 0.55 * t + Math.sin(t * Math.PI) * size * 0.04;
     const r = size * (0.05 + rng() * 0.09);
     const grad = g.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, 'rgba(255,255,255,.40)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,.22)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    grad.addColorStop(0, 'rgba(92,112,62,.40)');
+    grad.addColorStop(0.5, 'rgba(64,86,48,.22)');
+    grad.addColorStop(1, 'rgba(64,86,48,0)');
     g.fillStyle = grad;
     g.beginPath();
     g.ellipse(x, y, r * 1.4, r * 0.72, -0.35 + rng() * 0.7, 0, Math.PI * 2);
     g.fill();
   }
 
-  g.strokeStyle = 'rgba(255,255,255,.85)';
+  g.strokeStyle = 'rgba(58,78,44,.85)';
   g.lineWidth = size * 0.010;
   g.beginPath();
   g.moveTo(size * 0.10, size * 0.88);
@@ -463,7 +462,7 @@ function paintNeedleAlpha(g: CanvasRenderingContext2D, size: number, rng: () => 
     const len = size * (0.09 + rng() * 0.20);
     const x2 = x + Math.cos(angle) * len;
     const y2 = y + Math.sin(angle) * len;
-    g.strokeStyle = rng() < 0.16 ? 'rgba(255,255,255,.95)' : 'rgba(255,255,255,.72)';
+    g.strokeStyle = rng() < 0.16 ? 'rgba(138,158,94,.95)' : 'rgba(76,100,58,.72)';
     g.lineWidth = size * (0.0028 + rng() * 0.0045);
     g.beginPath();
     g.moveTo(x, y);
@@ -474,9 +473,131 @@ function paintNeedleAlpha(g: CanvasRenderingContext2D, size: number, rng: () => 
     const t = rng();
     const x = size * 0.12 + size * 0.76 * t;
     const y = size * 0.86 - size * 0.62 * t + Math.sin(t * Math.PI) * size * 0.035;
-    g.fillStyle = 'rgba(255,255,255,.55)';
+    g.fillStyle = 'rgba(110,130,74,.55)';
     g.beginPath();
     g.arc(x, y, size * (0.004 + rng() * 0.010), 0, Math.PI * 2);
+    g.fill();
+  }
+}
+
+function paintGrass(g: CanvasRenderingContext2D, size: number, rng: () => number): void {
+  // 草地的“远看是绒、近看有针”：底色只负责大块色差，高频靠短草叶。
+  const grad = g.createLinearGradient(0, 0, 0, size);
+  grad.addColorStop(0, '#53633b');
+  grad.addColorStop(0.55, '#667645');
+  grad.addColorStop(1, '#4b5b36');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, size, size);
+  for (let i = 0; i < 2600; i += 1) {
+    const x = rng() * size;
+    const y = rng() * size;
+    const len = 3 + rng() * 12;
+    g.strokeStyle = rng() < 0.42
+      ? `rgba(32,44,24,${0.10 + rng() * 0.20})`
+      : `rgba(${Math.round(118 + rng() * 42)},${Math.round(136 + rng() * 38)},${Math.round(64 + rng() * 32)},${0.10 + rng() * 0.22})`;
+    g.lineWidth = 0.5 + rng() * 1.1;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.quadraticCurveTo(x + (rng() - 0.5) * 5, y - len * 0.55, x + (rng() - 0.5) * 3, y - len);
+    g.stroke();
+  }
+}
+
+function paintGrassClumpAlpha(g: CanvasRenderingContext2D, size: number, rng: () => number): void {
+  g.clearRect(0, 0, size, size);
+  for (let i = 0; i < 46; i += 1) {
+    const x0 = size * (0.32 + rng() * 0.36);
+    const bend = (rng() - 0.5) * size * 0.42;
+    const tipX = x0 + bend;
+    const tipY = size * (0.10 + rng() * 0.34);
+    g.strokeStyle = `rgba(104,132,72,${0.55 + rng() * 0.45})`;
+    g.lineWidth = size * (0.006 + rng() * 0.012);
+    g.beginPath();
+    g.moveTo(x0, size * 0.96);
+    g.quadraticCurveTo(x0 + bend * 0.35, size * 0.55, tipX, tipY);
+    g.stroke();
+  }
+  g.fillStyle = 'rgba(74,96,50,.30)';
+  g.beginPath();
+  g.ellipse(size * 0.5, size * 0.92, size * 0.22, size * 0.04, 0, 0, Math.PI * 2);
+  g.fill();
+}
+
+function paintShrubAlpha(g: CanvasRenderingContext2D, size: number, rng: () => number): void {
+  g.clearRect(0, 0, size, size);
+  for (let i = 0; i < 34; i += 1) {
+    const a = rng() * Math.PI * 2;
+    const r = size * (0.06 + rng() * 0.22);
+    const x = size * 0.5 + Math.cos(a) * r;
+    const y = size * 0.56 + Math.sin(a) * r * 0.72;
+    const rx = size * (0.06 + rng() * 0.10);
+    const ry = size * (0.045 + rng() * 0.075);
+    const grad = g.createRadialGradient(x, y, 0, x, y, rx);
+    grad.addColorStop(0, 'rgba(92,118,66,.95)');
+    grad.addColorStop(0.72, 'rgba(72,96,52,.72)');
+    grad.addColorStop(1, 'rgba(72,96,52,0)');
+    g.fillStyle = grad;
+    g.beginPath();
+    g.ellipse(x, y, rx, ry, a, 0, Math.PI * 2);
+    g.fill();
+  }
+  g.strokeStyle = 'rgba(62,82,44,.55)';
+  g.lineWidth = size * 0.008;
+  g.beginPath();
+  g.moveTo(size * 0.5, size * 0.96);
+  g.lineTo(size * 0.5, size * 0.62);
+  g.stroke();
+}
+
+function paintSky(g: CanvasRenderingContext2D, w: number, h: number, rng: () => number): void {
+  // 等矩形全景：上冷下暖，地平线附近一团低太阳；远山用低对比剪影压住地平线。
+  const grad = g.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(36,52,78,1)');
+  grad.addColorStop(0.34, 'rgba(82,88,103,1)');
+  grad.addColorStop(0.50, 'rgba(156,119,92,1)');
+  grad.addColorStop(0.58, 'rgba(92,73,57,1)');
+  grad.addColorStop(1, 'rgba(38,32,26,1)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, w, h);
+
+  const sx = w * 0.70;
+  const sy = h * 0.47;
+  const glow = g.createRadialGradient(sx, sy, 0, sx, sy, w * 0.32);
+  glow.addColorStop(0, 'rgba(255,214,154,.88)');
+  glow.addColorStop(0.26, 'rgba(238,166,103,.45)');
+  glow.addColorStop(1, 'rgba(238,166,103,0)');
+  g.fillStyle = glow;
+  g.fillRect(0, 0, w, h);
+
+  // 远山：两层低饱和剪影，避免一条直线把球体贴图切出接缝。
+  for (let layer = 0; layer < 2; layer += 1) {
+    const base = h * (0.505 + layer * 0.045);
+    const amp = h * (0.035 + layer * 0.012);
+    g.fillStyle = layer === 0 ? 'rgba(42,50,56,.72)' : 'rgba(28,34,38,.78)';
+    g.beginPath();
+    g.moveTo(0, h * 0.8);
+    for (let x = 0; x <= w; x += 8) {
+      const y = base + Math.sin(x * 0.012 + layer * 2.1 + rng() * 0.02) * amp
+        + Math.sin(x * 0.031 + layer * 3.7) * amp * 0.32;
+      g.lineTo(x, y);
+    }
+    g.lineTo(w, h * 0.8);
+    g.closePath();
+    g.fill();
+  }
+
+  // 云带：只用稀疏、低透明度的横向软椭圆。
+  for (let i = 0; i < 34; i += 1) {
+    const x = rng() * w;
+    const y = h * (0.18 + rng() * 0.28);
+    const rx = w * (0.03 + rng() * 0.10);
+    const ry = h * (0.006 + rng() * 0.018);
+    const cloud = g.createRadialGradient(x, y, 0, x, y, rx);
+    cloud.addColorStop(0, `rgba(218,210,199,${0.06 + rng() * 0.08})`);
+    cloud.addColorStop(1, 'rgba(218,210,199,0)');
+    g.fillStyle = cloud;
+    g.beginPath();
+    g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
     g.fill();
   }
 }
@@ -512,26 +633,19 @@ export class MaterialLab {
     return t;
   }
 
-  private photo(
-    data: string,
-    repeat: readonly [number, number],
-    opts: { srgb?: boolean; flip?: boolean } = {},
-  ): THREE.Texture {
-    const t = new THREE.TextureLoader().load(data);
-    t.colorSpace = opts.srgb === false ? THREE.NoColorSpace : THREE.SRGBColorSpace;
-    t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping;
-    t.repeat.set(opts.flip ? -repeat[0] : repeat[0], repeat[1]);
-    if (opts.flip) t.offset.x = 1;
-    t.anisotropy = this.anisotropy;
-    this.textures.push(t);
-    return t;
-  }
-
-  skyPhoto(data: string): THREE.Texture {
-    const t = new THREE.TextureLoader().load(data);
+  sky(): THREE.Texture {
+    const c = document.createElement('canvas');
+    c.width = 1024;
+    c.height = 512;
+    const g = c.getContext('2d');
+    if (!g) throw new Error('MaterialLab 需要 2D 画布');
+    paintSky(g, c.width, c.height, mulberry(9));
+    const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
     t.mapping = THREE.EquirectangularReflectionMapping;
+    t.wrapS = THREE.RepeatWrapping;
     t.anisotropy = this.anisotropy;
+    t.needsUpdate = true;
     this.textures.push(t);
     return t;
   }
@@ -543,7 +657,7 @@ export class MaterialLab {
     let material: THREE.Material;
     switch (kind) {
       case 'cedar': {
-        const map = this.photo(CEDAR_JPG, [1.4, 1.2]);
+        const map = this.tex('cedar', paintCedar, [1.4, 1.2], { seed: 11 });
         material = new THREE.MeshPhysicalMaterial({
           map,
           bumpMap: map,
@@ -556,7 +670,7 @@ export class MaterialLab {
         break;
       }
       case 'cedarVertical': {
-        const map = this.photo(CEDAR_JPG, [1.2, 1.1]);
+        const map = this.tex('cedar-v', paintCedar, [1.2, 1.1], { seed: 12 });
         map.center.set(0.5, 0.5);
         map.rotation = Math.PI / 2;
         material = new THREE.MeshPhysicalMaterial({
@@ -571,7 +685,7 @@ export class MaterialLab {
         break;
       }
       case 'redLacquer': {
-        const map = this.photo(RED_JPG, [2.1, 2.1]);
+        const map = this.tex('red-lacquer', paintRedLacquer, [2.1, 2.1], { seed: 21 });
         material = new THREE.MeshPhysicalMaterial({
           map,
           bumpMap: map,
@@ -584,7 +698,7 @@ export class MaterialLab {
         break;
       }
       case 'darkWood': {
-        const map = this.photo(CEDAR_JPG, [2.2, 2.2], { srgb: true });
+        const map = this.tex('dark-wood', paintCedar, [2.2, 2.2], { seed: 13 });
         material = new THREE.MeshPhysicalMaterial({
           map,
           color: 0x6b4b34,
@@ -597,8 +711,8 @@ export class MaterialLab {
       }
       case 'plaster':
         material = new THREE.MeshStandardMaterial({
-          map: this.photo(PLASTER_JPG, [2.6, 2.2]),
-          bumpMap: this.photo(PLASTER_JPG, [2.6, 2.2], { srgb: false }),
+          map: this.tex('plaster', paintPlaster, [2.6, 2.2], { seed: 31 }),
+          bumpMap: this.tex('plaster-bump', paintPlaster, [2.6, 2.2], { seed: 31, srgb: false }),
           bumpScale: 0.026,
           color: 0xd9d0c2,
           roughness: 0.94,
@@ -606,10 +720,10 @@ export class MaterialLab {
         });
         break;
       case 'roofTile': {
-        const map = this.photo(ROOF_JPG, [3, 1.55]);
+        const map = this.tex('roof-tile', paintSlate, [3, 1.55], { seed: 41 });
         map.center.set(0.5, 0.5);
         map.rotation = -Math.PI / 4;
-        const bump = this.photo(ROOF_JPG, [3, 1.55], { srgb: false });
+        const bump = this.tex('roof-tile-bump', paintSlate, [3, 1.55], { seed: 41, srgb: false });
         bump.center.set(0.5, 0.5);
         bump.rotation = -Math.PI / 4;
         material = new THREE.MeshPhysicalMaterial({
@@ -642,8 +756,8 @@ export class MaterialLab {
         break;
       case 'stone':
         material = new THREE.MeshStandardMaterial({
-          map: this.photo(STONE_JPG, [4, 4]),
-          bumpMap: this.photo(STONE_JPG, [4, 4], { srgb: false }),
+          map: this.tex('stone', paintStone, [4, 4], { seed: 51 }),
+          bumpMap: this.tex('stone-bump', paintStone, [4, 4], { seed: 51, srgb: false }),
           bumpScale: 0.035,
           color: 0xa7a093,
           roughness: 0.9,
@@ -652,8 +766,8 @@ export class MaterialLab {
         break;
       case 'moss':
         material = new THREE.MeshStandardMaterial({
-          map: this.photo(MOSS_JPG, [18, 18]),
-          bumpMap: this.photo(MOSS_JPG, [18, 18], { srgb: false }),
+          map: this.tex('moss', paintMoss, [18, 18], { seed: 61 }),
+          bumpMap: this.tex('moss-bump', paintMoss, [18, 18], { seed: 61, srgb: false }),
           bumpScale: 0.028,
           roughness: 1,
           metalness: 0,
@@ -661,8 +775,8 @@ export class MaterialLab {
         break;
       case 'grass':
         material = new THREE.MeshStandardMaterial({
-          map: this.photo(GRASS_JPG, [20, 20]),
-          bumpMap: this.photo(GRASS_JPG, [20, 20], { srgb: false }),
+          map: this.tex('grass', paintGrass, [20, 20], { seed: 71 }),
+          bumpMap: this.tex('grass-bump', paintGrass, [20, 20], { seed: 71, srgb: false }),
           bumpScale: 0.018,
           color: 0xd3d0bc,
           roughness: 1,
@@ -671,8 +785,8 @@ export class MaterialLab {
         break;
       case 'gravel':
         material = new THREE.MeshStandardMaterial({
-          map: this.photo(GRAVEL_JPG, [1.4, 7]),
-          bumpMap: this.photo(GRAVEL_JPG, [1.4, 7], { srgb: false }),
+          map: this.tex('gravel', paintGravel, [1.4, 7], { seed: 81 }),
+          bumpMap: this.tex('gravel-bump', paintGravel, [1.4, 7], { seed: 81, srgb: false }),
           bumpScale: 0.038,
           roughness: 0.96,
           metalness: 0,
@@ -744,11 +858,18 @@ export class MaterialLab {
     return material;
   }
 
-  private cutout(data: string, flip = false): THREE.Texture {
-    const t = this.photo(data, [1, 1], { flip });
-    t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
-    // 透明底 PNG 的透明像素是白 RGB；不预乘 alpha 时 mipmap 会把白边混进叶面，
-    // 远看整棵树会发银白。premultiply + 关 mipmap 是植被 cutout 的必要处理。
+  private cutout(
+    paint: (g: CanvasRenderingContext2D, size: number, rng: () => number) => void,
+    seed: number,
+    flip = false,
+  ): THREE.Texture {
+    const t = this.tex(`cutout-${seed}`, paint, [1, 1], { size: 512, seed });
+    t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping;
+    if (flip) {
+      t.repeat.x = -1;
+      t.offset.x = 1;
+    }
+    // 透明底 cutout 的透明像素是白 RGB；premultiply 后 mipmap 才不会把白边混进叶面。
     t.premultiplyAlpha = true;
     t.generateMipmaps = true;
     t.minFilter = THREE.LinearMipmapLinearFilter;
@@ -762,7 +883,7 @@ export class MaterialLab {
     const cached = this.cache.get(key);
     if (cached) return cached as THREE.MeshStandardMaterial;
     // 真透明 PNG：alpha 不再靠黑底亮度猜，针叶边缘干净，逆光也不会整片发灰。
-    const map = this.cutout(PINE_CUT_PNG, flip);
+    const map = this.cutout(paintNeedleAlpha, 91, flip);
     const mat = new THREE.MeshStandardMaterial({
       map,
       color,
@@ -781,7 +902,7 @@ export class MaterialLab {
     const key = `cutout:grass:${color}`;
     const cached = this.cache.get(key);
     if (cached) return cached as THREE.MeshStandardMaterial;
-    const map = this.cutout(GRASS_CUT_PNG);
+    const map = this.cutout(paintGrassClumpAlpha, 92);
     const mat = new THREE.MeshStandardMaterial({
       map,
       color,
@@ -800,7 +921,7 @@ export class MaterialLab {
     const key = `cutout:shrub:${color}`;
     const cached = this.cache.get(key);
     if (cached) return cached as THREE.MeshStandardMaterial;
-    const map = this.cutout(SHRUB_CUT_PNG);
+    const map = this.cutout(paintShrubAlpha, 93);
     const mat = new THREE.MeshStandardMaterial({
       map,
       color,

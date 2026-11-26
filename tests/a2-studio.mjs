@@ -103,7 +103,8 @@ try {
       };
     });
     check(initial.platform === 'toy', `/a2: Studio 初始平台=${initial.platform}`);
-    check(initial.temple?.over === true, `/a2: temple 在 Toy 档未红（${initial.temple?.badge}）`);
+    // 2026-11-26：temple/gate 已换程序化表面，606 KB / gzip 161 KB，Toy 档不再红。
+    check(initial.temple?.over === false, `/a2: temple 在 Toy 档误红（${initial.temple?.badge}）`);
     check(initial.deepsea?.over === false, `/a2: deepsea 在 Toy 档误红（${initial.deepsea?.badge}）`);
     check(initial.iframes === 5, `/a2: Studio iframe 数=${initial.iframes}（应 5）`);
     check(!initial.deepsea?.src.includes('debug=1'), `/a2: Studio 预览 src 带 debug=1：${initial.deepsea?.src}`);

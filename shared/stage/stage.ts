@@ -43,6 +43,11 @@ export interface StageOptions {
   readonly seed: number;
   readonly budgetMs?: number;
   readonly maxDpr?: number;
+  /**
+   * 自动降分辨率的下限（0.55–1，默认 0.55）。
+   * 纸面类站点（/license）用它保住可读清晰度：预算再紧也不把纸压成糊图。
+   */
+  readonly minRenderScale?: number;
   readonly reducedMotion?: boolean;
   /** 启动超时（毫秒）。超过后壳应放行首帧可用的 L0 画面并显示一句原因。 */
   readonly bootTimeoutMs?: number;
@@ -286,6 +291,8 @@ export function createStage(options: StageOptions): Stage {
   );
   /** 用户/自动降分辨率系数（1 = 原生；与 dpr 相乘后才是真正的像素比）。 */
   let renderScale = 1;
+  /** 本场自动降分辨率的下限；默认保持历史行为 0.55。 */
+  const minRenderScale = Math.min(1, Math.max(0.55, options.minRenderScale ?? 0.55));
   let autoScale = true;
 
   // ---- 几何：先让 L0 底材报出纸矩形，world 通道才能在 create 前知道画在哪 ----
@@ -966,8 +973,8 @@ export function createStage(options: StageOptions): Stage {
         slowFrames = 0;
         fastFrames = 0;
       }
-      if (slowFrames >= 12 && renderScale > 0.56 && timestamp - lastScaleAt > 1200) {
-        pendingScale = Math.max(0.55, renderScale * 0.85);
+      if (slowFrames >= 12 && renderScale > minRenderScale + 0.01 && timestamp - lastScaleAt > 1200) {
+        pendingScale = Math.max(minRenderScale, renderScale * 0.85);
         slowFrames = 0;
       } else if (fastFrames >= 240 && renderScale < 1 && timestamp - lastScaleAt > 3000) {
         pendingScale = Math.min(1, renderScale * 1.08);
@@ -1037,7 +1044,7 @@ export function createStage(options: StageOptions): Stage {
     },
     setRenderScale(scale: number): void {
       autoScale = false;
-      renderScale = Math.min(1, Math.max(0.55, scale));
+      renderScale = Math.min(1, Math.max(minRenderScale, scale));
       applyResize(width, height, dpr);
     },
     setAutoScale(enabled: boolean): void {

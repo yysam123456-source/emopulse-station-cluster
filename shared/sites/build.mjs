@@ -1,7 +1,7 @@
 // 站点构建器 —— 把「一个站」编成 `dist/<slug>/index.html`（单文件、零外部请求）。
 //
 // 与 `shared/stage/preview/build.mjs` 的分工：
-//   · preview 是**零件探针**（14 个预设，给我和 PM 看零件长什么样）
+//   · preview 是**零件探针**（18 个预设，给我和 PM 看零件长什么样）
 //   · 这里是**站点**（4 个 slug，给用户看；有壳、有 L5 位置、有 Esc 菜单、有主按钮）
 // 两条都复用同一套：真实 import 零件 → 装配器自己校验排序 → esbuild 打成 IIFE → 内联进单 HTML。
 //
@@ -79,6 +79,8 @@ export const STATIONS = Object.freeze({
     biome: 'room',
     seed: 20261118,
     budgetMs: 8,
+    // 纸面要能读：手机盖章后预算再紧，也不把纸压到 0.55 的糊图。
+    minRenderScale: 0.8,
     /**
      * 带走物尺寸。**必须与屏上纸同比例**（`paper-ink` 的 `SHEET_ASPECT`）：
      * cover 裁切横帧到竖版时，比例不一致会把纸左右各切掉一截，章可能落出画外 —— 那种失败不报错。
@@ -520,6 +522,7 @@ export async function buildSite(options) {
     biome: station.biome,
     seed: station.seed,
     budgetMs: station.budgetMs,
+    minRenderScale: station.minRenderScale ?? null,
     glBlend: null,
     hasGl,
     paperSheet: station.paperSheet === true,

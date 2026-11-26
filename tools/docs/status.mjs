@@ -219,4 +219,27 @@ out(`当前健康度与路线：[\`HANDOFF.md\`](./HANDOFF.md) §0 · 验证门�
 out();
 
 writeFileSync(OUT, `${lines.join('\n')}\n`, 'utf8');
+
+// ── README 状态块：同一份脚本生成，根 README 不再手抄结构数字 ──
+const README = path.join(REPO_ROOT, 'README.md');
+if (existsSync(README)) {
+  const readme = readFileSync(README, 'utf8');
+  const missingScripts = Object.keys(PRESETS).length - noScript.length;
+  const block = [
+    '<!-- STATUS:BEGIN -->',
+    '<!-- 由 npm run docs:status 生成，勿手改；详见 docs/STATUS.md -->',
+    `- 登记零件 **${Object.keys(PART_ENTRY).length} 件**（\`shared/parts/\` ${formal.length} 件，孤儿 ${orphans.length} 件）· 预设 **${Object.keys(PRESETS).length} 个**（有专用 npm script ${missingScripts} / ${Object.keys(PRESETS).length}）· 站 **${Object.keys(STATIONS).length} 个** · 模板 **${TEMPLATES.length} 套**。`,
+    `- 仍指向 v1 构建器的 npm script：${v1Scripts.length ? v1Scripts.map((s) => `\`${s}\``).join(' ') : '无'}；浏览器门 ${browserScripts.length} 条，统一走零依赖 CDP。`,
+    '- 完整结构表、孤儿/README/bench 覆盖、预设与模板对照见 [`docs/STATUS.md`](./docs/STATUS.md)。',
+    '<!-- STATUS:END -->',
+  ].join('\n');
+  if (!readme.includes('<!-- STATUS:BEGIN -->') || !readme.includes('<!-- STATUS:END -->')) {
+    console.warn('[docs:status] README 缺少 STATUS 标记，未写入状态块');
+  } else {
+    const next = readme.replace(/<!-- STATUS:BEGIN -->[\s\S]*?<!-- STATUS:END -->/, block);
+    if (next !== readme) writeFileSync(README, next, 'utf8');
+  }
+}
+
 console.log(`[docs:status] 已写出 ${toPosix(path.relative(REPO_ROOT, OUT))}：零件 ${Object.keys(PART_ENTRY).length} · 预设 ${Object.keys(PRESETS).length} · 站 ${Object.keys(STATIONS).length} · 模板 ${TEMPLATES.length}`);
+
