@@ -44,6 +44,10 @@ export const STATIONS = Object.freeze({
     extra: [
       // 桌面：木纹、左上斜光、右侧印台与印章实物。它们都不是 UI，只负责让这张纸落在桌面上。
       '<div id="desk" aria-hidden="true"><i id="ink-pad"></i><i id="stamp-block"></i></div>',
+      // 深绿皮革桌垫：纸不是直接落在木头上，而是落在垫子上；纸边有第二层承重。
+      '<div id="desk-pad" aria-hidden="true"></div>',
+      // 纸下面垫一张略大的牛皮纸夹：只露出右/下两条边，给纸张一个“被放在桌上”的厚度。
+      '<i id="sheet-under" aria-hidden="true"></i>',
       '<div id="sheet" aria-hidden="true"></div>',
       // 折角的那一面：纸角翻起来露出的背面（三角形 + 折痕阴影）。默认 opacity:0。
       '<div id="fold-flap" aria-hidden="true"></div>',
@@ -286,20 +290,53 @@ const STYLE = [
   // ── /license 的桌面（世界层，不是 UI）──
   // 纸上盖章如果没有桌面承重，整页会读成“棕色背景上浮着一张图”。
   // #desk 放在 #stage 后面；#stage 无 z-index，#desk 用 -1 压在它下面，纸仍是主体。
-  '#desk{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;',
+  // body 自己的 --veil 会盖住负 z-index 的桌面；这里只对 license 让 body 透明，
+  // 保留 html 的深色兜底。不能全局改 body，否则另外三站的底色一起变。
+  'body[data-station=license]{background:transparent}',
+  '#desk{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;',
   'background:',
   'radial-gradient(58% 46% at 23% 3%,rgba(255,208,150,.20),transparent 64%),',
   'radial-gradient(90% 72% at 54% 46%,rgba(118,73,43,.18),transparent 72%),',
   'linear-gradient(155deg,#120c09 0%,#2a1a11 32%,#3d2819 58%,#1c110b 100%)}',
   // 木纹用极低对比的斜向条纹，不能变成“棕白条纹背景板”。
-  '#desk::before{content:"";position:absolute;inset:-8%;opacity:.8;transform:rotate(-.4deg);',
-  'background:repeating-linear-gradient(96deg,rgba(255,224,181,.035) 0 1px,transparent 1px 6px,',
-  'rgba(0,0,0,.045) 6px 8px,transparent 8px 18px)}',
+  '#desk::before{content:"";position:absolute;inset:-8%;opacity:.5;transform:rotate(-.4deg);',
+  'filter:blur(.6px);background:',
+  'repeating-linear-gradient(6deg,rgba(255,222,180,.026) 0 2px,transparent 2px 9px),',
+  'repeating-linear-gradient(176deg,rgba(0,0,0,.05) 0 1px,transparent 1px 14px,',
+  'rgba(255,218,175,.02) 14px 22px)}',
   // 四周压暗：桌面要有深度，纸才有被灯照着的中心感。
   '#desk::after{content:"";position:absolute;inset:0;',
   'background:radial-gradient(ellipse at 50% 43%,transparent 34%,rgba(0,0,0,.34) 72%,rgba(0,0,0,.72) 100%)}',
+  // #stage 的 paper-ink 会画满整块画布（含桌面底色）。桌面要压在它上面，
+  // 但必须在纸矩形上挖一个洞，否则会盖掉纸纹理。
+  '#desk{mask-image:linear-gradient(#000,#000),linear-gradient(#000,#000);',
+  'mask-size:100% 100%,calc(var(--sheet-w) + 2px) calc(var(--sheet-h) + 2px);',
+  'mask-position:0 0,calc(var(--sheet-x) - 1px) calc(var(--sheet-y) - 1px);',
+  'mask-repeat:no-repeat;mask-composite:exclude}',
+  // 皮革桌垫：只保留纸外的一圈，中心用 mask 挖掉，纸面仍由 canvas 绘制。
+  '#desk-pad{position:fixed;left:calc(var(--sheet-x) - 52px);top:calc(var(--sheet-y) - 52px);',
+  'width:calc(var(--sheet-w) + 104px);height:calc(var(--sheet-h) + 104px);z-index:1;pointer-events:none;',
+  'border-radius:4px;background:',
+  'radial-gradient(80% 60% at 30% 8%,rgba(126,164,136,.16),transparent 68%),',
+  'repeating-linear-gradient(115deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),',
+  'linear-gradient(145deg,#1b2f25,#0f1d16 58%,#182a20);',
+  'box-shadow:0 26px 48px rgba(0,0,0,.5),inset 0 0 0 1px rgba(197,170,115,.26),',
+  'inset 0 0 26px rgba(0,0,0,.5);',
+  'mask-image:linear-gradient(#000,#000),linear-gradient(#000,#000);',
+  'mask-size:100% 100%,var(--sheet-w) var(--sheet-h);mask-position:0 0,52px 52px;',
+  'mask-repeat:no-repeat;mask-composite:exclude}',
+  '#desk-pad::before{content:"";position:absolute;inset:14px;border-radius:2px;',
+  'border:1px dashed rgba(201,172,116,.34)}',
+  '@media (max-width:900px){#desk-pad{display:none}}',
+  // 牛皮纸夹：只画右/下两条边，不盖住纸面；box-sizing 让内边正好贴住纸边。
+  '#sheet-under{position:fixed;left:var(--sheet-x);top:var(--sheet-y);width:calc(var(--sheet-w) + 14px);',
+  'height:calc(var(--sheet-h) + 14px);z-index:1;pointer-events:none;box-sizing:border-box;',
+  'border-right:14px solid #c8ad83;border-bottom:14px solid #c8ad83;',
+  'background:transparent;transform:rotate(.45deg);transform-origin:50% 50%;',
+  'box-shadow:8px 10px 22px rgba(0,0,0,.32)}',
+  '@media (max-width:700px){#sheet-under{display:none}}',
   // 右侧：一块深色木印台 + 一支斜放的印章。位置跟着纸走，纸动它们不动。
-  '#ink-pad{position:absolute;left:calc(var(--sheet-x) + var(--sheet-w) + 2.2vw);',
+  '#ink-pad{position:absolute;left:calc(var(--sheet-x) + var(--sheet-w) + 6.2vw);',
   'top:calc(var(--sheet-y) + var(--sheet-h)*.80);width:clamp(82px,7vw,112px);height:clamp(34px,3vw,48px);',
   'border-radius:10px 10px 14px 14px;transform:rotate(-7deg);opacity:.92;',
   'background:linear-gradient(150deg,#2b1710,#6a3a27 42%,#24120d 100%);',
@@ -307,7 +344,7 @@ const STYLE = [
   '#ink-pad::after{content:"";position:absolute;inset:7px 9px;border-radius:7px;',
   'background:radial-gradient(circle at 38% 32%,#b84537,#7a2821 58%,#3e1210 100%);',
   'box-shadow:inset 0 2px 4px rgba(0,0,0,.55),0 0 14px rgba(190,62,48,.2)}',
-  '#stamp-block{position:absolute;left:calc(var(--sheet-x) + var(--sheet-w) + 4.1vw);',
+  '#stamp-block{position:absolute;left:calc(var(--sheet-x) + var(--sheet-w) + 7.6vw);',
   'top:calc(var(--sheet-y) + var(--sheet-h)*.66);width:clamp(24px,2.4vw,38px);height:clamp(64px,6vw,92px);',
   'border-radius:8px 8px 4px 4px;transform:rotate(23deg);opacity:.9;',
   'background:linear-gradient(90deg,#2b160d,#8b5a36 46%,#3a2011 100%);',
@@ -388,7 +425,11 @@ const STYLE = [
   '#stage-word{position:fixed;z-index:4;left:50%;transform:translateX(-50%);',
   'bottom:calc(6vh + 46px);letter-spacing:.34em;text-transform:lowercase;',
   'font-size:12px;color:rgba(232,238,245,.8);pointer-events:none}',
-  'body[data-sheet=on] #stage-word{bottom:calc(var(--sheet-y) + var(--sheet-h) * 0.155);color:rgba(64,52,40,.85)}',
+  // 状态词放到纸的右上角，像档案上的状态戳；不要和朱砂章下面的副行挤在一起。
+  '@media (min-width:601px){body[data-sheet=on] #stage-word{left:auto;',
+  'right:calc((100vw - var(--sheet-w)) / 2 + var(--sheet-w) * .075);transform:none;',
+  'top:calc(var(--sheet-y) + var(--sheet-h) * .135);bottom:auto;',
+  'letter-spacing:.24em;font-size:10px;color:rgba(163,52,44,.72)}}',
   '#seal{position:fixed;z-index:3;right:calc((100vw - var(--sheet-w)) / 2 + var(--sheet-w) * .14);',
   'bottom:calc((100vh - var(--sheet-h)) / 2 + var(--sheet-h) * .16);',
   'width:96px;height:96px;border:3px solid rgba(163,52,44,.85);border-radius:50%;',
@@ -396,23 +437,28 @@ const STYLE = [
   'display:flex;align-items:center;justify-content:center;transform:rotate(var(--seal-tilt,0deg));',
   'opacity:0;transition:opacity .28s ease}',
   '#seal.is-set{opacity:1}',
-  // Save 必须落在纸**内**：纸底距视口 4.2%，按钮再往上 4.5% —— 之前 4.5vh
-  // 在 800 高时正好压在纸边外，截图里半截悬空。
+  // Save 是纸边下方的一张签条，不是纸面上的深色胶囊。
+  // 纸缩到 80% 高以后，纸底到视口有 72px：正好放一条“带走”签条。
   '#save{position:fixed;z-index:4;left:50%;transform:translateX(-50%);',
-  'bottom:calc((100vh - var(--sheet-h)) / 2 + var(--sheet-h)*0.045);',
-  'background:rgba(10,12,16,.5);border:1px solid rgba(232,238,245,.6);border-radius:999px;',
-  'color:var(--ink);font:inherit;font-size:13px;padding:.5em 1.3em;cursor:pointer}',
+  'bottom:calc((100vh - var(--sheet-h)) / 2 - 34px);',
+  'background:linear-gradient(#f6ecd8,#ddc9a8);border:1px solid rgba(92,66,42,.42);border-radius:3px;',
+  'color:#3a2a1e;font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;',
+  'text-transform:uppercase;padding:.8em 1.3em;cursor:pointer;',
+  'box-shadow:0 7px 14px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.65)}',
   '#save[hidden]{display:none}',
-  // 纸角二级提示：定稿要求低对比、在纸上、不是按钮样式。仅盖章完成后出现。
+  // 二级提示留在纸的左下角：产品门的定义是“纸上的低对比提示”，不是桌垫 UI。
+  // 纸缩到 80% 高后，左下角终于空出来；Save 已移到纸外，这里不再和任何按钮抢位置。
   '#play-hint{position:fixed;z-index:4;left:calc(var(--sheet-x) + var(--sheet-w)*0.075);',
-  'top:calc(var(--sheet-y) + var(--sheet-h)*0.86);max-width:calc(var(--sheet-w)*0.85);',
-  'font:11px/1.7 ui-serif,Georgia,serif;color:rgba(64,52,40,.70);letter-spacing:.02em}',
+  'top:calc(var(--sheet-y) + var(--sheet-h)*0.855);max-width:calc(var(--sheet-w)*0.34);',
+  'font:11.5px/1.35 ui-serif,Georgia,serif;color:rgba(64,52,40,.70);letter-spacing:.02em}',
   '#play-hint[hidden]{display:none}',
   '#again,#fold{background:none;border:0;padding:0;margin:0 12px 2px 0;cursor:pointer;',
   'font:inherit;color:inherit;letter-spacing:.06em;text-decoration:underline;',
   'text-underline-offset:3px;text-decoration-color:rgba(64,52,40,.25)}',
-  '#again:hover,#fold:hover{color:rgba(64,52,40,.78)}',
+  '#again:hover,#fold:hover{color:rgba(64,52,40,.82)}',
   '.play-note{display:block;opacity:.85}',
+  // 桌面把 Save 贴到纸的右下角，和朱砂章同一列；手机上仍居中（见媒体块）。
+  '@media (min-width:601px){#save{left:auto;right:calc((100vw - var(--sheet-w)) / 2);transform:none}}',
   // 启动遮罩：不是装饰，是「世界还没就绪」的唯一诚实表达（/still 的体素要 2–4s）。
   // 无文字（文案只能来自 COPY），只有一层与 --veil 同色的渐变；就绪后淡出。
   '#veil{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;',
@@ -478,7 +524,7 @@ const TEMPLATE = [
   '<!-- __SITE_META__ -->',
   '<style>__SITE_STYLE__</style>',
   '</head>',
-  '<body data-state="booting" data-modal="closed" data-debug="off" data-sheet="off" data-biome="neutral">',
+  '<body data-station="__SITE_STATION__" data-state="booting" data-modal="closed" data-debug="off" data-sheet="off" data-biome="neutral">',
   '<canvas id="stage" aria-hidden="true"></canvas>',
   '__SITE_GL__',
   // L5 的第一块内容：站点的一句话。**必须真的渲染出来** ——
@@ -630,6 +676,7 @@ export async function buildSite(options) {
   ].join(' | ');
 
   const html = TEMPLATE
+    .replace('__SITE_STATION__', () => station.slug)
     .replace('__SITE_TITLE__', () => station.title)
     .replace('__SITE_META__', () => meta)
     .replace('__SITE_STYLE__', () => STYLE)

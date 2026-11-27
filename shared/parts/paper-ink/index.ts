@@ -48,11 +48,13 @@ export function sheetRect(width: number, height: number, biome?: BiomeId): Rect 
   if (biome === 'ink') return null;
   const w = width > 0 ? width : 1;
   const h = height > 0 ? height : 1;
-  let sheetH = Math.round(h * 0.90);
+  // 桌面把纸收到 80% 高、68% 宽：/license 不是一张铺满屏幕的图，
+  // 而是桌上的物件；纸外必须留出桌垫、印章和二级动作的位置。
+  // 手机仍用 90%/95%，否则许可证正文会挤成三层重叠。
+  const mobile = w <= 600;
+  let sheetH = Math.round(h * (mobile ? 0.90 : 0.80));
   let sheetW = Math.round(sheetH * SHEET_ASPECT);
-  // 手机上 82% 宽只留下 226px 高的纸，许可证正文会挤成三层重叠；
-  // 95% 宽让纸多出约 35px 高，同时仍留出边缘阴影。
-  const maxW = Math.round(w * (w <= 600 ? 0.95 : 0.82));
+  const maxW = Math.round(w * (mobile ? 0.95 : 0.68));
   if (sheetW > maxW) {
     sheetW = maxW;
     sheetH = Math.round(sheetW / SHEET_ASPECT);
