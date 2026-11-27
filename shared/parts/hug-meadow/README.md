@@ -1,43 +1,68 @@
-# hug-meadow · L1 world 零件（原站蒲公英草甸完整移植）
+# hug-meadow · 黄昏草甸 L1 world 零件
 
-**来源**：<https://demo.darmk.com.cn/threejsExample/#/dandelion-meadow>（实验 15 / 风的来信）
-原始场景 chunk：`assets/DandelionStage-BVqHDGlE.js`（13,869 B）· 样式：`assets/DandelionStage-BFvFbee1.css`。
-本目录只有 `index.ts` 与这份说明；上游源码不复制进仓库，场景常量与着色器按原文件逐段还原。
+**来源**：<https://demo.darmk.com.cn/threejsExample/#/dandelion-meadow>（实验 15 / 风的来信），原场景 chunk `assets/DandelionStage-BVqHDGlE.js`。
+上游只作为**种子几何与放飞时序的基准**；构图、地面、光线按 `docs/PRODUCT-FORM.md §1.2` 改成「黄昏草甸 · 一株前景实体 + 远景群体」，不是逐项复刻原站的五簇摆位。
 
-## 还原了什么
+## 产品形态
 
-1. **场景结构**：10 株植物（`PLANTS` 即原站 `G` 数组，逐项同值）、固定种子 `31121`、共 **1,335 颗种子**。每颗种子是 **44 段线段 / 88 顶点**：2 段花茎 + 14 根冠毛 × 3 段。
-2. **渲染方式**：`InstancedBufferGeometry` + `LineSegments`，`aHome/aAxis/aRelease/aRandom/aSize` 五组实例属性；`release` 初值 `-1`，放飞后按 `0..1.8s` 错峰脱开、飞行 `10s`。风场 x 向右、z 向负后方，与原件同向。
-3. **草甸**：每株一根 `CatmullRomCurve3` + `TubeGeometry` 花茎（半径 0.018）、3 片压弯的 `PlaneGeometry` 叶、`SphereGeometry(radius*0.12, 10, 7)` 花托。
-4. **背景**：程序化全屏片元，上暗下亮深橄榄渐变 + `vec2(0.72, 0.69)` 暖光；100 颗 bokeh 点位于 `z=-10..-18`。
-5. **大气**：`FogExp2('#172c29', 0.046)`、`HemisphereLight('#eedab0','#152e22',3)`、`scene.background = '#172c29'`。**无后处理。**
-6. **交互**：`cue('release')` 放飞、`cue('reset')` 收回；`update` 读 `audio.level`，超过 0.12 自动放飞（与原站麦克风路径同义）；`reducedMotion` 关闭常驻摇曳。
+- 一株近景主花占画面中心，9 株远景花群退到地平线；草甸从镜头脚下一直铺到天边。
+- 低位水平线在地面约 31.5% 高度；暖光压在花群后方，天光从上往下退，地面是暗褐草影。
+- 主 CTA `Let it go`：点草地或按钮即放飞；放走后种子云向右上散开，底部出现 `Link copied. Send it to someone.`。
+- `?from=hug` 进入时只提示 `Someone sent you a little warmth.`，CTA 改成 `Send one on`；不自动播放、不重复寄出。
+- 停留 40s 后太阳沿地平线继续下沉、整片天光变暗；这是真实时钟，不随帧率/后台节流回弹。
 
-## 与原件的有意差异（都在这里，别在别处偷偷改）
+## 保留的上游内核
 
-- **相机**：桌面保持原站 `PerspectiveCamera(40°) @ (0,3.7,10.8)`，`lookAt` 左移到 `-1.3`，让主花球回到中线、左簇退到约 27%，给左侧标题让位。中间试过 34°，实机对照花球偏大、单位面积线更稀；已回退 40°。手机保持 `42° / (-0.8,3.7,16.8) / lookAt(-0.3,2,-0.6)`。
-- **像素比**：高档 `min(dpr, 1.25)`、低档 `min(dpr, 1.0)`。原件是 1.6，但在 Retina 下 1px 种子线被压到 0.625 CSS px，对照 DPR1 参考图显得过分规整；收到 1.25 让线回到约 0.8 CSS px，换回一点毛边。
-- **叶片**：几何与朝向不动，三片叶的 mesh 放宽到 `scale(1.35, 1.08, 1.35)`，补回原站 DPR1 下的叶片体量。
-- **种子 alpha**：以原站 `0.19 + max(0,aAxis.z)*0.26` / 飞行 `0.62` 为底，抬到 `0.22 + max(0,aAxis.z)*0.30` / `0.64`。原值在 1px 线 + 1.25 DPR 下实机偏灰；这 +0.03 是补线覆盖率，不是改风格。
-- **bokeh**：100 颗、尺寸 `16 + rng()*110`、片元 alpha `0.12`（原站尺寸 10–100、alpha 0.12）。
-- **无头兜底**：`body[data-slug=hug]` 在构建层有一层草甸色渐变；WebGL2 缺席时页面不会只剩黑幕。L0 仍为空缺，草地由本零件不透明铺满。
+1. **种子几何**：固定种子 `31121`，`PLANTS` 合计 **1,335 颗种子**；每颗 **44 段线 / 88 顶点**（2 段花茎 + 14 根冠毛 × 3 段）。换种子会改每颗种子的尺寸与抖动，整团轮廓就不是同一个花球。
+2. **渲染方式**：`InstancedBufferGeometry` + `LineSegments`，`aHome/aAxis/aRelease/aRandom/aSize` 五组实例属性；`release` 初值 `-1`，放飞后按 `0..1.8s` 错峰脱开，飞行约 `10s`，风场向 x 正、z 负。
+3. **花茎/叶片/花托**：每株一根 `CatmullRomCurve3` + `TubeGeometry` 花茎（半径 0.018）、3 片压弯的 `PlaneGeometry` 叶、`SphereGeometry(radius*0.12, 10, 7)` 花托。
+4. **交互语义**：`cue('release')` 放飞、`cue('reset')` 收回；`audio.level > 0.12` 可自动放飞；`reducedMotion` 关闭常驻摇曳。
 
-## 性能
+## 本站的产品级改写（有意差异，别在别处偷偷改）
 
-`costMs: 4`、`kb: 16`；1440×900@dpr2 实测 `fps≈59.9`、`cpuMs≈0.7`。高/低档只改像素比，**不删种子**——删种子会变成秃球。
+### 1. 一株前景 + 远景群体（`PLANTS`）
 
-## 真机对照（2026-11-20）
+| 角色 | x | y | z | 半径 | 种子 |
+|---|---:|---:|---:|---:|---:|
+| 近景主花 | -0.9 | 2.50 | 2.0 | 0.92 | 300 |
+| 右前 | 1.9 | 1.25 | -1.6 | 0.52 | 190 |
+| 左前 | -3.8 | 1.15 | -2.4 | 0.48 | 160 |
+| 中远 1 | -0.3 | 0.95 | -5.0 | 0.42 | 130 |
+| 中远 2 | -2.8 | 1.05 | -6.2 | 0.40 | 110 |
+| 右远 1 | 4.0 | 0.90 | -4.8 | 0.40 | 110 |
+| 右远 2 | 2.4 | 1.10 | -7.4 | 0.38 | 100 |
+| 左远 1 | -5.4 | 0.80 | -4.6 | 0.36 | 90 |
+| 左远 2 | -6.3 | 0.95 | -7.2 | 0.34 | 80 |
+| 最右远 | 5.6 | 0.65 | -8.0 | 0.28 | 65 |
 
-- 原站静止：`docs/review-2026-11-20/hug/reference-rest.png`（场景 1310×701）
-- 本站静止：`docs/review-2026-11-20/hug/after-rest.png`（1440×900，DPR1）
-- 本站 Retina：`docs/review-2026-11-20/hug/after-retina.png`（2880×1800，DPR2，检查线感）
-- 原站释放 39%：`docs/review-2026-11-20/hug/reference-release.png`
-- 本站释放 39%（约 4.6s）：`docs/review-2026-11-20/hug/after-release.png`
-- 手机：`docs/review-2026-11-20/hug/after-mobile.png`
-- 并排对照：`docs/review-2026-11-20/hug/compare.png`
+原站是 10 株几乎同 z 线的等大花球，在 16:9 下读成「一排白球」。现在只有一株近景实体，其余后退 4–10 个单位并压低 1.2–1.8 个单位，形成近大远小的草甸纵深。总种子数仍为 1,335。
 
-结论：花球屏占比、5 簇构图、绒毛密度与逆光位置已对齐；种子云散开方向与错峰时序一致。**测试全绿不算验收，以这些同尺寸实机图为准。**
+### 2. 草甸不是三角钉，是程序化草卡
 
-## 契约
+- 两张 `128×128` 的 CanvasTexture：深色草叶为主，少量草尖沾到低太阳的暖金，绝不做成麦田。
+- 每张 620 个 `InstancedMesh` 竖直面片，合计 1,240 丛；`PlaneGeometry(0.62, 0.92)` 底边落在 y=0，近处更高、成丛散布，`alphaTest:0.16`、`DoubleSide`。
+- 不使用外部贴图；纹理进入 `textures` 集合并随零件 dispose 释放。
+
+### 3. 黄昏天光与低位太阳
+
+- 背景是程序化片元：底色 `#24160d`，天光从 `y=0.24` 到 `0.82` 由暗转暖；地平线暖带固定在 `y=0.315`，只在太阳附近亮，不横贯全屏。
+- 低太阳位置 `(0.79 - 0.17*uLong, 0.36 - 0.075*uLong)`；核心光斑 + 大范围暖雾，不做圆盘太阳。
+- 40s 慢变量：`uLong = clamp((wallClock - 40) / 30, 0, 1)`，同时把整幅天光压暗 `1 - 0.24*uLong`。必须走 `performance.now()`，不能走被 rAF 节流的累计帧时——否则无头/后台标签只出一帧时，太阳永远停在 40s 前。
+- `FogExp2(BG, 0.046)` 让远景花群退进暖褐空气里；`HemisphereLight('#ffdfb0','#24160d',2.4)` + `DirectionalLight('#ffc98a',1.8)` 从右后方 `(9,5,-5)` 给茎叶一层暖边，不投影、不改种子的自发光线。
+
+### 4. 镜头与像素比
+
+- 桌面 `PerspectiveCamera(40°) @ (0,3.7,10.8)`，`lookAt(-1.3,2,-0.6)`；手机 `42° / (-0.8,3.7,16.8) / lookAt(-0.3,2,-0.6)`。主花在手机上仍落在上 1/3，不压标题。
+- 高/低档像素比 `min(dpr,1.25)` / `min(dpr,1.0)`；低档不删种子（删了会变成秃球），只降采样。
+
+## 真机证据（2026-11-27）
+
+- 首屏：`docs/evidence/plan-2026-11-25/hug-meadow-before.png`（1280×720，真实 WebGL，一株主花 + 远景草甸 + 低太阳）
+- 放飞后：`docs/evidence/plan-2026-11-25/hug-meadow-after.png`（同一机位，种子云向右上散开、主花只剩花托）
+- 40s+ 长停留：`docs/evidence/plan-2026-11-25/hug-long-62s-final.png`（2560×1440@dpr2，天光压暗、太阳落到草线后）
+- 历史上游对齐图在 `docs/review-2026-11-20/hug/`，只用于核对种子几何与放飞方向，**不再作为本站构图验收**。
+
+## 性能与契约
 
 `id:'hug-meadow'`、`layer:'L1'`、`channel:'world'`、`space:'screen'`、`blend:'source-over'`、`requires:['webgl2']`、`costMs:4`、`kb:16`、`expendable:false`。
+新增开销是 1,240 个双面草卡 + 两张 128px 程序化纹理；没有后处理、没有外部资源。

@@ -34,16 +34,19 @@ interface Plant {
 
 /** 原站的 10 株布局；数量、半径、纵深关系逐项对齐参考站。 */
 const PLANTS: readonly Plant[] = [
-  { x: -1.1, y: 2.45, z: 1.1, radius: 0.82, seeds: 300 },
-  { x: -3.5, y: 1.7, z: 0.1, radius: 0.53, seeds: 160 },
-  { x: 1.35, y: 1.82, z: -0.5, radius: 0.58, seeds: 190 },
-  { x: -0.1, y: 1.35, z: -2.3, radius: 0.48, seeds: 130 },
-  { x: -4.6, y: 1.05, z: -2.8, radius: 0.39, seeds: 90 },
-  { x: 3.45, y: 1.18, z: -2.4, radius: 0.44, seeds: 110 },
-  { x: -2.6, y: 2.05, z: -4.1, radius: 0.47, seeds: 110 },
-  { x: 2.2, y: 2.35, z: -5.5, radius: 0.45, seeds: 100 },
-  { x: 4.7, y: 0.8, z: -5.4, radius: 0.32, seeds: 65 },
-  { x: -5.7, y: 1.8, z: -5.2, radius: 0.39, seeds: 80 },
+  // 2026-11-27 产品重排：一株近景主花 + 一片后退的远景花群。
+  // 原来的 10 株几乎站在同一条 z 线上，透视压平后变成“一排棒棒糖”。
+  // 种子数不变（仍是 1335）：只改纵深与主次，不动原站的密度预算。
+  { x: -0.9, y: 2.50, z: 2.0, radius: 0.92, seeds: 300 },
+  { x: -3.8, y: 1.15, z: -2.4, radius: 0.48, seeds: 160 },
+  { x: 1.9, y: 1.25, z: -1.6, radius: 0.52, seeds: 190 },
+  { x: -0.3, y: 0.95, z: -5.0, radius: 0.42, seeds: 130 },
+  { x: -5.4, y: 0.80, z: -4.6, radius: 0.36, seeds: 90 },
+  { x: 4.0, y: 0.90, z: -4.8, radius: 0.40, seeds: 110 },
+  { x: -2.8, y: 1.05, z: -6.2, radius: 0.40, seeds: 110 },
+  { x: 2.4, y: 1.10, z: -7.4, radius: 0.38, seeds: 100 },
+  { x: 5.6, y: 0.65, z: -8.0, radius: 0.28, seeds: 65 },
+  { x: -6.3, y: 0.95, z: -7.2, radius: 0.34, seeds: 80 },
 ];
 
 /** 种子错峰脱开窗口（秒）。 */
@@ -129,11 +132,23 @@ uniform float uLong;
 void main() {
   // 黄昏暖褐：上暗下暖，右下角一团低太阳的橘光。原来的深橄榄绿把全帧拉到 139°，
   // 与产品规格的 35–55° 相反；颜色是构图的一部分，不是后期滤镜。
-  vec3 c = mix(vec3(0.012, 0.008, 0.004), vec3(0.24, 0.172, 0.064), vUv.y);
-  // 40s 后太阳缓慢下落：高光位置左移、整体变暗。只改背景，不碰种子的放飞因果。
-  vec2 glowAt = vec2(0.72 - 0.20 * uLong, 0.69 - 0.13 * uLong);
-  float glow = exp(-length((vUv - glowAt) * vec2(2.0, 2.5)) * 6.0);
-  c += vec3(0.55, 0.34, 0.12) * glow * (1.0 - 0.38 * uLong);
+  float y = vUv.y;
+  // 黄昏天光：地平线附近最暖，往上转暗，往下是草甸的暗底。
+  vec3 c = mix(vec3(0.012, 0.007, 0.003), vec3(0.145, 0.095, 0.036),
+    smoothstep(0.24, 0.82, y));
+  // 40s 后太阳沿地平线缓慢下落：只改背景，不碰种子的放飞因果。
+  vec2 glowAt = vec2(0.79 - 0.17 * uLong, 0.36 - 0.075 * uLong);
+  // 地平线暖带只围着太阳，不能横贯全屏变成一条发光的河。
+  float horizon = exp(-pow((y - 0.315) / 0.095, 2.0));
+  float hx = 0.16 + 0.84 * exp(-pow((vUv.x - glowAt.x) / 0.58, 2.0));
+  c += vec3(0.29, 0.175, 0.060) * horizon * hx * 0.30;
+  c *= mix(0.46, 1.0, smoothstep(0.03, 0.31, y));
+  float glow = exp(-length((vUv - glowAt) * vec2(2.1, 3.0)) * 5.0);
+  c += vec3(0.64, 0.38, 0.13) * glow * (1.0 - 0.34 * uLong);
+  float core = exp(-length((vUv - glowAt) * vec2(3.8, 5.2)) * 15.0);
+  c += vec3(1.0, 0.70, 0.33) * core * 0.22;
+  // 太阳沉下去，天色也要跟着退：只移光斑不压整体亮度，40s 的慢变量在画面上读不出来。
+  c *= 1.0 - 0.24 * uLong;
   gl_FragColor = vec4(c, 1.0);
   #include <colorspace_fragment>
 }
@@ -271,6 +286,9 @@ function create(env: PartEnv): PartInstance {
   let phase: Phase = 'ready';
   let time = 0;
   let launchTime = 0;
+  // 40s 长停留是「用户在这站待了多久」，必须走真实时钟，不能走被 rAF 节流的累计帧时；
+  // 否则无头/后台标签只出一帧时，太阳永远停在 40s 之前。
+  const bornAt = performance.now();
   let lastSize: StageSize = { w, h, dpr };
   const releaseRng = mulberry32((env.seed ^ 0x9e3779b9) >>> 0);
 
@@ -294,11 +312,18 @@ function create(env: PartEnv): PartInstance {
   scene.fog = new THREE.FogExp2(BG, 0.046);
 
   const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 80);
-  const hemi = new THREE.HemisphereLight(0xffdfb0, 0x24160d, 3);
+  const hemi = new THREE.HemisphereLight(0xffdfb0, 0x24160d, 2.4);
   scene.add(hemi);
+  // 低太阳从右后方打进来：只给茎/叶/花托一层暖边，不投影、不改变种子的自发光线。
+  const lowSun = new THREE.DirectionalLight(0xffc98a, 1.8);
+  lowSun.position.set(9, 5, -5);
+  lowSun.target.position.set(0, 1.2, -1);
+  scene.add(lowSun);
+  scene.add(lowSun.target);
 
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
+  const textures = new Set<THREE.Texture>();
   const owned = <T extends THREE.BufferGeometry>(geometry: T): T => {
     geometries.add(geometry);
     return geometry;
@@ -406,8 +431,97 @@ function create(env: PartEnv): PartInstance {
     }
   }
 
+  function buildGrass(): void {
+    // 草甸的“草”不是一排三角钉：一张程序化画的草叶卡片，重复成上千个竖直面片。
+    // 卡片的透明边缘用 alphaTest 切掉，近处有体积、远处被雾吃掉，仍不引入任何外部图片。
+    const doc = (env.canvas as unknown as { ownerDocument?: Document }).ownerDocument
+      ?? (globalThis as unknown as { document?: Document }).document;
+    if (!doc || typeof doc.createElement !== 'function') return;
+
+    function grassTexture(seed: number): THREE.CanvasTexture | null {
+      const c = doc!.createElement('canvas');
+      c.width = 128;
+      c.height = 128;
+      const ctx = c.getContext('2d');
+      if (!ctx) return null;
+      ctx.clearRect(0, 0, 128, 128);
+      const rng = mulberry32(seed);
+      for (let i = 0; i < 34; i += 1) {
+        const x = 10 + rng() * 108;
+        const baseY = 126;
+        const height = 34 + rng() * 88;
+        const tipX = x + (rng() - 0.5) * 20;
+        const midX = x + (rng() - 0.5) * 9;
+        ctx.beginPath();
+        ctx.moveTo(x, baseY);
+        ctx.quadraticCurveTo(midX, baseY - height * 0.58, tipX, baseY - height);
+        ctx.lineWidth = 1.0 + rng() * 1.4;
+        const lit = rng();
+        // 少量草尖吃到低太阳，大部分是深色剪影；全画成金黄色会变成麦田。
+        ctx.strokeStyle = lit > 0.82
+          ? `rgba(176,143,76,${0.22 + rng() * 0.24})`
+          : `rgba(48,42,20,${0.36 + rng() * 0.34})`;
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      textures.add(tex);
+      return tex;
+    }
+
+    const cardGeo = owned(new THREE.PlaneGeometry(0.62, 0.92));
+    // 几何底边落在 y=0，实例位置就是草的落地位置。
+    cardGeo.translate(0, 0.46, 0);
+    const variants = [grassTexture(BASE_SEED + 41), grassTexture(BASE_SEED + 53)]
+      .filter((tex): tex is THREE.CanvasTexture => Boolean(tex));
+    if (variants.length === 0) return;
+
+    const countPer = 620;
+    const m = new THREE.Matrix4();
+    const p = new THREE.Vector3();
+    const q = new THREE.Quaternion();
+    const e = new THREE.Euler();
+    const sc = new THREE.Vector3();
+    variants.forEach((tex, variant) => {
+      // 半透明草卡：草叶之间保留空气感，低太阳的暖光才会从草缝里透出来。
+      // alphaTest 切硬边，transparent 负责叶与叶的叠色；depthWrite 关掉，避免透明面互相截断。
+      const mat = material(new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        alphaTest: 0.16,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      }));
+      const mesh = new THREE.InstancedMesh(cardGeo, mat, countPer);
+      mesh.frustumCulled = false;
+      const rng = mulberry32(BASE_SEED + 67 + variant * 19);
+      for (let i = 0; i < countPer; i += 1) {
+        // 成丛：先选丛心，再在 0.4–1.1m 内撒卡片；近处卡片更高。
+        const cx = -13 + rng() * 24;
+        const cz = -12 + rng() * 15;
+        const angle = rng() * Math.PI * 2;
+        const r = Math.sqrt(rng()) * (0.35 + rng() * 0.75);
+        const x = cx + Math.cos(angle) * r;
+        const z = cz + Math.sin(angle) * r;
+        const height = 0.55 + rng() * 0.55 + (z > 0.6 ? 0.22 : 0);
+        const width = 0.75 + rng() * 0.8;
+        e.set(0, rng() * Math.PI * 2, (rng() - 0.5) * 0.18);
+        q.setFromEuler(e);
+        p.set(x, -0.79, z);
+        sc.set(width, height, 1);
+        m.compose(p, q, sc);
+        mesh.setMatrixAt(i, m);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+      scene.add(mesh);
+    });
+  }
+
   buildBackground();
   buildMeadow();
+  buildGrass();
   // 必须用原站固定种子 31121：换 seed 会改掉每颗种子的大小与抖动，
   // 花球轮廓就和参考站不是同一团（之前用 env.seed 是错的）。
   const seed = buildSeedGeometry(BASE_SEED);
@@ -472,7 +586,8 @@ function create(env: PartEnv): PartInstance {
       if (disposed) return;
       time = f.t;
       // 长停留单向慢变量：40s 后太阳高度/暖光位置开始下降，不会回弹。
-      if (bgLong) bgLong.value = Math.min(1, Math.max(0, (time - 40) / 80));
+      const wall = (performance.now() - bornAt) / 1000;
+      if (bgLong) bgLong.value = Math.min(1, Math.max(0, (wall - 40) / 30));
       const uTime = seed.material.uniforms.uTime;
       if (uTime) uTime.value = time;
       const uMotion = seed.material.uniforms.uMotion;
@@ -510,6 +625,8 @@ function create(env: PartEnv): PartInstance {
       env.canvas.removeEventListener('webglcontextlost', onLost);
       geometries.forEach((geometry) => geometry.dispose());
       materials.forEach((mat) => mat.dispose());
+      textures.forEach((tex) => tex.dispose());
+      textures.clear();
       geometries.clear();
       materials.clear();
       renderer.dispose();
