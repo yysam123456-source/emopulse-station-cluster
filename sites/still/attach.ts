@@ -25,8 +25,10 @@ export function attach(handle: SiteHandle): void {
   const toggle = (): void => {
     seated = !seated;
     if (seated) seatedAt = lastT;
+    document.body.dataset.sit = seated ? 'sit' : 'stand';
     handle.stage.cue(seated ? 'sit' : 'stand');
   };
+  document.body.dataset.sit = 'stand';
   window.addEventListener('site:cta', toggle);
 
   handle.onFrame((t) => {

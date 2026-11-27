@@ -135,7 +135,7 @@ export const STATIONS = Object.freeze({
     budgetMs: 12,
     /** Sit 之后 40s 才出现的带走入口；不抢首屏。 */
     extra: '<button id="copy-line" type="button" data-channel="ui" hidden>__STILL_COPY__</button>',
-    parts: ['tide-medium', 'voxel-world', 'bubbles', 'still-sink',
+    parts: [{ id: 'tide-medium', opts: { still: true } }, 'voxel-world', 'bubbles', 'still-sink',
       { id: 'pixel-post', opts: { grain: 0.03, scanline: 0, vignette: 0.18 } },
     ],
   },

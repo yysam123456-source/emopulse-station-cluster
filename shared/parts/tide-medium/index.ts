@@ -23,6 +23,7 @@
 // 帧预算纪律：draw 里零 new、零 createGradient、零 Math.random、零自持时钟（只用 frame.t）。
 import type { PartEnv, PartInstance, PartV2, StageSize, WorldFrame } from '../../stage/contract';
 import { mulberry32 } from '../../stage/world';
+import { createStillWater } from './still-water';
 
 /** 三个变体（骨架期的并排探针）。 */
 export type TideVariant = 'A' | 'B' | 'C';
@@ -53,6 +54,13 @@ export interface TideMediumOptions {
   readonly fog?: boolean;
   /** 微粒（已定） */
   readonly motes?: boolean;
+  /**
+   * `/still` 的产品水层：满幅水下介质 + 可接 `sit`/`stand` 的水面折光。
+   *
+   * 只给 still 站点用；三版探针（tide-a/b/c）不传这个字段，画面不变。
+   * 有 WebGPU 时被 `voxel-world` 整块遮住；没有 GPU 时它就是用户看到的那片水。
+   */
+  readonly still?: boolean;
 }
 
 /** 微粒数量（三版一致 —— 差异轴只有一条）。 */
@@ -419,6 +427,20 @@ export function createTide(env: PartEnv, options: Required<TideMediumOptions>): 
 export function makeTideMedium(raw: TideVariant | TideMediumOptions = 'A'): PartV2 {
   // 允许两种调用形态：骨架期手写 `makeTideMedium('B')`，装配期由加载器传 `{ variant }`
   const options: TideMediumOptions = typeof raw === 'string' ? { variant: raw } : (raw ?? {});
+  if (options.still === true) {
+    // /still 产品水层：同一零件 id/layer，换一套产品实现；三版探针完全不受影响。
+    return {
+      id: 'tide-medium',
+      layer: 'L0',
+      blend: 'source-over',
+      costMs: 2.4,
+      kb: 4,
+      z: 0,
+      channel: 'canvas2d',
+      expendable: false,
+      create: (env: PartEnv) => createStillWater(env),
+    };
+  }
   const requested = options.variant;
   const variant: TideVariant = requested === 'B' || requested === 'C' ? requested : 'A';
   const resolved: Required<TideMediumOptions> = {
@@ -428,6 +450,7 @@ export function makeTideMedium(raw: TideVariant | TideMediumOptions = 'A'): Part
     glow: options.glow ?? STYLES[variant].glow,
     fog: options.fog !== false,
     motes: options.motes !== false,
+    still: false,
   };
   return {
     id: 'tide-medium',

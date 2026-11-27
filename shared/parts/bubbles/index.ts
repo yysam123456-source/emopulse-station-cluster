@@ -82,8 +82,11 @@ export function create(env: PartEnv): PartInstance {
       next.push({
         x: rnd(),
         y: rnd(),
-        // 原文 `(0.6 + rand*2.2) * dpr`：dpr 越大物理半径越大，但视觉尺寸不变（设备像素）
-        r: (0.6 + rnd() * 2.2) * dpr,
+        // 原文 `(0.6 + rand*2.2) * dpr` 是按设备像素给的半径；装配器已经把 2D 上下文
+        // 按 dpr 缩放（canvas.width = cssW*dpr，ctx.scale(dpr)），这里再乘一次 dpr
+        // 会让 dpr2 的手机上气泡变成 2 倍 CSS 大小（实拍是 10–20px 的灰盘，像散景不像气泡）。
+        // 所以半径按 **CSS px** 存，缩放交给上下文。
+        r: 0.6 + rnd() * 2.2,
         // 原文是**每帧**位移，且以归一化坐标计：这里换算成每秒（×60），
         // 因为契约里的时间单位是 frame.t（秒）。不换算会慢 60 倍（气泡几乎不动）。
         speed: (0.0004 + rnd() * 0.0012) * 60,
