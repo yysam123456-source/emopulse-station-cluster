@@ -23,6 +23,16 @@
 6. **设备**：倾斜/摇晃（`?motion=1` 或 `cue('motion:on')`）；移动端鱼数 9，桌面 11，`low` 降 7。
 7. **站点层**：DOM 控件、localStorage、Wake Lock、PWA/manifest 不进零件，留在 `sites/koi/attach.ts` 与构建层。标题/引导文案由站点 `COPY` 持有。
 
+## 产品级改写（不是原件逐项照搬）
+
+原件的鱼出生点是 `x∈±1.2, y∈±2` 的随机撒点；但 ink/paint 的可见半高只有 **0.8**，一半鱼一出生就在画外。再加上首帧前 600 步 warm 模拟，鱼会先游散——首屏就变成「鱼挤四边、中心一块空纸」。现在的处理：
+
+- **出生构图**：`FishSchool.arrange()` 在 **600 步 warm 之后** 才落位，11 条鱼分三簇沿左下→右上对角线铺开：左下 4、中央 3、右上 4；x 最远 ±0.9、y 最远 ±0.55，鱼体再留 0.35 余量，首屏不再有整条鱼被裁掉。
+- **朝向**：边缘鱼头朝池心，鱼身向里收；中央鱼各有横/斜朝向，不做「一排同向鱼」。初始速度 `0.16L`（低于原件的 `0.3L`），前几秒构图不会立刻塌成一团。
+- **脊线**：`arrange()` 末尾对每条鱼跑一次 `updateSpine(1/30)`，否则身体仍留在 warm 模拟的旧位置，首帧会拉出一条长线。
+- **池边莲叶**：`SurfaceEcology.composePads()` 把原件三簇（左上 / 右下 / 右上）改成 **右下 4 + 右中 3 + 左下 2**；上边留干净纸面给 `Koi Pond` H1，不再让莲叶压字。
+- 只改出生构图与池边落位，鱼群模拟、三风格渲染、涟漪/投食/唤鱼、Keep this frame 全部保持原件路径。
+
 ## 关键坑（不要再踩）
 
 - **real 全黑**：`fishRT` 最初用 `setClearColor(0, 0, 0, 1)` 清屏，空像素 alpha=1；composite 把整张鱼纹理当成不透明黑盖在水面上，池底和焦散全被吃掉。改为 alpha **0** 清屏后恢复。`renderer.setClearColor(0x000000, 0)` 也必须是全局 0 alpha。
@@ -35,6 +45,16 @@
 `?style=ink|paint|real`、`?mode=ripple|feed|call`、`?cam=top|angle|orbit`、`?floor=pebble|sky|dark`、`?rain=dry|drizzle|rain`、`?music=off|still|flow`、`?fps=`、`?still`、`?motion=1`、`?seed=`、`?fish=`、`?view=`、`?warm=`、`?t=`、`?shot=1`。
 
 Esc 菜单提供同名控制：Look / Touch / Camera / Water / Weather / Music；Sound 由零件持有真实状态并经 `koi:sound` 广播，菜单不猜。
+
+## 真机证据（2026-11-27，1280×720 / 390×844）
+
+- ink 首屏：`docs/evidence/plan-2026-11-25/koi-ink-1280.png`
+- paint 首屏：`docs/evidence/plan-2026-11-25/koi-paint-1280.png`
+- real 首屏：`docs/evidence/plan-2026-11-25/koi-real-1280.png`
+- 手机竖屏：`docs/evidence/plan-2026-11-25/koi-mobile.png`
+- 40s 带走帧：`docs/evidence/plan-2026-11-25/koi-keep-40s.png`
+
+判读：首屏不再有整条鱼被画框裁掉（只有池沿处鱼尾自然出画）；11 条鱼从左上到右下都有自己的位置，中央空水有一条回游鱼，H1 左上角没有被莲叶压住。三 style 共用同一套出生构图，但渲染路径各自成立。
 
 ## 契约
 

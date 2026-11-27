@@ -679,6 +679,8 @@ function create(env: PartEnv, opts: KoiOptions = {}): PartInstance {
   // 原件在首帧前 warm 600 步：鱼先散开、脊线松弛，再让人看见。
   const warm = Math.max(0, Math.round(num('warm', 600)));
   for (let i = 0; i < warm; i += 1) simulate(1 / 30);
+  // 600 步 warm 是让鱼脊松弛，不是让构图跑掉；出生斜线必须在 warm 之后才落位。
+  fishSchool.arrange(view.hx, view.hy);
   for (let i = 0; i < num('t', 0) * 30; i += 1) simulate(1 / 30);
   ready = true;
 
