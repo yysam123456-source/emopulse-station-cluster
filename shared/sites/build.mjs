@@ -42,6 +42,8 @@ export const STATIONS = Object.freeze({
     attach: 'sites/license/index.ts',
     /** 站内专用 DOM：纸框（可折角）/ 光层（--sun-angle）/ 阶段词 / 章 / 保存 */
     extra: [
+      // 桌面：木纹、左上斜光、右侧印台与印章实物。它们都不是 UI，只负责让这张纸落在桌面上。
+      '<div id="desk" aria-hidden="true"><i id="ink-pad"></i><i id="stamp-block"></i></div>',
       '<div id="sheet" aria-hidden="true"></div>',
       // 折角的那一面：纸角翻起来露出的背面（三角形 + 折痕阴影）。默认 opacity:0。
       '<div id="fold-flap" aria-hidden="true"></div>',
@@ -176,6 +178,7 @@ const STYLE = [
   'body[data-sheet=on] #h1{left:calc(var(--sheet-x) + var(--sheet-w)*0.075);',
   'top:calc(var(--sheet-y) + var(--sheet-h)*0.13);color:rgba(52,42,32,.92);',
   'text-shadow:0 1px 2px rgba(250,248,242,.55)}',
+  'body[data-sheet=on] #h1{font-size:clamp(28px,3.4vw,42px);letter-spacing:-.01em}',
   '.menu-title{font-size:11px;letter-spacing:.22em;color:var(--dim);margin-bottom:10px}',
   '.menu-item{display:block;width:100%;text-align:left;background:none;border:0;color:var(--ink);',
   'font:inherit;font-size:13px;padding:5px 0;cursor:pointer}',
@@ -231,6 +234,13 @@ const STYLE = [
   '#cta[hidden]{display:none}',
   '#cta:hover{border-color:var(--ink)}',
   '#cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}',
+  // 纸上的 CTA 不能还是深色胶囊：它看起来像贴纸，且和“纸/章”不是同一套材质。
+  // 做成一张窄的纸质签条：纸色底、棕墨字、细边、下方短影，读作“桌上压着的标签”。
+  'body[data-sheet=on] #cta{background:linear-gradient(#faf4e8,#e7d8c2);',
+  'border:1px solid rgba(94,68,44,.38);border-radius:3px;color:#3a2a1e;',
+  'font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;',
+  'padding:1em 1.7em;box-shadow:0 10px 18px rgba(30,18,8,.24),inset 0 1px rgba(255,255,255,.7)}',
+  'body[data-sheet=on] #cta:hover{background:linear-gradient(#fffaf0,#efe2cf);border-color:rgba(94,68,44,.6)}',
   // /koi 的带走物：40s 后出现在右下，不与左下 hook 抢位置；手机居中。
   '#keep{position:fixed;right:5vw;bottom:9vh;z-index:3;background:rgba(10,12,16,.42);',
   'border:1px solid rgba(232,238,245,.64);border-radius:999px;color:var(--ink);',
@@ -273,11 +283,47 @@ const STYLE = [
   'border:1px solid rgba(120,140,180,.22);font:11px/1.5 ui-monospace,Menlo,monospace;',
   'white-space:pre-wrap;pointer-events:none;color:var(--dim)}',
   'body[data-debug=on] #dbg{display:block}',
+  // ── /license 的桌面（世界层，不是 UI）──
+  // 纸上盖章如果没有桌面承重，整页会读成“棕色背景上浮着一张图”。
+  // #desk 放在 #stage 后面；#stage 无 z-index，#desk 用 -1 压在它下面，纸仍是主体。
+  '#desk{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;',
+  'background:',
+  'radial-gradient(58% 46% at 23% 3%,rgba(255,208,150,.20),transparent 64%),',
+  'radial-gradient(90% 72% at 54% 46%,rgba(118,73,43,.18),transparent 72%),',
+  'linear-gradient(155deg,#120c09 0%,#2a1a11 32%,#3d2819 58%,#1c110b 100%)}',
+  // 木纹用极低对比的斜向条纹，不能变成“棕白条纹背景板”。
+  '#desk::before{content:"";position:absolute;inset:-8%;opacity:.8;transform:rotate(-.4deg);',
+  'background:repeating-linear-gradient(96deg,rgba(255,224,181,.035) 0 1px,transparent 1px 6px,',
+  'rgba(0,0,0,.045) 6px 8px,transparent 8px 18px)}',
+  // 四周压暗：桌面要有深度，纸才有被灯照着的中心感。
+  '#desk::after{content:"";position:absolute;inset:0;',
+  'background:radial-gradient(ellipse at 50% 43%,transparent 34%,rgba(0,0,0,.34) 72%,rgba(0,0,0,.72) 100%)}',
+  // 右侧：一块深色木印台 + 一支斜放的印章。位置跟着纸走，纸动它们不动。
+  '#ink-pad{position:absolute;left:calc(var(--sheet-x) + var(--sheet-w) + 2.2vw);',
+  'top:calc(var(--sheet-y) + var(--sheet-h)*.80);width:clamp(82px,7vw,112px);height:clamp(34px,3vw,48px);',
+  'border-radius:10px 10px 14px 14px;transform:rotate(-7deg);opacity:.92;',
+  'background:linear-gradient(150deg,#2b1710,#6a3a27 42%,#24120d 100%);',
+  'box-shadow:0 14px 22px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,214,166,.08)}',
+  '#ink-pad::after{content:"";position:absolute;inset:7px 9px;border-radius:7px;',
+  'background:radial-gradient(circle at 38% 32%,#b84537,#7a2821 58%,#3e1210 100%);',
+  'box-shadow:inset 0 2px 4px rgba(0,0,0,.55),0 0 14px rgba(190,62,48,.2)}',
+  '#stamp-block{position:absolute;left:calc(var(--sheet-x) + var(--sheet-w) + 4.1vw);',
+  'top:calc(var(--sheet-y) + var(--sheet-h)*.66);width:clamp(24px,2.4vw,38px);height:clamp(64px,6vw,92px);',
+  'border-radius:8px 8px 4px 4px;transform:rotate(23deg);opacity:.9;',
+  'background:linear-gradient(90deg,#2b160d,#8b5a36 46%,#3a2011 100%);',
+  'box-shadow:0 12px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,220,170,.18)}',
+  '#stamp-block::after{content:"";position:absolute;left:-4px;right:-4px;bottom:-7px;height:12px;',
+  'border-radius:3px;background:linear-gradient(#9d3029,#4c1413);box-shadow:0 3px 6px rgba(0,0,0,.5)}',
+  '@media (max-width:1100px){#ink-pad,#stamp-block{display:none}}',
   // ── /license 的站内叠层（纸框 / 光 / 阶段词 / 章 / 保存）──
   // 它们都是 DOM 叠在画布之上：L5 走 DOM，所以这些不占 `costMs`、不需要每帧重绘。
   'body[data-sheet=on] #sheet{position:fixed;left:var(--sheet-x);top:var(--sheet-y);',
   'width:var(--sheet-w);height:var(--sheet-h);z-index:1;pointer-events:none;',
-  'box-shadow:inset 0 0 0 1px rgba(120,100,80,.25)}',
+  'box-shadow:0 32px 68px rgba(0,0,0,.55),0 5px 14px rgba(0,0,0,.34),',
+  'inset 0 0 0 1px rgba(120,100,80,.25)}',
+  // 纸边：内圈压印线 + 极细亮边，纸才不是一块贴图。
+  'body[data-sheet=on] #sheet::before{content:"";position:absolute;inset:2px;',
+  'border:1px solid rgba(92,68,44,.18);box-shadow:inset 0 0 0 7px rgba(255,250,238,.16);pointer-events:none}',
   // ★ 折角**不许**用 transform 转 #sheet。上一版就是 `transform:rotate(var(--fold))`，
   //   而 #sheet 只是一个空 div + 1px inset 边框，于是"折角"的实际效果是
   //   **一条 1px 斜线划过整张纸**（穿过正文），纸本身没动 —— 既不像折角，还像渲染故障。
